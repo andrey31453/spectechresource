@@ -1,6 +1,5 @@
-// Схема БД v1 — слайс db-core.
+// Схема БД v1 — слайс db-core (миграция 20261115162119_init применена).
 // Спека: docs/specs/db-core.md
-// ВНИМАНИЕ: миграция ещё не создавалась — файл на ревью.
 // Prisma 7: url базы живёт в prisma7.config.ts, не в datasource.
 
 generator client {

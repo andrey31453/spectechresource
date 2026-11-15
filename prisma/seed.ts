@@ -16,15 +16,16 @@ import { PrismaClient } from "../generated/prisma/client";
 const adapter = new PrismaPg({ connectionString: process.env["DATABASE_URL"] });
 const prisma = new PrismaClient({ adapter });
 
+// ДЕМО: h1 и короткие описания — заменить реальными текстами через админку.
 const categories = [
-  { slug: "zemleroynaya-tehnika", title: "Землеройная техника", sortOrder: 10 },
-  { slug: "pogruzochnaya-tehnika", title: "Погрузочная техника", sortOrder: 20 },
-  { slug: "podyomnaya-tehnika", title: "Подъёмная техника", sortOrder: 30 },
-  { slug: "dorozhno-remontnaya-tehnika", title: "Дорожно-ремонтная техника", sortOrder: 40 },
-  { slug: "stroitelnaya-tehnika", title: "Строительная техника", sortOrder: 50 },
-  { slug: "transportnaya-tehnika", title: "Транспортная техника", sortOrder: 60 },
-  { slug: "kommunalnaya-tehnika", title: "Коммунальная техника", sortOrder: 70 },
-  { slug: "svaeboynaya-tehnika", title: "Сваебойная техника", sortOrder: 80 },
+  { slug: "zemleroynaya-tehnika", title: "Землеройная техника", h1: "Аренда землеройной техники в Москве", shortDesc: "Экскаваторы, траншеекопатели и планировщики для земляных работ.", sortOrder: 10 },
+  { slug: "pogruzochnaya-tehnika", title: "Погрузочная техника", h1: "Аренда погрузочной техники в Москве", shortDesc: "Мини-погрузчики, вилочные и телескопические погрузчики.", sortOrder: 20 },
+  { slug: "podyomnaya-tehnika", title: "Подъёмная техника", h1: "Аренда подъёмной техники в Москве", shortDesc: "Автокраны, гусеничные краны и автовышки.", sortOrder: 30 },
+  { slug: "dorozhno-remontnaya-tehnika", title: "Дорожно-ремонтная техника", h1: "Аренда дорожно-ремонтной техники в Москве", shortDesc: "Грейдеры, катки, фрезы и асфальтоукладчики.", sortOrder: 40 },
+  { slug: "stroitelnaya-tehnika", title: "Строительная техника", h1: "Аренда строительной техники в Москве", shortDesc: "Бетононасосы, бетоносмесители и вибропогружатели.", sortOrder: 50 },
+  { slug: "transportnaya-tehnika", title: "Транспортная техника", h1: "Аренда транспортной техники в Москве", shortDesc: "Манипуляторы, самосвалы, длинномеры и тралы.", sortOrder: 60 },
+  { slug: "kommunalnaya-tehnika", title: "Коммунальная техника", h1: "Аренда коммунальной техники в Москве", shortDesc: "Илососы, водовозы и поливомоечные машины.", sortOrder: 70 },
+  { slug: "svaeboynaya-tehnika", title: "Сваебойная техника", h1: "Аренда сваебойной техники в Москве", shortDesc: "Сваебойные установки для свайных работ.", sortOrder: 80 },
 ];
 
 type TypeSeed = {
@@ -266,8 +267,23 @@ async function main() {
     const row = await prisma.category.upsert({
       where: { slug: c.slug },
       update: { title: c.title, sortOrder: c.sortOrder },
-      create: { slug: c.slug, title: c.title, sortOrder: c.sortOrder },
+      create: {
+        slug: c.slug,
+        title: c.title,
+        h1: c.h1,
+        shortDesc: c.shortDesc,
+        sortOrder: c.sortOrder,
+      },
     });
+
+    // ДЕМО-h1 заполняем только если админ ещё не задал свой — правки не затираем.
+    if (!row.h1 || !row.shortDesc) {
+      await prisma.category.update({
+        where: { slug: c.slug },
+        data: { h1: row.h1 ?? c.h1, shortDesc: row.shortDesc ?? c.shortDesc },
+      });
+    }
+
     categoryIds.set(c.slug, row.id);
   }
 
@@ -365,15 +381,14 @@ async function main() {
   }
 
   // 9. Политика ПДн — ДЕМО-текст, заменить юридическим текстом заказчика
+  const pageSlug = "politika-obrabotki-personalnyh-dannyh";
   await prisma.page.upsert({
-    where: { slug: "politika-obrabotki-personalnyh-dannyh" },
+    where: { slug: pageSlug },
     update: {},
     create: {
-      slug: "politika-obrabotki-personalnyh-dannyh",
+      slug: pageSlug,
       title: "Политика обработки персональных данных",
       content: [
-        "# Политика обработки персональных данных",
-        "",
         "> ДЕМО-текст. Заменить юридическим текстом заказчика до запуска сайта.",
         "",
         "## 1. Общие положения",
@@ -390,6 +405,15 @@ async function main() {
       ].join("\n"),
     },
   });
+
+  // Ранняя версия сида дублировала H1 внутри markdown — срезаем его, если он совпал с title.
+  const existingPage = await prisma.page.findUnique({ where: { slug: pageSlug } });
+  if (existingPage?.content.startsWith(`# ${existingPage.title}`)) {
+    await prisma.page.update({
+      where: { slug: pageSlug },
+      data: { content: existingPage.content.replace(/^# .+\n{1,2}/, "") },
+    });
+  }
 
   // 10. Итог
   const [categoryCount, typeCount, modelCount, faqCount, serviceCount, pageCount] = await Promise.all([

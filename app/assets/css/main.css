@@ -1,0 +1,383 @@
+/* Технические стили SEO-каркаса. Дизайн-система — отдельный слайс (ADR-7, Tailwind). */
+
+:root {
+  --bg: #ffffff;
+  --bg-soft: #f4f6f8;
+  --text: #1b1f24;
+  --muted: #5b6773;
+  --line: #dfe4ea;
+  --accent: #0f5c9c;
+  --accent-dark: #0b4575;
+  --radius: 10px;
+  --container: 1180px;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+  line-height: 1.55;
+  color: var(--text);
+  background: var(--bg);
+  -webkit-text-size-adjust: 100%;
+}
+
+a {
+  color: var(--accent);
+  text-decoration: none;
+}
+
+a:hover,
+a:focus-visible {
+  color: var(--accent-dark);
+  text-decoration: underline;
+}
+
+img {
+  max-width: 100%;
+  height: auto;
+}
+
+h1,
+h2,
+h3 {
+  line-height: 1.2;
+  margin: 0 0 0.5em;
+}
+
+h1 {
+  font-size: clamp(1.6rem, 1.2rem + 1.6vw, 2.4rem);
+}
+
+h2 {
+  font-size: clamp(1.3rem, 1.1rem + 0.9vw, 1.8rem);
+  margin-top: 1.6em;
+}
+
+p {
+  margin: 0 0 0.8em;
+}
+
+.container {
+  width: 100%;
+  max-width: var(--container);
+  margin: 0 auto;
+  padding: 0 16px;
+}
+
+.page-main {
+  padding: 24px 0 48px;
+}
+
+.muted {
+  color: var(--muted);
+}
+
+.lead {
+  font-size: 1.05rem;
+  color: var(--muted);
+  max-width: 70ch;
+}
+
+/* ── Шапка ── */
+.site-header {
+  border-bottom: 1px solid var(--line);
+  background: var(--bg);
+}
+
+.site-header__top {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px 24px;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 0;
+}
+
+.site-header__brand {
+  font-weight: 700;
+  font-size: 1.05rem;
+  color: var(--text);
+}
+
+.site-header__contacts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 20px;
+  align-items: center;
+  font-size: 0.95rem;
+}
+
+.site-header__phone {
+  font-weight: 700;
+  font-size: 1.15rem;
+  white-space: nowrap;
+}
+
+.site-nav {
+  border-top: 1px solid var(--line);
+  padding: 10px 0;
+  overflow-x: auto;
+}
+
+.site-nav ul {
+  display: flex;
+  gap: 18px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  white-space: nowrap;
+}
+
+/* ── Карточки и сетки ── */
+.grid {
+  display: grid;
+  gap: 14px;
+  grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+  margin: 0 0 8px;
+  padding: 0;
+  list-style: none;
+}
+
+.card {
+  display: block;
+  height: 100%;
+  padding: 14px 16px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--bg);
+  color: var(--text);
+}
+/* ── Таблицы (модели техники) ── */
+.table-wrap {
+  overflow-x: auto;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 560px;
+  font-size: 0.95rem;
+}
+
+.table th,
+.table td {
+  padding: 10px 12px;
+  text-align: left;
+  border-bottom: 1px solid var(--line);
+  vertical-align: top;
+}
+
+.table th {
+  background: var(--bg-soft);
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.table tr:last-child td {
+  border-bottom: 0;
+}
+
+/* ── Цены и метки ── */
+.price {
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.price--request {
+  font-weight: 400;
+  color: var(--muted);
+}
+
+.badge {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: var(--bg-soft);
+  font-size: 0.8rem;
+  color: var(--muted);
+}
+
+/* ── Крошки ── */
+.breadcrumbs ol {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 0 0 18px;
+  padding: 0;
+  list-style: none;
+  font-size: 0.9rem;
+  color: var(--muted);
+}
+
+.breadcrumbs li::after {
+  content: "›";
+  margin-left: 6px;
+}
+
+.breadcrumbs li:last-child::after {
+  content: "";
+}
+
+/* ── FAQ ── */
+.faq {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.faq details {
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 12px 14px;
+}
+
+.faq summary {
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.faq p {
+  margin: 10px 0 0;
+  color: var(--muted);
+}
+
+/* ── CTA ── */
+.cta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px 18px;
+  align-items: center;
+  justify-content: space-between;
+  padding: 18px;
+  border-radius: var(--radius);
+  background: var(--bg-soft);
+}
+
+.button {
+  display: inline-block;
+  padding: 10px 18px;
+  border-radius: var(--radius);
+  background: var(--accent);
+  color: #fff;
+  font-weight: 600;
+}
+
+.button:hover,
+.button:focus-visible {
+  background: var(--accent-dark);
+  color: #fff;
+  text-decoration: none;
+}
+
+.button--ghost {
+  background: transparent;
+  color: var(--accent);
+  border: 1px solid var(--accent);
+}
+
+.button--ghost:hover {
+  background: var(--accent);
+  color: #fff;
+}
+
+/* ── Подвал ── */
+.site-footer {
+  margin-top: 40px;
+  padding: 26px 0 32px;
+  border-top: 1px solid var(--line);
+  background: var(--bg-soft);
+  font-size: 0.92rem;
+}
+
+.site-footer__cols {
+  display: grid;
+  gap: 20px;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+}
+
+.site-footer h2 {
+  margin: 0 0 8px;
+  font-size: 1rem;
+}
+
+.site-footer ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.site-footer li {
+  margin-bottom: 4px;
+}
+
+.site-footer__bottom {
+  margin-top: 20px;
+  padding-top: 14px;
+  border-top: 1px solid var(--line);
+  color: var(--muted);
+}
+
+/* ── Ошибки ── */
+.error-page {
+  max-width: 640px;
+  margin: 8vh auto;
+  padding: 0 16px;
+  text-align: center;
+}
+
+.error-page__code {
+  font-size: 4rem;
+  font-weight: 700;
+  line-height: 1;
+  color: var(--accent);
+}
+
+
+.card:hover {
+  border-color: var(--accent);
+  text-decoration: none;
+}
+
+.card__title {
+  margin: 0 0 6px;
+  font-weight: 600;
+}
+
+.card__meta {
+  font-size: 0.9rem;
+  color: var(--muted);
+}
+
+.stats {
+  display: grid;
+  gap: 14px;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.stat {
+  padding: 16px;
+  border-radius: var(--radius);
+  background: var(--bg-soft);
+}
+
+.stat__value {
+  font-size: 1.7rem;
+  font-weight: 700;
+}
+
+.section {
+  margin-bottom: 36px;
+}

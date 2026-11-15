@@ -56,12 +56,16 @@
 - **БД локально:** `npm run db:up` → контейнер `spectech-postgres` (хост-порт **5433**, 5432 занят другим проектом).
 - **Команды:** `nvm use` в новом терминале → `npm run dev` · `npm run build` · `npm run preview` ·
   `npm run db:migrate` · `npm run db:seed` · `npm run db:studio` · `npm run db:reset`.
-  Тестов и линтера пока нет (⏳ Vitest + ESLint — до первого API-слайса).
 - **Prisma:** клиент создаётся **только с driver adapter** — `new PrismaClient({ adapter: new PrismaPg(...) })` (ADR-11);
   импорт из `generated/prisma/client` (папка генерируется `prisma generate`, в git не входит).
 - **Обязательные правила:** заявка сначала в БД, затем в CRM (ADR-5); `prisma`, `@prisma/client`, `@prisma/adapter-pg` —
   только точными версиями (ADR-4); URL без завершающего слеша (ADR-6); деньги — `Decimal(12,2)` (ADR-9).
-- **Структура папок:** `app/` (Nuxt), `server/` (Nitro API), `prisma/`, `shared/` (типы и zod-схемы), `docs/`.
+- **Структура папок:** `app/` (Nuxt: страницы, компоненты, композаблы), `server/` (Nitro API и routes),
+  `prisma/` (схема, миграции, сид), `docs/`. DTO публичного API описаны в `app/types/catalog.ts`.
+- **Слайсы:** ✅ `db-core` (15.11.2026, `docs/specs/db-core.md`) · ✅ `seo-routing` (15.11.2026,
+  `docs/specs/seo-routing.md`). Следующий — формы → `Lead` → заглушка CRM или админка.
+- **Тестов и линтера пока нет** — ⏳ Vitest + ESLint подключить до слайса форм (правило §6 п.4),
+  до этого готовность API подтверждается `curl`-проверками из спеки.
 
 ## 6. Бэкенд: правило вертикальных слайсов
 
