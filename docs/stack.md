@@ -77,9 +77,15 @@
 │   ├── pages/             # index, katalog/, arenda-[...], kontakty
 │   ├── components/        # блоки страниц и UI
 │   └── assets/
-├── server/                # Nitro: /api/leads, /api/admin, /api/cron
+├── server/                # Nitro: API, routes, задачи, утилиты
+│   ├── api/               # публичные GET + POST /api/leads
+│   ├── tasks/             # задачи Nitro (leads:send)
+│   └── utils/             # dto, markdown, prisma, bitrix, leads, rate-limit
 ├── prisma/                # schema.prisma, migrations/, seed.ts
-├── shared/                # типы и valibot-схемы (клиент + сервер)
+├── shared/                # общее для клиента и сервера
+│   ├── schemas/           # valibot-схемы (leads.ts)
+│   └── utils/             # normalizePhone
+├── tests/                 # Vitest: чистые функции и сервисный слой
 └── docker-compose.yml     # postgres для локальной разработки
 ```
 
@@ -96,10 +102,12 @@
 3. ✅ Nuxt 4.6.4 инициализирован вручную (без `nuxi init`): `package.json`, `nuxt.config.ts`, `app/app.vue`.
 4. ✅ Установлены `prisma@7.10.1`, `@prisma/client@7.10.1`, `@prisma/adapter-pg@7.10.1`, `tsx`, `dotenv`.
    ✅ SEO-каркас (15.11.2026) — без `@nuxtjs/seo`: sitemap/robots на Nitro-роутах, мета и JSON-LD — свои композаблы (ADR-13).
-   ⏳ `@nuxt/image`, Tailwind — слайс фронтенда; `valibot` подключён (ADR-17), схемы — в слайсе `leads`.
+   ⏳ `@nuxt/image`, Tailwind — слайс фронтенда; `valibot` подключён (ADR-17), схема заявки — `shared/schemas/leads.ts` (слайс `leads`).
 5. ✅ `.env` из `.env.example`: `DATABASE_URL` (порт 5433), `SESSION_SECRET` сгенерирован; секреты не в репозитории.
 6. ✅ Миграция `20261115162119_init` + `npm run db:seed`: 8 разделов, 39 видов техники, 4 демо-модели
    с характеристиками, 5 услуг, 6 вопросов FAQ, блоки главной, страница политики ПДн.
+7. ✅ Слайс `leads` (15.11.2026): `POST /api/leads` → `Lead` → CRM-клиент Битрикс24 (dry-run по умолчанию),
+   задача `leads:send`, 85 unit-тестов; контракт — `docs/specs/leads.md`.
 
 ## 8. Журнал решений (ADR)
 
@@ -120,8 +128,9 @@
 | ADR-13 | 15.11.2026 | SEO-обвязку делаем **без `@nuxtjs/seo`**: `sitemap.xml` и `robots.txt` — Nitro-роуты (`server/routes/`), мета и JSON-LD — `useSeoMeta` + свои композаблы | Нужен точный контроль: 39 ЧПУ из БД, таблица `Redirect`, один H1, предсказуемый JSON-LD. Пакет `@nuxtjs/seo` тянет og-image и link-checker, которые на этом этапе не нужны | Меньше зависимостей и вес сборки; проверяется `curl`. `og-image`/валидатор ссылок при необходимости ставим точечно, `@nuxt/image` — в слайсе фронтенда, `valibot` — в `leads` (ADR-17) |
 | ADR-14 | 15.11.2026 | Markdown статических страниц и SEO-текстов рендерим **на сервере мини-рендерером** (`server/utils/markdown.ts`) с экранированием HTML | Сейчас нужны только заголовки, абзацы, списки, цитаты и ссылки; полноценный редактор появится вместе с админкой | Свойства безопасны (HTML экранируется), нет лишней зависимости; при появлении сложной разметки заменяем на `marked` в слайсе админки |
 | ADR-15 | 15.11.2026 | **TypeScript 5.9.3**, а не 7.0.2 | `typescript-eslint@8.72` и `ts-api-utils@2.5` обращаются к `ts.TypeFlags.Intrinsic`, которого в TS 7 нет: линтер падал с `TypeError: Cannot read properties of undefined (reading 'Intrinsic')` | Пока линтер — часть DoD, держим TS 5.9.3; на TS 7 переходим, когда `typescript-eslint` объявит поддержку |
-| ADR-16 | 15.11.2026 | Тестовый контур: **Vitest 5** (unit) + **`@nuxt/eslint` 1.17** (flat config); тесты — на чистых функциях; API-интеграция — через сервисный слой слайса `leads` | Нужны быстрые тесты без поднятия Nuxt/Nitro и БД; `@nuxt/test-utils` тянет полную сборку и пока не оправдан | `npm test` — 36 unit-тестов, `npm run typecheck` — только `.ts`; `.vue`, Playwright и тесты API с БД — в следующих слайсах (`vue-tsc`/`@nuxt/test-utils`) |
+| ADR-16 | 15.11.2026 | Тестовый контур: **Vitest 5** (unit) + **`@nuxt/eslint` 1.17** (flat config); тесты — на чистых функциях; API-интеграция — через сервисный слой слайса `leads` | Нужны быстрые тесты без поднятия Nuxt/Nitro и БД; `@nuxt/test-utils` тянет полную сборку и пока не оправдан | `npm test` — 85 unit-тестов (после `leads`), `npm run typecheck` — только `.ts`; `.vue`, Playwright и тесты API с БД — в следующих слайсах (`vue-tsc`/`@nuxt/test-utils`) |
 | ADR-17 | 15.11.2026 | Валидация — **valibot 1.5.0** вместо zod 4.6.7 | Решение заказчика. Модульные схемы-функции (`v.pipe`, `v.transform`) позволяют нормализовать телефон прямо в схеме, в клиентском бандле valibot ≈1,5 КБ против ≈14 КБ у zod | Схемы — `shared/schemas/leads.ts` (Nuxt 4 `sharedDir`), одна схема для формы и для `POST /api/leads`; сообщения об ошибках пишем в правилах по-русски, `@valibot/i18n` не нужен. Проверено 15.11.2026 на Node 24: `v.pipe`/`v.transform`/`v.safeParse` работают, `h3@1.15.11` валидирует через `validateData(data, fn)` — привязки к конкретной библиотеке нет. zod остаётся в lock-файле только транзитивно (dev, `@modelcontextprotocol/*` из Nuxt-тулинга) |
+| ADR-18 | 15.11.2026 | Заявки: одна valibot-схема на клиент и сервер, **`LEADS_DRY_RUN=true` по умолчанию**, антиспам = honeypot + `requestId` (unique) + лимит 10 заявок / 10 минут на IP в памяти Nitro, досылка — задача `leads:send` | Порядок «сначала БД, потом CRM» (ADR-5) реализован через `deliverLead`: ошибка CRM не отменяет заявку. Dry-run по умолчанию — защита от случайной боевой отправки, пока нет вебхука (Q-07). In-memory лимит не требует Redis на одном инстансе | Смена стора лимитера и расписание задачи — точечно (`rate-limit.ts`, `scheduledTasks`); админ-кнопка «повторить» — после `admin-auth` |
 
 > ADR-6 предварительный: применяем, если нет возражений заказчика/SEO-специалиста.
 

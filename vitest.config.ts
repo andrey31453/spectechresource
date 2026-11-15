@@ -4,10 +4,11 @@ import { defineConfig } from "vitest/config";
 const appDir = fileURLToPath(new URL("./app", import.meta.url));
 const rootDir = fileURLToPath(new URL("./", import.meta.url));
 
-/** Юнит-тесты чистой логики: рендер markdown, DTO, форматирование цен, ссылки, ЧПУ. */
+/** Юнит-тесты чистой логики: схемы заявки, markdown, DTO, цены, телефоны, ЧПУ. */
 export default defineConfig({
   resolve: {
     alias: {
+      "#shared": fileURLToPath(new URL("./shared", import.meta.url)),
       "~~": rootDir,
       "@@": rootDir,
       "~": appDir,

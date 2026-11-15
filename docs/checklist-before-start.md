@@ -28,8 +28,9 @@
 
 - [x] TypeScript `strict` + ESLint (`@nuxt/eslint`, flat config) — 15.11.2026; форматирование — правила stylistic там же.
 - [x] Стили: **Tailwind CSS 4** (ADR-7).
-- [x] Тесты: **Vitest** подключён 15.11.2026 — 36 unit-тестов (markdown, DTO, цены, телефоны, ЧПУ).
-      ⏳ Playwright (e2e формы/роутинг) и тесты API с БД — в слайсах `leads`/`auth`.
+- [x] Тесты: **Vitest** подключён 15.11.2026 — 85 unit-тестов (markdown, DTO, цены, телефоны, ЧПУ, схема заявки,
+      CRM-клиент с моком `fetch`, rate limit).
+      ⏳ Playwright (e2e формы/роутинг) и сквозной тест «форма → БД → CRM» — в слайсе фронтенда.
 - [x] Схема БД v1 — **принята и применена 15.11.2026**: 17 моделей, миграция `20261115162119_init`, сид проверен
       повторным запуском (`docs/specs/db-core.md`).
 - [x] Политика URL: **без** завершающего слеша, 301 с варианта со слешем (ADR-6).
@@ -75,8 +76,11 @@ FAQ, SEO) · реквизиты, адрес, мессенджеры (в т.ч. M
    4 демо-модели с характеристиками, 5 услуг, 6 FAQ (`docs/specs/db-core.md` — «реализовано»).
 3. ✅ **SEO-каркас и ЧПУ:** 8 страниц + посадочная `/arenda-{vid}-v-{gorod}`, мета по шаблонам с городом из `City`,
    canonical, JSON-LD, `sitemap.xml` (57 URL), `robots.txt`, 301 со слеша и из `Redirect`, 404 (`docs/specs/seo-routing.md`).
-4. ✅ **Качество кода:** `@nuxt/eslint` 1.17 + ESLint 10 (flat config), Vitest 5 — 36 unit-тестов,
-   скрипты `lint`/`test`/`typecheck`; TypeScript 5.9.3 вместо 7.x (ADR-15, ADR-16).
-5. ⏭ **Следующий слайс:** `leads` — `POST /api/leads` → `Lead` → dry-run CRM, ретраи, антиспам, согласие
-   (без UI формы); затем `admin-auth` → CRUD каталога → журнал заявок → загрузка фото.
-6. Админка: вход, каталог, журнал заявок, настройки и страницы.
+4. ✅ **Качество кода:** `@nuxt/eslint` 1.17 + ESLint 10 (flat config), Vitest 5, скрипты `lint`/`test`/`typecheck`;
+   TypeScript 5.9.3 вместо 7.x (ADR-15, ADR-16).
+5. ✅ **Заявки:** `POST /api/leads` — valibot-схема в `shared/schemas/leads.ts`, запись в `Lead` → dry-run CRM,
+   honeypot + `requestId` + rate limit 10/10 мин, ретраи 3×5 с, задача `leads:send`; 85 unit-тестов
+   (`docs/specs/leads.md`). Боевой вебхук — после ответа заказчика (Q-07).
+6. ⏭ **Следующий слайс:** `admin-auth` — вход в админку, сессия в БД, защита `/api/admin/*`;
+   затем CRUD каталога → журнал заявок (переотправка, CSV, срок хранения) → загрузка фото.
+7. Админка: вход, каталог, журнал заявок, настройки и страницы.
