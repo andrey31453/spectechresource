@@ -53,10 +53,14 @@
   `docs/stack.md` (стек и журнал решений ADR), `docs/checklist-before-start.md` (что сделать до старта).
 - **Стек:** Nuxt 4.6 (Vue 3, SSR/Nitro) + TypeScript + Prisma 7.10 + PostgreSQL; админка **своя** на Nuxt (ADR-1).
 - **Node:** 24 LTS, зафиксирован в `.nvmrc` (ADR-3).
-- **БД локально:** Docker: `docker compose up -d postgres`.
-- **Установка / dev / build / тесты / линт:** _TBD — заполнить сразу после инициализации `package.json`_.
-- **Обязательные правила:** заявка сначала в БД, затем в CRM (ADR-5); `prisma`/`@prisma/client` только точной версией (ADR-4);
-  URL без завершающего слеша (ADR-6).
+- **БД локально:** `npm run db:up` → контейнер `spectech-postgres` (хост-порт **5433**, 5432 занят другим проектом).
+- **Команды:** `nvm use` в новом терминале → `npm run dev` · `npm run build` · `npm run preview` ·
+  `npm run db:migrate` · `npm run db:seed` · `npm run db:studio` · `npm run db:reset`.
+  Тестов и линтера пока нет (⏳ Vitest + ESLint — до первого API-слайса).
+- **Prisma:** клиент создаётся **только с driver adapter** — `new PrismaClient({ adapter: new PrismaPg(...) })` (ADR-11);
+  импорт из `generated/prisma/client` (папка генерируется `prisma generate`, в git не входит).
+- **Обязательные правила:** заявка сначала в БД, затем в CRM (ADR-5); `prisma`, `@prisma/client`, `@prisma/adapter-pg` —
+  только точными версиями (ADR-4); URL без завершающего слеша (ADR-6); деньги — `Decimal(12,2)` (ADR-9).
 - **Структура папок:** `app/` (Nuxt), `server/` (Nitro API), `prisma/`, `shared/` (типы и zod-схемы), `docs/`.
 
 ## 6. Бэкенд: правило вертикальных слайсов

@@ -72,11 +72,11 @@ model EquipmentType {
   slug                 String    @unique // "gusenichnogo-ekskavatora"
   name                 String // «Гусеничные экскаваторы»
   nameGenitive         String // «гусеничного экскаватора» — для H1 и слага
-  priceFrom            Int? // null = «цена по запросу»
+  priceFrom            Decimal?  @db.Decimal(12, 2) // null = «цена по запросу»
   priceUnit            PriceUnit @default(SHIFT)
   minOrder             String? // «минимум 4 часа»
   deliveryTerms        String? // условия доставки текстом
-  deliveryPrice        Int?
+  deliveryPrice        Decimal?  @db.Decimal(12, 2) // если доставка считается отдельно
   crewAvailable        Boolean   @default(true) // с экипажем
   withoutCrewAvailable Boolean   @default(false) // без экипажа
   worksPerformed       String? // «какие работы выполняет»
@@ -107,8 +107,8 @@ model EquipmentModel {
   type          EquipmentType @relation(fields: [typeId], references: [id], onDelete: Cascade)
   brand         String // «JCB»
   model         String // «3CX»
-  pricePerShift Int?
-  pricePerHour  Int?
+  pricePerShift Decimal?      @db.Decimal(12, 2)
+  pricePerHour  Decimal?      @db.Decimal(12, 2)
   photos        String[]      @default([])
   isAvailable   Boolean       @default(true)
   sortOrder     Int           @default(0)
@@ -232,6 +232,24 @@ model TrustStat {
 
 // ────────────────────────── Контент и настройки ──────────────────────────
 
+/// Город работы: «Москва» / «Москве». Сейчас один, таблица — на вырост (мультигород).
+model City {
+  id        String   @id @default(cuid())
+  slug      String   @unique // "moskva"
+  name      String // «Москва» — именительный
+  nameIn    String // «Москве» — предложный, для H1 «Аренда … в Москве»
+  isDefault Boolean  @default(false)
+  isActive  Boolean  @default(true)
+  sortOrder Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  siteSettings SiteSettings[]
+
+  @@index([isActive, sortOrder])
+  @@map("cities")
+}
+
 /// Singleton: одна запись с id = "main".
 model SiteSettings {
   id              String   @id @default("main")
@@ -243,8 +261,8 @@ model SiteSettings {
   maxMessenger    String? // мессенджер MAX
   workingHours    String?
   address         String?
-  city            String // «Москва» — именительный
-  cityIn          String // «Москве» — предложный, для H1 «Аренда … в Москве»
+  cityId          String
+  city            City     @relation(fields: [cityId], references: [id], onDelete: Restrict)
   mapLat          Float?
   mapLng          Float?
   legalName       String?

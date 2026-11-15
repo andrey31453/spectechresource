@@ -1,0 +1,25 @@
+# Локальная PostgreSQL для разработки.
+# Порт на хосте 5433, потому что 5432 занят другим контейнером на этой машине.
+# Внутри Docker сеть своя, для прод-контейнера используем 5432.
+
+services:
+  postgres:
+    image: postgres:17-alpine
+    container_name: spectech-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: spectech
+      POSTGRES_PASSWORD: spectech
+      POSTGRES_DB: spectech
+    ports:
+      - "5433:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U spectech -d spectech"]
+      interval: 5s
+      timeout: 3s
+      retries: 12
+
+volumes:
+  pgdata:
