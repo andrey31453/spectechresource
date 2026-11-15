@@ -21,6 +21,9 @@ dist/
 .env.*
 !.env.example
 
+# Prisma 7: сгенерированный клиент (создаётся `prisma generate`)
+/generated/
+
 # Prisma
 prisma/*.db
 prisma/*.db-journal

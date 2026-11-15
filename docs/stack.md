@@ -86,7 +86,7 @@
 3. Инициализация Nuxt 4 в корне проекта.
 4. Установка: `prisma@7.10.1`, `@prisma/client@7.10.1`, `@nuxtjs/seo`, `@nuxt/image`, `zod`.
 5. `.env`: `DATABASE_URL`, `BITRIX24_WEBHOOK_URL`, `NUXT_PUBLIC_METRIKA_ID`, `SESSION_SECRET` (секреты только в `.env`, не в репозитории).
-6. `prisma migrate dev` + сид: 6 разделов, 39 видов техники, демо-модели и цены.
+6. `prisma migrate dev` + сид: 8 разделов, 39 видов техники, демо-модели и цены.
 
 ## 8. Журнал решений (ADR)
 

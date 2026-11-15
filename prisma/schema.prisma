@@ -1,0 +1,371 @@
+// Схема БД v1 — слайс db-core.
+// Спека: docs/specs/db-core.md
+// ВНИМАНИЕ: миграция ещё не создавалась — файл на ревью.
+// Prisma 7: url базы живёт в prisma7.config.ts, не в datasource.
+
+generator client {
+  provider = "prisma-client"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// ─────────────────────────── Перечисления ───────────────────────────
+
+/// Единица цены: за смену 8 ч, за час, за погонный метр (траншеекопатели).
+enum PriceUnit {
+  SHIFT
+  HOUR
+  PER_METER
+}
+
+/// К чему привязан вопрос FAQ.
+enum FaqScope {
+  GLOBAL
+  TYPE
+  SERVICE
+}
+
+/// Статус доставки заявки в CRM.
+enum LeadStatus {
+  NEW
+  SENT
+  FAILED
+}
+
+enum AdminRole {
+  ADMIN
+  EDITOR
+}
+
+// ───────────────────────────── Каталог ─────────────────────────────
+
+/// Раздел каталога: «Землеройная техника», «Погрузочная» и т.д. (8 шт.)
+model Category {
+  id             String   @id @default(cuid())
+  slug           String   @unique // "zemleroynaya-tehnika"
+  title          String // «Землеройная техника»
+  h1             String?
+  shortDesc      String?
+  image          String?
+  seoTitle       String?
+  seoDescription String?
+  seoText        String?
+  sortOrder      Int      @default(0)
+  isPublished    Boolean  @default(true)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  types EquipmentType[]
+
+  @@index([sortOrder])
+  @@map("categories")
+}
+
+/// Вид техники = посадочная страница (/arenda-{slug}-v-{город}/), 39 шт.
+model EquipmentType {
+  id                   String    @id @default(cuid())
+  categoryId           String
+  category             Category  @relation(fields: [categoryId], references: [id], onDelete: Restrict)
+  slug                 String    @unique // "gusenichnogo-ekskavatora"
+  name                 String // «Гусеничные экскаваторы»
+  nameGenitive         String // «гусеничного экскаватора» — для H1 и слага
+  priceFrom            Int? // null = «цена по запросу»
+  priceUnit            PriceUnit @default(SHIFT)
+  minOrder             String? // «минимум 4 часа»
+  deliveryTerms        String? // условия доставки текстом
+  deliveryPrice        Int?
+  crewAvailable        Boolean   @default(true) // с экипажем
+  withoutCrewAvailable Boolean   @default(false) // без экипажа
+  worksPerformed       String? // «какие работы выполняет»
+  gallery              String[]  @default([])
+  seoTitle             String?
+  seoDescription       String?
+  seoText              String?
+  sortOrder            Int       @default(0)
+  isPublished          Boolean   @default(true)
+  createdAt            DateTime  @default(now())
+  updatedAt            DateTime  @updatedAt
+
+  models      EquipmentModel[]
+  faq         FaqItem[]
+  relatedFrom RelatedType[]    @relation("RelatedSource")
+  relatedTo   RelatedType[]    @relation("RelatedTarget")
+  leads       Lead[]
+
+  @@index([categoryId, sortOrder])
+  @@index([isPublished])
+  @@map("equipment_types")
+}
+
+/// Конкретная модель в таблице на посадочной: JCB 3CX, Hitachi ZX200 и т.д.
+model EquipmentModel {
+  id            String        @id @default(cuid())
+  typeId        String
+  type          EquipmentType @relation(fields: [typeId], references: [id], onDelete: Cascade)
+  brand         String // «JCB»
+  model         String // «3CX»
+  pricePerShift Int?
+  pricePerHour  Int?
+  photos        String[]      @default([])
+  isAvailable   Boolean       @default(true)
+  sortOrder     Int           @default(0)
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+
+  specs EquipmentSpec[]
+  leads Lead[]
+
+  @@unique([typeId, brand, model])
+  @@index([typeId, sortOrder])
+  @@map("equipment_models")
+}
+
+/// Строка характеристик модели: «Масса, т» → «7,2».
+model EquipmentSpec {
+  id        String         @id @default(cuid())
+  modelId   String
+  equipment EquipmentModel @relation(fields: [modelId], references: [id], onDelete: Cascade)
+  name      String
+  value     String
+  sortOrder Int            @default(0)
+
+  @@index([modelId, sortOrder])
+  @@map("equipment_specs")
+}
+
+/// Ручная перелинковка «Похожая техника» (порядок задаёт редактор).
+model RelatedType {
+  sourceId  String
+  targetId  String
+  sortOrder Int           @default(0)
+  source    EquipmentType @relation("RelatedSource", fields: [sourceId], references: [id], onDelete: Cascade)
+  target    EquipmentType @relation("RelatedTarget", fields: [targetId], references: [id], onDelete: Cascade)
+
+  @@id([sourceId, targetId])
+  @@index([sourceId, sortOrder])
+  @@map("related_types")
+}
+
+/// Дополнительная услуга: доставка, работа с экипажем и т.п. (P1, 5 шт.)
+model Service {
+  id             String   @id @default(cuid())
+  slug           String   @unique
+  title          String
+  description    String?
+  image          String?
+  seoTitle       String?
+  seoDescription String?
+  seoText        String?
+  sortOrder      Int      @default(0)
+  isPublished    Boolean  @default(true)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  faq FaqItem[]
+
+  @@index([sortOrder])
+  @@map("services")
+}
+
+/// Вопрос-ответ. Отдаётся в JSON-LD FAQPage.
+model FaqItem {
+  id              String         @id @default(cuid())
+  scope           FaqScope       @default(TYPE)
+  equipmentTypeId String?
+  equipmentType   EquipmentType? @relation(fields: [equipmentTypeId], references: [id], onDelete: Cascade)
+  serviceId       String?
+  service         Service?       @relation(fields: [serviceId], references: [id], onDelete: Cascade)
+  question        String
+  answer          String
+  sortOrder       Int            @default(0)
+  isPublished     Boolean        @default(true)
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
+
+  @@index([scope, sortOrder])
+  @@index([equipmentTypeId, sortOrder])
+  @@index([serviceId, sortOrder])
+  @@map("faq_items")
+}
+
+// ──────────────────────── Блоки главной/лендингов ────────────────────────
+
+model Advantage {
+  id          String   @id @default(cuid())
+  title       String
+  text        String?
+  icon        String? // ключ иконки, не путь к файлу
+  sortOrder   Int      @default(0)
+  isPublished Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([sortOrder])
+  @@map("advantages")
+}
+
+/// «Порядок работы»: заявка → расчёт → договор → подача техники.
+model WorkStep {
+  id          String  @id @default(cuid())
+  title       String
+  text        String?
+  sortOrder   Int     @default(0)
+  isPublished Boolean @default(true)
+
+  @@map("work_steps")
+}
+
+/// Цифры доверия: «120 единиц в парке», «12 лет на рынке».
+model TrustStat {
+  id          String  @id @default(cuid())
+  value       String // «120» — строка, чтобы писать «12+» и «4,9»
+  unit        String? // «ед.», «лет», «%»
+  label       String // «единиц техники в парке»
+  sortOrder   Int     @default(0)
+  isPublished Boolean @default(true)
+
+  @@map("trust_stats")
+}
+
+// ────────────────────────── Контент и настройки ──────────────────────────
+
+/// Singleton: одна запись с id = "main".
+model SiteSettings {
+  id              String   @id @default("main")
+  companyName     String   @default("ООО «СПЕЦТЕХРЕСУРС»")
+  phone           String // в отображаемом виде: «+7 (495) 000-00-00»
+  email           String?
+  telegram        String?
+  whatsapp        String?
+  maxMessenger    String? // мессенджер MAX
+  workingHours    String?
+  address         String?
+  city            String // «Москва» — именительный
+  cityIn          String // «Москве» — предложный, для H1 «Аренда … в Москве»
+  mapLat          Float?
+  mapLng          Float?
+  legalName       String?
+  inn             String?
+  ogrn            String?
+  legalAddress    String?
+  priceDisclaimer String   @default("Цены указаны за смену 8 часов и не являются публичной офертой.")
+  metrikaId       String?
+  updatedAt       DateTime @updatedAt
+
+  @@map("site_settings")
+}
+
+/// Статические страницы: политика ПДн, согласие, «О компании».
+model Page {
+  id             String   @id @default(cuid())
+  slug           String   @unique // "politika-konfidencialnosti"
+  title          String
+  content        String // markdown из редактора
+  seoTitle       String?
+  seoDescription String?
+  isPublished    Boolean  @default(true)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  @@map("pages")
+}
+
+/// Постоянные редиректы (смена ЧПУ, склейка дублей).
+model Redirect {
+  id         String   @id @default(cuid())
+  from       String   @unique // "/arenda-ekskavatora-v-moskva/"
+  to         String // "/arenda-gusenichnogo-ekskavatora-v-moskva"
+  statusCode Int      @default(301)
+  createdAt  DateTime @default(now())
+
+  @@map("redirects")
+}
+
+// ────────────────────────────── Админка ──────────────────────────────
+
+model AdminUser {
+  id           String    @id @default(cuid())
+  email        String    @unique
+  passwordHash String // argon2id
+  name         String?
+  role         AdminRole @default(EDITOR)
+  isActive     Boolean   @default(true)
+  lastLoginAt  DateTime?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  sessions AdminSession[]
+
+  @@map("admin_users")
+}
+
+/// Сессии в БД — можно отозвать доступ, не меняя пароль.
+model AdminSession {
+  id        String    @id @default(cuid())
+  userId    String
+  user      AdminUser @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tokenHash String    @unique // sha256 от токена, сам токен только в cookie
+  expiresAt DateTime
+  ip        String?
+  userAgent String?
+  createdAt DateTime  @default(now())
+
+  @@index([userId])
+  @@index([expiresAt])
+  @@map("admin_sessions")
+}
+
+// ─────────────────────────────── Заявки ───────────────────────────────
+
+/// Заявка с формы. Сначала пишется в БД, потом уходит в Битрикс24.
+model Lead {
+  id        String @id @default(cuid())
+  /// Идемпотентность: повторная отправка той же формы не создаёт дубль.
+  requestId String @unique
+
+  name    String
+  phone   String
+  email   String?
+  comment String?
+
+  /// Где оставлена заявка: "hero", "landing-form", "callback", "contacts".
+  place     String
+  pageUrl   String
+  pageTitle String?
+  referer   String?
+
+  utmSource   String?
+  utmMedium   String?
+  utmCampaign String?
+  utmContent  String?
+  utmTerm     String?
+
+  equipmentTypeId  String?
+  equipmentType    EquipmentType?  @relation(fields: [equipmentTypeId], references: [id], onDelete: SetNull)
+  equipmentModelId String?
+  equipmentModel   EquipmentModel? @relation(fields: [equipmentModelId], references: [id], onDelete: SetNull)
+
+  /// Согласие на обработку ПДн: когда и с какой редакцией политики.
+  consentAt      DateTime
+  consentVersion String
+
+  ip        String?
+  userAgent String?
+
+  status    LeadStatus @default(NEW)
+  attempts  Int        @default(0)
+  sentAt    DateTime?
+  crmLeadId String?
+  errorText String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([createdAt])
+  @@index([status, createdAt])
+  @@index([equipmentTypeId])
+  @@map("leads")
+}
