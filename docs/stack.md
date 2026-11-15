@@ -14,7 +14,7 @@
 | Линтер | **`@nuxt/eslint`** (flat config) | 1.17.0 / ESLint 10.15.0 | ADR-16 |
 | SEO-обвязка | Nitro-роуты + свои композаблы | — | без `@nuxtjs/seo` (ADR-13) |
 | Изображения | `@nuxt/image` + sharp | 2.2.1 | WebP/AVIF, srcset, ресайз |
-| Валидация | `zod` | 4.6.7 | общие схемы для клиента и сервера |
+| Валидация | **valibot** | 1.5.0 | общие схемы для клиента и сервера (ADR-17) |
 | Стили | Tailwind CSS | 4.3.5 | **подтверждено** — Tailwind 4 (ADR-7) |
 | Тесты | **Vitest** (unit) / Playwright (e2e) | 5.1.0 / 1.65.1 | unit подключён 15.11.2026; e2e — вместе с формами (ADR-16) |
 
@@ -49,7 +49,7 @@
 | `sitemap.xml`, `robots.txt` | модули `@nuxtjs/sitemap` и `@nuxtjs/robots` (генерация из данных каталога) |
 | Микроразметка Organization / Product-Offer / FAQ / Breadcrumb | `nuxt-schema-org` + `defineBreadcrumb`, `defineProduct`, FAQPage вручную/хелпером |
 | ЧПУ `/arenda-{vid}-v-{gorod}/` | роут + поиск по `slug` в БД, 404 при отсутствии (шаблон зависит от Q-01) |
-| Формы → Битрикс24 | Nitro server route `/api/leads`: zod-валидация → запись в `Lead` → REST вебхук Битрикс24 |
+| Формы → Битрикс24 | Nitro server route `/api/leads`: valibot-валидация → запись в `Lead` → REST вебхук Битрикс24 |
 | Страница-источник и UTM в лиде | сервер получает `pageUrl`/`utm_*` из запроса и заголовков, подставляет в поля лида |
 | Яндекс.Метрика + цели | плагин + `reachGoal` по событиям, ID счётчика из `SiteSettings` |
 | Редактирование каталога заказчиком | `/admin` на Nuxt + серверные API + сессия в httpOnly-cookie (`nuxt-auth-utils`) |
@@ -79,7 +79,7 @@
 │   └── assets/
 ├── server/                # Nitro: /api/leads, /api/admin, /api/cron
 ├── prisma/                # schema.prisma, migrations/, seed.ts
-├── shared/                # типы и zod-схемы (клиент + сервер)
+├── shared/                # типы и valibot-схемы (клиент + сервер)
 └── docker-compose.yml     # postgres для локальной разработки
 ```
 
@@ -96,7 +96,7 @@
 3. ✅ Nuxt 4.6.4 инициализирован вручную (без `nuxi init`): `package.json`, `nuxt.config.ts`, `app/app.vue`.
 4. ✅ Установлены `prisma@7.10.1`, `@prisma/client@7.10.1`, `@prisma/adapter-pg@7.10.1`, `tsx`, `dotenv`.
    ✅ SEO-каркас (15.11.2026) — без `@nuxtjs/seo`: sitemap/robots на Nitro-роутах, мета и JSON-LD — свои композаблы (ADR-13).
-   ⏳ `@nuxt/image`, `zod`, Tailwind — слайсы фронтенда и форм.
+   ⏳ `@nuxt/image`, Tailwind — слайс фронтенда; `valibot` подключён (ADR-17), схемы — в слайсе `leads`.
 5. ✅ `.env` из `.env.example`: `DATABASE_URL` (порт 5433), `SESSION_SECRET` сгенерирован; секреты не в репозитории.
 6. ✅ Миграция `20261115162119_init` + `npm run db:seed`: 8 разделов, 39 видов техники, 4 демо-модели
    с характеристиками, 5 услуг, 6 вопросов FAQ, блоки главной, страница политики ПДн.
@@ -117,10 +117,11 @@
 | ADR-10 | 15.11.2026 | Город — **отдельная таблица `City`** + `SiteSettings.cityId`, вместо полей `city`/`cityIn` | Городов может стать больше одного (Q-01), добавление не требует миграции схемы | Город подтягивается через `include`; `City.nameIn` («Москве») — для H1 и ЧПУ |
 | ADR-11 | 15.11.2026 | Prisma Client создаётся **только с driver adapter** `@prisma/adapter-pg` | В Prisma 7 удалён Rust-движок: `new PrismaClient()` без адаптера падает при инициализации | Один экземпляр клиента на процесс; `datasource db` без `url`, строка — в `prisma7.config.ts` |
 | ADR-12 | 15.11.2026 | Слаги видов техники — **по ТЗ, в родительном падеже** (`/arenda-gusenichnogo-ekskavatora`) | URL уже заданы в ТЗ и согласованы с SEO-структурой; менять их позже — терять индексацию | `EquipmentType.slug` = слаги из ТЗ, `name` (именительный) — для меню и хлебных крошек |
-| ADR-13 | 15.11.2026 | SEO-обвязку делаем **без `@nuxtjs/seo`**: `sitemap.xml` и `robots.txt` — Nitro-роуты (`server/routes/`), мета и JSON-LD — `useSeoMeta` + свои композаблы | Нужен точный контроль: 39 ЧПУ из БД, таблица `Redirect`, один H1, предсказуемый JSON-LD. Пакет `@nuxtjs/seo` тянет og-image и link-checker, которые на этом этапе не нужны | Меньше зависимостей и вес сборки; проверяется `curl`. `og-image`/валидатор ссылок при необходимости ставим точечно, `@nuxtjs/image` и `zod` — в слайсе фронтенда и форм |
+| ADR-13 | 15.11.2026 | SEO-обвязку делаем **без `@nuxtjs/seo`**: `sitemap.xml` и `robots.txt` — Nitro-роуты (`server/routes/`), мета и JSON-LD — `useSeoMeta` + свои композаблы | Нужен точный контроль: 39 ЧПУ из БД, таблица `Redirect`, один H1, предсказуемый JSON-LD. Пакет `@nuxtjs/seo` тянет og-image и link-checker, которые на этом этапе не нужны | Меньше зависимостей и вес сборки; проверяется `curl`. `og-image`/валидатор ссылок при необходимости ставим точечно, `@nuxt/image` — в слайсе фронтенда, `valibot` — в `leads` (ADR-17) |
 | ADR-14 | 15.11.2026 | Markdown статических страниц и SEO-текстов рендерим **на сервере мини-рендерером** (`server/utils/markdown.ts`) с экранированием HTML | Сейчас нужны только заголовки, абзацы, списки, цитаты и ссылки; полноценный редактор появится вместе с админкой | Свойства безопасны (HTML экранируется), нет лишней зависимости; при появлении сложной разметки заменяем на `marked` в слайсе админки |
 | ADR-15 | 15.11.2026 | **TypeScript 5.9.3**, а не 7.0.2 | `typescript-eslint@8.72` и `ts-api-utils@2.5` обращаются к `ts.TypeFlags.Intrinsic`, которого в TS 7 нет: линтер падал с `TypeError: Cannot read properties of undefined (reading 'Intrinsic')` | Пока линтер — часть DoD, держим TS 5.9.3; на TS 7 переходим, когда `typescript-eslint` объявит поддержку |
 | ADR-16 | 15.11.2026 | Тестовый контур: **Vitest 5** (unit) + **`@nuxt/eslint` 1.17** (flat config); тесты — на чистых функциях; API-интеграция — через сервисный слой слайса `leads` | Нужны быстрые тесты без поднятия Nuxt/Nitro и БД; `@nuxt/test-utils` тянет полную сборку и пока не оправдан | `npm test` — 36 unit-тестов, `npm run typecheck` — только `.ts`; `.vue`, Playwright и тесты API с БД — в следующих слайсах (`vue-tsc`/`@nuxt/test-utils`) |
+| ADR-17 | 15.11.2026 | Валидация — **valibot 1.5.0** вместо zod 4.6.7 | Решение заказчика. Модульные схемы-функции (`v.pipe`, `v.transform`) позволяют нормализовать телефон прямо в схеме, в клиентском бандле valibot ≈1,5 КБ против ≈14 КБ у zod | Схемы — `shared/schemas/leads.ts` (Nuxt 4 `sharedDir`), одна схема для формы и для `POST /api/leads`; сообщения об ошибках пишем в правилах по-русски, `@valibot/i18n` не нужен. Проверено 15.11.2026 на Node 24: `v.pipe`/`v.transform`/`v.safeParse` работают, `h3@1.15.11` валидирует через `validateData(data, fn)` — привязки к конкретной библиотеке нет. zod остаётся в lock-файле только транзитивно (dev, `@modelcontextprotocol/*` из Nuxt-тулинга) |
 
 > ADR-6 предварительный: применяем, если нет возражений заказчика/SEO-специалиста.
 
