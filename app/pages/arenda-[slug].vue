@@ -84,7 +84,7 @@ function specLine(specs: Array<{ name: string; value: string }>): string {
 
 <template>
   <div v-if="landing">
-    <Breadcrumbs
+    <SiteBreadcrumbs
       :items="[
         { name: 'Главная', path: '/' },
         { name: 'Каталог', path: '/katalog' },

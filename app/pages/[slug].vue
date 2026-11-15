@@ -22,7 +22,7 @@ usePageSeo({
 
 <template>
   <div v-if="page">
-    <Breadcrumbs :items="[{ name: 'Главная', path: '/' }, { name: page.title }]" />
+    <SiteBreadcrumbs :items="[{ name: 'Главная', path: '/' }, { name: page.title }]" />
 
     <h1>{{ page.title }}</h1>
 

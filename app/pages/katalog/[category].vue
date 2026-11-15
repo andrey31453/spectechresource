@@ -26,7 +26,7 @@ usePageSeo({
 
 <template>
   <div v-if="category">
-    <Breadcrumbs
+    <SiteBreadcrumbs
       :items="[
         { name: 'Главная', path: '/' },
         { name: 'Каталог', path: '/katalog' },

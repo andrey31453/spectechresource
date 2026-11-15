@@ -18,7 +18,7 @@ usePageSeo({
 
 <template>
   <div>
-    <Breadcrumbs :items="[{ name: 'Главная', path: '/' }, { name: 'Услуги' }]" />
+    <SiteBreadcrumbs :items="[{ name: 'Главная', path: '/' }, { name: 'Услуги' }]" />
 
     <h1>Услуги</h1>
     <p class="lead">

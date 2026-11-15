@@ -23,7 +23,7 @@ usePageSeo({
 
 <template>
   <div v-if="service">
-    <Breadcrumbs
+    <SiteBreadcrumbs
       :items="[
         { name: 'Главная', path: '/' },
         { name: 'Услуги', path: '/uslugi' },

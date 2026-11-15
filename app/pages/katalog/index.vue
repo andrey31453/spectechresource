@@ -21,7 +21,7 @@ usePageSeo({
 
 <template>
   <div>
-    <Breadcrumbs :items="[{ name: 'Главная', path: '/' }, { name: 'Каталог' }]" />
+    <SiteBreadcrumbs :items="[{ name: 'Главная', path: '/' }, { name: 'Каталог' }]" />
 
     <h1>Каталог спецтехники</h1>
     <p class="lead">

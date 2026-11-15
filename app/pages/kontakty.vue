@@ -35,7 +35,7 @@ const requisites = computed(() =>
 
 <template>
   <div v-if="site">
-    <Breadcrumbs :items="[{ name: 'Главная', path: '/' }, { name: 'Контакты' }]" />
+    <SiteBreadcrumbs :items="[{ name: 'Главная', path: '/' }, { name: 'Контакты' }]" />
 
     <h1>Контакты</h1>
     <p class="lead">

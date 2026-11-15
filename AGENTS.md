@@ -62,10 +62,10 @@
   только точными версиями (ADR-4); URL без завершающего слеша (ADR-6); деньги — `Decimal(12,2)` (ADR-9).
 - **Структура папок:** `app/` (Nuxt: страницы, компоненты, композаблы), `server/` (Nitro API и routes),
   `prisma/` (схема, миграции, сид), `docs/`. DTO публичного API описаны в `app/types/catalog.ts`.
-- **Слайсы:** ✅ `db-core` (15.11.2026, `docs/specs/db-core.md`) · ✅ `seo-routing` (15.11.2026,
-  `docs/specs/seo-routing.md`). Следующий — формы → `Lead` → заглушка CRM или админка.
-- **Тестов и линтера пока нет** — ⏳ Vitest + ESLint подключить до слайса форм (правило §6 п.4),
-  до этого готовность API подтверждается `curl`-проверками из спеки.
+- **Слайсы:** ✅ `db-core` · ✅ `seo-routing` · ✅ `quality` (15.11.2026 — ESLint + Vitest, 36 unit-тестов).
+  Следующий — `leads`: `POST /api/leads` → `Lead` → dry-run CRM (спека `docs/specs/leads.md`).
+- **Проверки перед коммитом:** `npm run lint` · `npm run test` · `npm run typecheck` · `npm run build`.
+  Тесты — Vitest на чистых функциях (`tests/`); тесты API с БД — через сервисный слой (ADR-16).
 
 ## 6. Бэкенд: правило вертикальных слайсов
 
