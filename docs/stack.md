@@ -110,8 +110,8 @@
    задача `leads:send`, 85 unit-тестов; контракт — `docs/specs/leads.md`.
 8. ✅ Слайсы админки: `admin-auth` (15.11.2026 — сессии, guard, CSRF), `admin-catalog` (16.11.2026 — CRUD каталога),
    `admin-leads` (16.11.2026 — журнал заявок, `retry`, CSV), `admin-uploads` (16.11.2026 — изображения,
-   задача `uploads:cleanup`), `admin-settings` (16.11.2026 — настройки сайта и города, 227 unit-тестов);
-   спеки — `docs/specs/`.
+   задача `uploads:cleanup`), `admin-settings` (16.11.2026 — настройки сайта и города),
+   `admin-pages` (16.11.2026 — статические страницы, 243 unit-теста); спеки — `docs/specs/`.
 
 ## 8. Журнал решений (ADR)
 

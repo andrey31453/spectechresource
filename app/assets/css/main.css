@@ -640,6 +640,14 @@ p {
   resize: vertical;
 }
 
+/* Редактор markdown: моноширинный шрифт и высота под длинный текст страницы. */
+.field__textarea--code {
+  min-height: 340px;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 0.9rem;
+  line-height: 1.55;
+}
+
 .field__hint {
   font-size: 0.82rem;
   color: var(--muted);

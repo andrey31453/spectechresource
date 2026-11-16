@@ -63,7 +63,7 @@
 - **Структура папок:** `app/` (Nuxt: страницы, компоненты, композаблы), `server/` (Nitro API, routes, задачи, утилиты),
   `shared/` (valibot-схемы и утилиты для клиента и сервера), `prisma/` (схема, миграции, сид), `tests/`, `docs/`.
   DTO публичного API описаны в `app/types/catalog.ts`, админ-каталога — в `app/types/admin-catalog.ts`,
-  админ-настроек — в `app/types/admin-settings.ts`.
+  админ-настроек — в `app/types/admin-settings.ts`, админ-страниц — в `app/types/admin-pages.ts`.
 - **Слайсы:** ✅ `db-core` · ✅ `seo-routing` · ✅ `quality` (15.11.2026 — ESLint + Vitest) ·
   ✅ `leads` (15.11.2026 — `POST /api/leads`, dry-run CRM, 85 unit-тестов; спека `docs/specs/leads.md`) ·
   ✅ `admin-auth` (15.11.2026 — сессия в БД, guard `/api/admin/**`; спека `docs/specs/admin-auth.md`) ·
@@ -73,7 +73,9 @@
   ✅ `admin-uploads` (16.11.2026 — приём/отдача/удаление изображений, задача `uploads:cleanup`,
   211 unit-тестов; спека `docs/specs/admin-uploads.md`) ·
   ✅ `admin-settings` (16.11.2026 — настройки сайта и города, 227 unit-тестов;
-  спека `docs/specs/admin-settings.md`).
+  спека `docs/specs/admin-settings.md`) ·
+  ✅ `admin-pages` (16.11.2026 — статические страницы, 243 unit-теста;
+  спека `docs/specs/admin-pages.md`).
   Дальше — остальные разделы админки, план — `TODO.md` в корне.
 - **Каталог:** один набор valibot-схем на форму и API — `shared/schemas/catalog.ts`; деньги в форме — строки,
   нормализуются в `Decimal`-строку; `PATCH` — `partial`-схема, отсутствующие поля не трогаются; смена `slug`
@@ -86,6 +88,9 @@
 - **Настройки и города:** `SiteSettings` — singleton `id="main"`; схемы — `shared/schemas/admin-settings.ts`
   (переиспользуют правила каталога); город из настроек удалить нельзя, последний активный нельзя деактивировать
   (`409`), `isDefault` снимается с остальных в транзакции; публичного кэша нет — изменения видны сразу.
+- **Страницы:** корневой адрес `/{slug}`, коды разделов сайта (`katalog`, `uslugi`, `kontakty`, …) и префикс
+  `arenda-` отклоняет схема; markdown рендерит мини-парсер `server/utils/markdown.ts`; смена кода — 301,
+  удаление страницы чистит редиректы, ведущие на её адрес.
 - **Админка:** сессия — строка в `admin_sessions`, cookie `admin_session` (HttpOnly, SameSite=Lax), в БД только
   HMAC-SHA256-хеш токена (ADR-19); пароли — scrypt (`server/utils/password.ts`); ролей нет, все администраторы
   равны (ADR-20); новый администратор — `npm run admin:create`. Все `/api/admin/**` и `/admin/**` закрыты
