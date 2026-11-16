@@ -62,11 +62,15 @@
   только точными версиями (ADR-4); URL без завершающего слеша (ADR-6); деньги — `Decimal(12,2)` (ADR-9).
 - **Структура папок:** `app/` (Nuxt: страницы, компоненты, композаблы), `server/` (Nitro API, routes, задачи, утилиты),
   `shared/` (valibot-схемы и утилиты для клиента и сервера), `prisma/` (схема, миграции, сид), `tests/`, `docs/`.
-  DTO публичного API описаны в `app/types/catalog.ts`.
+  DTO публичного API описаны в `app/types/catalog.ts`, админ-каталога — в `app/types/admin-catalog.ts`.
 - **Слайсы:** ✅ `db-core` · ✅ `seo-routing` · ✅ `quality` (15.11.2026 — ESLint + Vitest) ·
   ✅ `leads` (15.11.2026 — `POST /api/leads`, dry-run CRM, 85 unit-тестов; спека `docs/specs/leads.md`) ·
-  ✅ `admin-auth` (15.11.2026 — сессия в БД, guard `/api/admin/**`, 119 unit-тестов; спека `docs/specs/admin-auth.md`).
-  Дальше — CRUD каталога, затем журнал заявок (отложен, план — `TODO.md` в корне).
+  ✅ `admin-auth` (15.11.2026 — сессия в БД, guard `/api/admin/**`; спека `docs/specs/admin-auth.md`) ·
+  ✅ `admin-catalog` (16.11.2026 — CRUD каталога, 161 unit-тест; спека `docs/specs/admin-catalog.md`).
+  Дальше — журнал заявок, план — `TODO.md` в корне.
+- **Каталог:** один набор valibot-схем на форму и API — `shared/schemas/catalog.ts`; деньги в форме — строки,
+  нормализуются в `Decimal`-строку; `PATCH` — `partial`-схема, отсутствующие поля не трогаются; смена `slug`
+  пишет 301 в `Redirect` и сбрасывает кэш карты редиректов; публичные страницы кэша не имеют.
 - **Заявки:** валидация — `shared/schemas/leads.ts` (одна схема для формы и API); заявка сначала в БД,
   потом в CRM (ADR-5); `LEADS_DRY_RUN` по умолчанию `true` (ADR-18); досылка — `npx nuxi task run leads:send`.
 - **Админка:** сессия — строка в `admin_sessions`, cookie `admin_session` (HttpOnly, SameSite=Lax), в БД только

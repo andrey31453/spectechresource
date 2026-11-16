@@ -1,0 +1,130 @@
+# Спека слайса `admin-catalog` — CRUD каталога в админке
+
+| | |
+|---|---|
+| Статус | ✅ реализовано и проверено 16.11.2026 (dev `:3999`, 161 unit-тест) |
+| Слайс | админ-API каталога (`categories`, `types`, `models` + `specs`, `related`) и три экрана админки |
+| Не входит | загрузка файлов (отдельный слайс), FAQ/преимущества, журнал заявок, роли (ADR-20) |
+
+## Зачем
+
+Заказчик правит разделы, виды техники, модели, характеристики и цены сам, без разработчика.
+Публичные страницы читают те же таблицы, поэтому после сохранения изменения видны сразу —
+отдельная «публикация» не нужна, есть только флаг `isPublished`.
+
+## Контракт API
+
+Все хэндлеры под `/api/admin/**`: middleware проверяет сессию и CSRF, в каждом хэндлере —
+`requireAdmin(event)` (ADR-19, ADR-20). Ответы — JSON, ошибки в формате
+`{ message, data: { errors: [{ field, message }] } }`.
+
+| Метод и путь | Назначение | Успех |
+|---|---|---|
+| `GET /api/admin/catalog/categories` | все разделы с числом видов | `{ categories: [] }` |
+| `POST /api/admin/catalog/categories` | новый раздел | `201 { category }` |
+| `PATCH /api/admin/catalog/categories/:id` | правка только переданных полей | `{ category }` |
+| `DELETE /api/admin/catalog/categories/:id` | удаление пустого раздела | `{ ok: true }` |
+| `GET /api/admin/catalog/types?categoryId=` | виды (все или раздела) с числом моделей | `{ types: [] }` |
+| `POST /api/admin/catalog/types` | новый вид (`categoryId` в теле) | `201 { type }` |
+| `GET /api/admin/catalog/types/:id` | карточка: поля, категория, модели со specs, related | `{ type }` |
+| `PATCH /api/admin/catalog/types/:id` | правка вида | `{ type }` |
+| `DELETE /api/admin/catalog/types/:id` | удаление вида с моделями | `{ ok, deletedModels, detachedLeads }` |
+| `POST /api/admin/catalog/types/:id/models` | модель в виде | `201 { model }` |
+| `PATCH /api/admin/catalog/models/:id` | правка модели; `specs` заменяет список целиком | `{ model }` |
+| `DELETE /api/admin/catalog/models/:id` | удаление модели | `{ ok, detachedLeads }` |
+| `PUT /api/admin/catalog/types/:id/related` | «похожая техника»: полный список id в порядке вывода | `{ relatedIds }` |
+
+Коды ошибок: `400` — схема не прошла (поля с русскими текстами), `401` — нет сессии,
+`404` — записи нет, `409` — занятый `slug` или непустой раздел (`P2002`/проверка `_count`).
+
+
+## Валидация (`shared/schemas/catalog.ts`)
+
+Схемы общие для форм и сервера; форма шлёт строки, сервер приводит их к виду Prisma.
+
+| Правило | Как |
+|---|---|
+| `slug` | `^[a-z0-9]+(-[a-z0-9]+)*$`, 2–80 символов, приводится к нижнему регистру |
+| Деньги | `«26 000,50» → «26000.50»`; пустая строка → `null` («цена по запросу»); до 9 цифр и 2 знаков |
+| Необязательный текст | `trim`, пустая строка → `null` |
+| Фото | массив адресов, до 20 штук, каждая строка ≤ 500 символов |
+| Характеристики | до 40 пар `name`/`value`; пустые строки форма отбрасывает |
+| «Похожая техника» | до 30 id, без повторов (схема) и без ссылки на себя (400 в хэндлере) |
+| `PATCH` | `partial`-схема: отсутствующие поля остаются `undefined`, Prisma их не трогает |
+
+## Смена кода и редиректы (ADR-6)
+
+- Раздел: `/katalog/{old}` → 301 `/katalog/{new}`.
+- Вид: `/arenda-{old}-v-{city}` → 301 `/arenda-{new}-v-{city}` для города по умолчанию;
+  пока город один, этого достаточно. Если активного города нет — редирект не создаётся.
+- Запись в `Redirect` — `upsert` по `from`; после записи кэш таблицы `redirects` (TTL 60 с)
+  сбрасывается `invalidateRedirectCache()`, поэтому старый адрес работает сразу.
+
+## Удаление: что происходит со связями
+
+- **Раздел с видами не удаляется** (`409`): сначала перенести или удалить виды.
+- **Вид** удаляется каскадом: модели, характеристики, FAQ, связи `RelatedType`; у заявок
+  `equipmentTypeId` обнуляется (`SetNull`) — сами заявки не теряются. В ответе `deletedModels` и `detachedLeads`.
+- **Модель**: характеристики каскадом, заявки без привязки. Ответ — `detachedLeads`.
+
+## UI админки
+
+| Страница | Что делает |
+|---|---|
+| `/admin/catalog` | таблица разделов: код, число видов, порядок, публикация; форма создания/правки; удаление с `confirm` |
+| `/admin/catalog/:categoryId` | виды раздела: таблица с ценой и числом моделей, форма вида, удаление |
+| `/admin/catalog/types/:id` | карточка вида: поля, модели с редактором характеристик, «похожая техника» с порядком |
+
+Общие компоненты: `AdminField` (подпись + ошибка), `AdminTypeFields` (поля вида на двух экранах),
+`AdminSpecsEditor` (строки характеристик), `AdminModelCard` (модель целиком).
+
+## Инвалидация публичных данных
+
+Публичные страницы и API читают PostgreSQL на каждый запрос, кэша страниц нет — после сохранения
+изменения видны сразу без `revalidate`. Единственный кэш — карта `Redirect` (60 с), он сбрасывается
+при записи. Если позже появится ISR/кэш страниц, инвалидацию добавить в те же хэндлеры.
+
+## Файлы
+
+| Файл | Назначение |
+|---|---|
+| `shared/schemas/catalog.ts` | схемы и нормализация: `Category*Schema`, `Type*Schema`, `Model*Schema`, `RelatedUpdateSchema`, `normalizeMoneyInput` |
+| `server/utils/admin-request.ts` | `readValidBody`, `throwValidationError`, `throwFieldError`, `throwNotFound`, `throwConflict` |
+| `server/utils/catalog-admin.ts` | DTO админ-каталога (`toAdminCategory`, `toAdminTypeListItem`, `toAdminType`, `toAdminModel`) |
+| `server/utils/catalog-slugs.ts` | `categorySlugRedirect`, `typeSlugRedirect`, `saveSlugRedirect` |
+| `server/utils/redirects.ts` | `getRedirectMap` + `invalidateRedirectCache` |
+| `server/api/admin/catalog/**` | 13 хэндлеров по таблице выше |
+| `app/pages/admin/catalog/index.vue`, `[categoryId].vue`, `types/[id].vue` | экраны |
+| `app/components/admin/*.vue` | поля, характеристики, карточка модели |
+| `app/utils/admin-catalog-forms.ts` | форма ↔ тело запроса (строки, `null`, массивы по строкам) |
+| `app/composables/useAdminForm.ts` | единая обработка ошибок сохранения |
+| `tests/catalog-schema.test.ts`, `catalog-slugs.test.ts`, `catalog-dto.test.ts`, `admin-catalog-forms.test.ts` | 42 новых кейса |
+
+## Проверено 16.11.2026 (dev на `:3999`)
+
+- Без cookie `GET /api/admin/catalog/categories` → `401`; страница `/admin/catalog` → `302` на вход с `next`.
+- Схема: `POST` с кодом «Плохой код» и коротким названием → `400`, ошибки по полям `slug` и `title`.
+- Раздел создан (`201`, `typesCount: 0`), код `test-razdel-crud` переименован → старый
+  `/katalog/test-razdel-crud` → `301` на новый, новый адрес — `200`; в `/api/catalog` раздел появился.
+- Вид создан в новом разделе, цена `«12 345,5»` сохранена как `12345.50`; смена кода →
+  `/arenda-test-tip-crud-v-moskva` → `301` на новый адрес, посадочная `200`.
+- Модель создана с двумя характеристиками, `PATCH` с новым `specs` заменил список (в карточке вида — одна строка).
+- `PUT related` с собственным id → `400` («Вид не может ссылаться сам на себя»); с `mini-ekskavatora` →
+  в `/api/landing` блок `related` содержит `mini-ekskavatora`, модели — 1.
+- `DELETE` вида → `{ ok, deletedModels: 1, detachedLeads: 0 }`, посадочная → `404`; `DELETE` раздела → `{ ok: true }`,
+  в публичном каталоге раздела нет. Попытка удалить раздел с 9 видами → `409` с текстом, раздел на месте.
+- Тестовые строки и редиректы удалены: `categories`/`equipment_types` с `test-%` — 0, `redirects` с `test-` — 0.
+- `npm run lint` — чисто; `npm test` — 161/161; `npm run typecheck` — без ошибок; `npm run build` — успешно.
+
+## Ограничения (осознанные)
+
+- Загрузки файлов нет: фото и галереи — только адреса (следующий слайс, `public/uploads`).
+- Смена кода вида создаёт редирект только для города по умолчанию; при нескольких городах
+  понадобится либо запись для каждого активного города, либо глобальный шаблон URL.
+- Дубликат `slug` ловится по `P2002` и отдаётся как `409`; проверка «занят другим адресом» отдельным
+  запросом не делается, чтобы не удваивать чтения.
+- Тесты API с реальной БД не автоматизированы (ADR-16): CRUD проверен `curl`-сценарием выше.
+- Удаление раздела с видами намеренно запрещено — массовое удаление посадочных страниц требует отдельного
+  подтверждения и UI, которого пока нет.
+
+Ошибки форм — `useAdminForm()`: `400` раскладывает по полям, `401` уводит на вход, `409/404` показывает текст.

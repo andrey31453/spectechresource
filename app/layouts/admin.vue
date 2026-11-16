@@ -3,16 +3,24 @@
 useSeoMeta({
   robots: "noindex, nofollow",
 });
+
+const route = useRoute();
+
+// Каталог — таблицы и формы в несколько колонок, им тесно в узкой колонке входа.
+const wide = computed(() => route.path.startsWith("/admin/catalog"));
 </script>
 
 <template>
   <div class="admin-shell">
     <header class="admin-shell__bar">
       <NuxtLink to="/admin" class="admin-shell__brand">СПЕЦТЕХРЕСУРС · админка</NuxtLink>
-      <NuxtLink to="/" class="admin-shell__link">На сайт</NuxtLink>
+      <nav class="admin-shell__nav" aria-label="Разделы админки">
+        <NuxtLink to="/admin/catalog" class="admin-shell__link">Каталог</NuxtLink>
+        <NuxtLink to="/" class="admin-shell__link">На сайт</NuxtLink>
+      </nav>
     </header>
 
-    <main class="admin-shell__main">
+    <main :class="['admin-shell__main', { 'admin-shell__main--wide': wide }]">
       <slot />
     </main>
   </div>
