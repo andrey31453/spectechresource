@@ -66,8 +66,10 @@
 - **Слайсы:** ✅ `db-core` · ✅ `seo-routing` · ✅ `quality` (15.11.2026 — ESLint + Vitest) ·
   ✅ `leads` (15.11.2026 — `POST /api/leads`, dry-run CRM, 85 unit-тестов; спека `docs/specs/leads.md`) ·
   ✅ `admin-auth` (15.11.2026 — сессия в БД, guard `/api/admin/**`; спека `docs/specs/admin-auth.md`) ·
-  ✅ `admin-catalog` (16.11.2026 — CRUD каталога, 161 unit-тест; спека `docs/specs/admin-catalog.md`).
-  Дальше — журнал заявок, план — `TODO.md` в корне.
+  ✅ `admin-catalog` (16.11.2026 — CRUD каталога, 161 unit-тест; спека `docs/specs/admin-catalog.md`) ·
+  ✅ `admin-leads` (16.11.2026 — журнал заявок, повторная отправка, CSV, 199 unit-тестов;
+  спека `docs/specs/admin-leads.md`).
+  Дальше — загрузка изображений и остальные разделы админки, план — `TODO.md` в корне.
 - **Каталог:** один набор valibot-схем на форму и API — `shared/schemas/catalog.ts`; деньги в форме — строки,
   нормализуются в `Decimal`-строку; `PATCH` — `partial`-схема, отсутствующие поля не трогаются; смена `slug`
   пишет 301 в `Redirect` и сбрасывает кэш карты редиректов; публичные страницы кэша не имеют.

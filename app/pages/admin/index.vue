@@ -40,10 +40,14 @@ async function logout() {
     <section class="admin-dashboard__todo">
       <h2>Разделы</h2>
       <p>
+        <NuxtLink to="/admin/leads"><strong>Заявки</strong></NuxtLink> — журнал: фильтры по статусу и датам,
+        поиск по контактам, карточка заявки с повтором отправки в Битрикс24 и выгрузка в CSV.
+      </p>
+      <p>
         <NuxtLink to="/admin/catalog"><strong>Каталог</strong></NuxtLink> — разделы, виды техники, модели,
         характеристики и цены. Изменения сразу видны на сайте.
       </p>
-      <p>Заявки, страницы и настройки сайта — следующие слайсы, план в <code>TODO.md</code> в корне проекта.</p>
+      <p>Страницы и настройки сайта — следующие слайсы, план в <code>TODO.md</code> в корне проекта.</p>
     </section>
   </div>
 </template>

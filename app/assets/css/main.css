@@ -758,3 +758,143 @@ p {
     grid-template-columns: 1fr 1fr;
   }
 }
+
+/* ── Админка: журнал заявок ── */
+.admin-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 16px;
+}
+
+.admin-tabs__item {
+  display: inline-flex;
+  gap: 6px;
+  align-items: center;
+  padding: 6px 12px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: var(--bg);
+  color: var(--muted);
+  font: inherit;
+  font-size: 0.85rem;
+  cursor: pointer;
+}
+
+.admin-tabs__item:hover {
+  border-color: var(--accent);
+}
+
+.admin-tabs__item--active {
+  border-color: var(--accent);
+  background: #f2f7fc;
+  color: var(--text);
+}
+
+.admin-tabs__count {
+  font-size: 0.8rem;
+  color: var(--muted);
+}
+
+.lead-filters {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+  align-items: end;
+  margin-bottom: 18px;
+}
+
+.lead-filters__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 12px;
+  align-items: center;
+  grid-column: 1 / -1;
+}
+
+.lead-table__error {
+  max-width: 260px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.pagination {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 16px;
+  font-size: 0.9rem;
+  color: var(--muted);
+}
+
+.pagination__buttons {
+  display: flex;
+  gap: 8px;
+}
+
+.lead-card {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.lead-card__section {
+  padding: 16px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+}
+
+.lead-card__title {
+  margin: 0 0 12px;
+  font-size: 1.05rem;
+}
+
+.lead-card__grid {
+  display: grid;
+  gap: 12px 20px;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  margin: 0;
+}
+
+.lead-card__row {
+  min-width: 0;
+  margin: 0;
+}
+
+.lead-card__term {
+  margin: 0 0 2px;
+  font-size: 0.8rem;
+  color: var(--muted);
+}
+
+.lead-card__value {
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+
+.lead-card__value--pre {
+  white-space: pre-wrap;
+}
+
+.lead-card__comment {
+  margin-top: 12px;
+}
+
+.lead-card__utm {
+  margin-top: 14px;
+  padding-top: 14px;
+  border-top: 1px solid var(--line);
+}
+
+.lead-card__error {
+  margin: 12px 0 0;
+  padding: 10px 12px;
+  border-radius: var(--radius);
+  background: #fdecec;
+  color: #8a1c1c;
+  font-size: 0.9rem;
+  overflow-wrap: anywhere;
+}

@@ -6,8 +6,8 @@ useSeoMeta({
 
 const route = useRoute();
 
-// Каталог — таблицы и формы в несколько колонок, им тесно в узкой колонке входа.
-const wide = computed(() => route.path.startsWith("/admin/catalog"));
+// Каталог и журнал заявок — таблицы и формы в несколько колонок, им тесно в узкой колонке входа.
+const wide = computed(() => route.path.startsWith("/admin/catalog") || route.path.startsWith("/admin/leads"));
 </script>
 
 <template>
@@ -15,6 +15,7 @@ const wide = computed(() => route.path.startsWith("/admin/catalog"));
     <header class="admin-shell__bar">
       <NuxtLink to="/admin" class="admin-shell__brand">СПЕЦТЕХРЕСУРС · админка</NuxtLink>
       <nav class="admin-shell__nav" aria-label="Разделы админки">
+        <NuxtLink to="/admin/leads" class="admin-shell__link">Заявки</NuxtLink>
         <NuxtLink to="/admin/catalog" class="admin-shell__link">Каталог</NuxtLink>
         <NuxtLink to="/" class="admin-shell__link">На сайт</NuxtLink>
       </nav>
