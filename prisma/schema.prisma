@@ -34,11 +34,6 @@ enum LeadStatus {
   FAILED
 }
 
-enum AdminRole {
-  ADMIN
-  EDITOR
-}
-
 // ───────────────────────────── Каталог ─────────────────────────────
 
 /// Раздел каталога: «Землеройная техника», «Погрузочная» и т.д. (8 шт.)
@@ -303,12 +298,12 @@ model Redirect {
 
 // ────────────────────────────── Админка ──────────────────────────────
 
+/// Сотрудник с доступом в админку. Все администраторы равны по правам (ADR-20).
 model AdminUser {
   id           String    @id @default(cuid())
   email        String    @unique
   passwordHash String // scrypt (ADR-19): `scrypt$N$r$p$соль$хеш`
   name         String?
-  role         AdminRole @default(EDITOR)
   isActive     Boolean   @default(true)
   lastLoginAt  DateTime?
   createdAt    DateTime  @default(now())

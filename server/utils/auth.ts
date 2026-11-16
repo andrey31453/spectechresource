@@ -15,14 +15,11 @@ export const ADMIN_SESSION_TTL_MS = 7 * 24 * 60 * 60 * 1000;
 /** Вход: 8 попыток за 5 минут на IP — человеку хватает, перебор становится бессмысленным. */
 export const ADMIN_LOGIN_RATE_LIMIT = { limit: 8, windowMs: 5 * 60 * 1000 } as const;
 
-export type AdminRoleName = "ADMIN" | "EDITOR";
-
 /** Что кладём в `event.context.admin` и отдаём в `GET /api/admin/me`. */
 export interface AdminIdentity {
   id: string;
   email: string;
   name: string | null;
-  role: AdminRoleName;
 }
 
 /** Случайный токен сессии: 32 байта → 43 символа base64url. */
@@ -46,11 +43,6 @@ export function adminSessionExpiry(now: Date = new Date()): Date {
 
 export function isSessionExpired(expiresAt: Date, now: Date = new Date()): boolean {
   return expiresAt.getTime() <= now.getTime();
-}
-
-/** `ADMIN` умеет всё, `EDITOR` — контент; сравнение ролей в одном месте. */
-export function hasAtLeastRole(role: AdminRoleName, required: AdminRoleName): boolean {
-  return role === "ADMIN" || required === "EDITOR";
 }
 
 export function isReadMethod(method: string): boolean {
@@ -107,16 +99,10 @@ export function isSameOrigin(origin: string | undefined, host: string | undefine
 }
 
 /** Представление пользователя для API: без `passwordHash` и служебных полей. */
-export function toAdminIdentity(user: {
-  id: string;
-  email: string;
-  name: string | null;
-  role: string;
-}): AdminIdentity {
+export function toAdminIdentity(user: { id: string; email: string; name: string | null }): AdminIdentity {
   return {
     id: user.id,
     email: user.email,
     name: user.name,
-    role: user.role === "ADMIN" ? "ADMIN" : "EDITOR",
   };
 }

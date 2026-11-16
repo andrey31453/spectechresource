@@ -1,12 +1,12 @@
 import type { H3Event } from "h3";
-import { hasAtLeastRole, type AdminIdentity, type AdminRoleName } from "./auth";
+import type { AdminIdentity } from "./auth";
 
 /**
  * Доступ к данным текущего администратора. Middleware уже проверил сессию,
  * но проверка здесь нужна: тип `event.context.admin` — опциональный,
  * и это последняя линия, если маршрут случайно окажется вне фильтра.
  */
-export function requireAdmin(event: H3Event, required: AdminRoleName = "EDITOR"): AdminIdentity {
+export function requireAdmin(event: H3Event): AdminIdentity {
   const admin = event.context.admin;
 
   if (!admin) {
@@ -14,14 +14,6 @@ export function requireAdmin(event: H3Event, required: AdminRoleName = "EDITOR")
       statusCode: 401,
       statusMessage: "Unauthorized",
       message: "Требуется вход в админку",
-    });
-  }
-
-  if (!hasAtLeastRole(admin.role, required)) {
-    throw createError({
-      statusCode: 403,
-      statusMessage: "Forbidden",
-      message: "Недостаточно прав для этого действия",
     });
   }
 

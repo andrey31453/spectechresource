@@ -19,8 +19,6 @@ if (!user.value) {
   await navigateTo("/admin/login");
 }
 
-const roleLabel = computed(() => (user.value?.role === "ADMIN" ? "администратор" : "редактор"));
-
 async function logout() {
   await $fetch("/api/admin/logout", { method: "POST" });
   await navigateTo("/admin/login");
@@ -31,7 +29,7 @@ async function logout() {
   <div v-if="user" class="admin-dashboard">
     <h1 class="admin-dashboard__title">Здравствуйте{{ user.name ? `, ${user.name}` : "" }}</h1>
     <p class="admin-dashboard__meta">
-      Вы вошли как <strong>{{ user.email }}</strong> ({{ roleLabel }}). Сессия хранится в базе,
+      Вы вошли как <strong>{{ user.email }}</strong>. Сессия хранится в базе,
       её можно отозвать — выход ниже удаляет её сразу.
     </p>
 

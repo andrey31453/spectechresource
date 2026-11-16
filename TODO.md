@@ -10,19 +10,20 @@
 - [x] `quality` — ESLint (flat) + Vitest, `npm run lint` / `npm test`
 - [x] `leads` — `POST /api/leads`: valibot, запись в БД, dry-run CRM, задача `leads:send`. `docs/specs/leads.md`
 - [x] `admin-auth` (15.11.2026) — сессия в БД, `login`/`logout`/`me`, guard `/api/admin/**` и `/admin/**`,
-      роли `ADMIN`/`EDITOR`, лимит попыток, CSRF, скрипт `npm run admin:create`. `docs/specs/admin-auth.md`
+      единые права для всех администраторов (ADR-20), лимит попыток, CSRF, `npm run admin:create`.
+      `docs/specs/admin-auth.md`
 
 ## 1. Следующий слайс: CRUD каталога в админке
 
 Цель: заказчик сам правит разделы, виды техники, модели, характеристики и цены — без разработчика.
 
-- [ ] Спека `docs/specs/admin-catalog.md`: ресурсы, поля, валидация, права (`EDITOR` — контент, `ADMIN` — удаление).
+- [ ] Спека `docs/specs/admin-catalog.md`: ресурсы, поля, валидация, кто что может (пока все администраторы равны, ADR-20).
 - [ ] `GET/POST/PATCH/DELETE /api/admin/catalog/categories`
 - [ ] `GET/POST/PATCH/DELETE /api/admin/catalog/types` (включая `priceFrom`, `slug`, `nameGenitive`, `isPublished`)
 - [ ] `GET/POST/PATCH/DELETE /api/admin/catalog/types/:id/models` + `specs` (список строк, порядок)
 - [ ] `RelatedType` — выбор «похожей техники» (порядок сохраняется)
 - [ ] Схемы valibot в `shared/schemas/catalog.ts` (те же, что для админ-форм)
-- [ ] Защита: `requireAdmin(event)` на чтении, `requireAdmin(event, "ADMIN")` на удалении
+- [ ] Защита: `requireAdmin(event)` в каждом хэндлере каталога
 - [ ] Инвалидация публичных данных: после изменения — `revalidate`/сброс кэша страниц ЧПУ
 - [ ] UI: список + форма раздела, таблица видов, редактор моделей и характеристик
 - [ ] Тесты: схемы (валидность/нормализация), права, «slug меняется → запись в `Redirect`»
@@ -52,9 +53,10 @@
 ## 4. Остальная админка
 
 - [ ] Настройки сайта (`SiteSettings`): телефон, мессенджеры, реквизиты, город — только `ADMIN`
-- [ ] Статические страницы (`Page`) и SEO-тексты разделов/видов — `EDITOR`
-- [ ] FAQ, преимущества, шаги, цифры доверия — `EDITOR`
-- [ ] Пользователи админки: список, приглашение, деактивация — `ADMIN`
+- [ ] Статические страницы (`Page`) и SEO-тексты разделов/видов
+- [ ] FAQ, преимущества, шаги, цифры доверия
+- [ ] Пользователи админки: список, приглашение, деактивация (все с равными правами, ADR-20)
+- [ ] Разделение прав (роли `ADMIN`/`EDITOR`) — только если появится подрядчик на контенте: миграция + `requireAdmin(role)`
 - [ ] Смена своего пароля из UI (`POST /api/admin/password`, отзывает другие сессии)
 - [ ] «Выйти на всех устройствах» + список активных сессий (`GET /api/admin/sessions`)
 

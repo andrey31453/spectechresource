@@ -4,7 +4,6 @@ import {
   ADMIN_SESSION_TTL_MS,
   adminSessionExpiry,
   createSessionToken,
-  hasAtLeastRole,
   hashSessionToken,
   isAdminApiPath,
   isAdminPagePath,
@@ -17,7 +16,7 @@ import {
   toAdminIdentity,
 } from "../server/utils/auth";
 
-/** Чистая логика сессии админки: токены, роли, какие маршруты закрыты. */
+/** Чистая логика сессии админки: токены, cookie и какие маршруты закрыты. */
 
 describe("токен сессии", () => {
   it("43 символа base64url и не повторяется", () => {
@@ -60,15 +59,6 @@ describe("срок жизни сессии", () => {
     expect(isSessionExpired(new Date("2026-11-15T11:59:59.000Z"), now)).toBe(true);
     expect(isSessionExpired(now, now)).toBe(true);
     expect(isSessionExpired(new Date("2026-11-15T12:00:01.000Z"), now)).toBe(false);
-  });
-});
-
-describe("роли", () => {
-  it("ADMIN проходит везде, EDITOR — только туда, где нужен редактор", () => {
-    expect(hasAtLeastRole("ADMIN", "ADMIN")).toBe(true);
-    expect(hasAtLeastRole("ADMIN", "EDITOR")).toBe(true);
-    expect(hasAtLeastRole("EDITOR", "EDITOR")).toBe(true);
-    expect(hasAtLeastRole("EDITOR", "ADMIN")).toBe(false);
   });
 });
 
@@ -156,15 +146,16 @@ describe("toAdminIdentity", () => {
       id: "u1",
       email: "admin@example.ru",
       name: null,
-      role: "ADMIN",
     });
 
-    expect(view).toEqual({ id: "u1", email: "admin@example.ru", name: null, role: "ADMIN" });
-    expect(Object.keys(view).sort()).toEqual(["email", "id", "name", "role"]);
+    expect(view).toEqual({ id: "u1", email: "admin@example.ru", name: null });
+    expect(Object.keys(view).sort()).toEqual(["email", "id", "name"]);
   });
 
-  it("неизвестная роль считается редактором", () => {
-    expect(toAdminIdentity({ id: "u1", email: "a@b.ru", name: "Иван", role: "OWNER" }).role).toBe("EDITOR");
+  it("не пропускает хеш пароля и служебные поля", () => {
+    const row = { id: "u2", email: "b@b.ru", name: "Пётр", passwordHash: "scrypt$…", isActive: false };
+
+    expect(toAdminIdentity(row)).toEqual({ id: "u2", email: "b@b.ru", name: "Пётр" });
   });
 });
 

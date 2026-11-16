@@ -18,7 +18,6 @@ import { hashPassword, PASSWORD_LIMITS } from "../server/utils/password";
 const email = process.env["ADMIN_EMAIL"]?.trim().toLowerCase() ?? "";
 const password = process.env["ADMIN_PASSWORD"] ?? "";
 const name = process.env["ADMIN_NAME"]?.trim() || null;
-const rawRole = process.env["ADMIN_ROLE"]?.trim().toUpperCase() || null;
 const connectionString = process.env["DATABASE_URL"];
 const shouldUpdate = process.argv.includes("--update");
 
@@ -32,11 +31,8 @@ function fail(message: string): never {
 if (!connectionString) fail("DATABASE_URL не задан — проверьте .env (см. .env.example)");
 if (!email) fail("ADMIN_EMAIL не задан: ADMIN_EMAIL=admin@example.ru ADMIN_PASSWORD='…' npm run admin:create");
 if (!EMAIL_RE.test(email)) fail(`ADMIN_EMAIL выглядит некорректно: ${email}`);
-if (rawRole && rawRole !== "ADMIN" && rawRole !== "EDITOR") fail("ADMIN_ROLE — только ADMIN или EDITOR");
 if (password.length < PASSWORD_LIMITS.min) fail(`Пароль короче ${PASSWORD_LIMITS.min} символов — так проще перебрать`);
 if (password.length > PASSWORD_LIMITS.max) fail(`Пароль длиннее ${PASSWORD_LIMITS.max} символов`);
-
-const role = rawRole === "ADMIN" || rawRole === "EDITOR" ? rawRole : null;
 
 const prisma = new PrismaClient({ adapter: new PrismaPg({ connectionString }) });
 
@@ -50,7 +46,7 @@ try {
   const passwordHash = await hashPassword(password);
 
   if (existing) {
-    // `--update` не затирает то, что не передали: имя и роль меняются только явно,
+    // `--update` не затирает то, что не передали: имя меняется только явно,
     // а `isActive` включаем — сброс пароля заодно возвращает доступ уволенному сотруднику.
     await prisma.adminUser.update({
       where: { id: existing.id },
@@ -58,14 +54,13 @@ try {
         passwordHash,
         isActive: true,
         ...(name ? { name } : {}),
-        ...(role ? { role } : {}),
       },
     });
     const revoked = await revokeAllAdminSessions(prisma, existing.id);
-    console.log(`✓ Пароль обновлён: ${email} (роль ${role ?? existing.role}), отозвано сессий: ${revoked}`);
+    console.log(`✓ Пароль обновлён: ${email}, отозвано сессий: ${revoked}`);
   } else {
-    await prisma.adminUser.create({ data: { email, passwordHash, name, role: role ?? "EDITOR" } });
-    console.log(`✓ Администратор создан: ${email} (роль ${role ?? "EDITOR"})`);
+    await prisma.adminUser.create({ data: { email, passwordHash, name } });
+    console.log(`✓ Администратор создан: ${email}`);
   }
 } finally {
   await prisma.$disconnect();

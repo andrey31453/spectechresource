@@ -65,14 +65,14 @@
   DTO публичного API описаны в `app/types/catalog.ts`.
 - **Слайсы:** ✅ `db-core` · ✅ `seo-routing` · ✅ `quality` (15.11.2026 — ESLint + Vitest) ·
   ✅ `leads` (15.11.2026 — `POST /api/leads`, dry-run CRM, 85 unit-тестов; спека `docs/specs/leads.md`) ·
-  ✅ `admin-auth` (15.11.2026 — сессия в БД, guard `/api/admin/**`, роли, 120 unit-тестов; спека `docs/specs/admin-auth.md`).
+  ✅ `admin-auth` (15.11.2026 — сессия в БД, guard `/api/admin/**`, 119 unit-тестов; спека `docs/specs/admin-auth.md`).
   Дальше — CRUD каталога, затем журнал заявок (отложен, план — `TODO.md` в корне).
 - **Заявки:** валидация — `shared/schemas/leads.ts` (одна схема для формы и API); заявка сначала в БД,
   потом в CRM (ADR-5); `LEADS_DRY_RUN` по умолчанию `true` (ADR-18); досылка — `npx nuxi task run leads:send`.
 - **Админка:** сессия — строка в `admin_sessions`, cookie `admin_session` (HttpOnly, SameSite=Lax), в БД только
-  HMAC-SHA256-хеш токена (ADR-19); пароли — scrypt (`server/utils/password.ts`); новый администратор —
-  `npm run admin:create`. Все `/api/admin/**` и `/admin/**` закрыты `server/middleware/admin-auth.ts`,
-  в хэндлерах — `requireAdmin(event)` / `requireAdmin(event, "ADMIN")`.
+  HMAC-SHA256-хеш токена (ADR-19); пароли — scrypt (`server/utils/password.ts`); ролей нет, все администраторы
+  равны (ADR-20); новый администратор — `npm run admin:create`. Все `/api/admin/**` и `/admin/**` закрыты
+  `server/middleware/admin-auth.ts`, в хэндлерах — `requireAdmin(event)`.
 - **Проверки перед коммитом:** `npm run lint` · `npm run test` · `npm run typecheck` · `npm run build`.
   Тесты — Vitest на чистых функциях (`tests/`); тесты API с БД — через сервисный слой (ADR-16).
 

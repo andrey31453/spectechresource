@@ -17,7 +17,6 @@ interface FakeUser {
   id: string;
   email: string;
   name: string | null;
-  role: string;
   isActive: boolean;
 }
 
@@ -83,7 +82,6 @@ const ACTIVE_USER: FakeUser = {
   id: "user-1",
   email: "admin@example.ru",
   name: "Иван",
-  role: "ADMIN",
   isActive: true,
 };
 
@@ -119,7 +117,7 @@ describe("resolveAdminSession", () => {
 
     const session = await resolveAdminSession(fake.prisma, created.token);
 
-    expect(session?.user).toEqual({ id: "user-1", email: "admin@example.ru", name: "Иван", role: "ADMIN" });
+    expect(session?.user).toEqual({ id: "user-1", email: "admin@example.ru", name: "Иван" });
     expect(session?.sessionId).toBe("session-1");
   });
 

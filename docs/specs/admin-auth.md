@@ -2,9 +2,9 @@
 
 | | |
 |---|---|
-| Статус | **✅ реализовано и проверено 15.11.2026** (dev `:3999`, 120 unit-тестов) |
+| Статус | **✅ реализовано и проверено 15.11.2026** (dev `:3999`, 119 unit-тестов), **16.11.2026 — роли убраны** (ADR-20) |
 | Слайс | сессия админки в БД, `POST /api/admin/login`, `POST /api/admin/logout`, `GET /api/admin/me`, guard на весь `/api/admin/**` и `/admin/**` |
-| Не входит | CRUD каталога, журнал заявок, смена пароля из UI, восстановление пароля по e-mail, 2FA |
+| Не входит | CRUD каталога, журнал заявок, разделение прав, смена пароля из UI, восстановление пароля по e-mail, 2FA |
 
 ## Контракт API
 
@@ -14,7 +14,7 @@
 | `POST /api/admin/logout` | без сессии (идемпотентно) | — | `200 { ok: true }`, cookie сброшена |
 | `GET /api/admin/me` | сессия | — | `200 { user }` |
 
-`user` = `{ id, email, name, role }`, `role` ∈ `ADMIN` \| `EDITOR`. `passwordHash` и токен наружу не отдаются.
+`user` = `{ id, email, name }`. Ролей нет: все администраторы равны (ADR-20). `passwordHash` и токен наружу не отдаются.
 
 ## Ошибки
 
@@ -22,7 +22,7 @@
 |---|---|---|
 | `400` | valibot не пропустил поля | `{ message, data: { errors: [{ field, message }] } }` |
 | `401` | нет/просрочена сессия, `isActive = false`, неверная пара e-mail+пароль | одинаковая формулировка: «Неверный e-mail или пароль» |
-| `403` | небезопасный метод с чужим `Origin`; роль ниже требуемой | «Запрос с чужого источника отклонён» / «Недостаточно прав» |
+| `403` | небезопасный метод с чужим `Origin` | «Запрос с чужого источника отклонён» |
 | `429` | больше 8 попыток входа за 5 минут с одного IP | «Слишком много попыток входа…» + `Retry-After` |
 | `503` | БД недоступна при проверке сессии | «Сервис временно недоступен» |
 
@@ -47,8 +47,8 @@
 1. `/admin/login`, `POST /api/admin/login`, `POST /api/admin/logout` — публичные;
 2. остальные `/api/admin/**` без сессии → `401` JSON; страницы `/admin/**` → `302 /admin/login?next=…`;
 3. небезопасные методы (кроме `GET/HEAD/OPTIONS`) с чужим `Origin` → `403`;
-4. ответы админки — `Cache-Control: no-store`; `event.context.admin` заполняется для хэндлеров;
-   `requireAdmin(event, "ADMIN")` — проверка роли на будущих мутирующих эндпоинтах.
+4. ответы админки — `Cache-Control: no-store`; `event.context.admin` заполняется для хэндлеров,
+   в них достаточно `requireAdmin(event)` — он вернёт `401`, если фильтр почему-то не отработал.
 5. `/admin/login` при валидной сессии → `302 /admin`.
 
 ## Валидация
@@ -63,14 +63,14 @@
 |---|---|
 | `shared/schemas/auth.ts`, `shared/schemas/errors.ts` | схема входа, общий формат ошибок полей |
 | `server/utils/password.ts` | scrypt: `hashPassword`, `verifyPassword`, `DUMMY_PASSWORD_HASH` |
-| `server/utils/auth.ts` | токены, TTL, роли, guard-предикаты, cookie, CSRF (чистые функции) |
+| `server/utils/auth.ts` | токены, TTL, предикаты путей, cookie, CSRF (чистые функции) |
 | `server/utils/admin-sessions.ts` | `createAdminSession`, `resolveAdminSession`, `revokeAdminSession`, `revokeAllAdminSessions` |
-| `server/utils/admin-guard.ts` | `requireAdmin(event, role)` |
+| `server/utils/admin-guard.ts` | `requireAdmin(event)` |
 | `server/middleware/admin-auth.ts` | защита префиксов |
 | `server/api/admin/{login,logout}.post.ts`, `me.get.ts` | эндпоинты |
 | `scripts/create-admin.ts` (`npm run admin:create`) | создание админа и `--update` (сброс пароля + отзыв сессий) |
 | `app/layouts/admin.vue`, `app/pages/admin/{login,index}.vue` | минимальный UI входа и дашборда |
-| `tests/{password,auth,admin-sessions}.test.ts` | 35 тестов на хеширование, guard и операции с сессиями |
+| `tests/{password,auth,admin-sessions}.test.ts` | 34 теста на хеширование, guard и операции с сессиями |
 
 ## Проверка 15.11.2026 (dev `http://localhost:3999`)
 
@@ -88,10 +88,12 @@
 | 9 попыток входа с неверным паролем | после лимита `429` |
 | `npm run admin:create -- --update` | пароль сменён, имя сохранено, отозвано 1 сессия, старый пароль → `401` |
 | `npm run admin:create` для существующего без `--update` | отказ с подсказкой |
-| `ADMIN_ROLE=OWNER` | отказ «только ADMIN или EDITOR» |
+| `ADMIN_ROLE=OWNER` при создании | флаг игнорируется: ролей нет (ADR-20), создаётся обычный администратор |
 
 ## Ограничения и следующий шаг
 
+- **Ролей нет** (ADR-20): любой администратор может всё. Появится сотрудник с урезанными правами —
+  вернуть `role` миграцией и проверкой в `requireAdmin`.
 - Пароль меняется только скриптом; смена из UI и «выйти на всех устройствах» — вместе с разделом «Настройки».
 - Лимит входа — в памяти Nitro (сбрасывается при рестарте, не общий для нескольких инстансов);
   при переезде на несколько инстансов — общий стор.

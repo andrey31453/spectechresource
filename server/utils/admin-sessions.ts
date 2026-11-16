@@ -10,7 +10,7 @@ import {
 
 /**
  * Операции с таблицей `admin_sessions`. Отдельно от `auth.ts`, чтобы чистая логика
- * (хеши, роли, guard-предикаты) тестировалась без Prisma, а здесь остались только запросы.
+ * (хеши, предикаты путей) тестировалась без Prisma, а здесь остались только запросы.
  */
 
 export interface AdminSessionContext {
@@ -74,7 +74,7 @@ export async function resolveAdminSession(
     select: {
       id: true,
       expiresAt: true,
-      user: { select: { id: true, email: true, name: true, role: true, isActive: true } },
+      user: { select: { id: true, email: true, name: true, isActive: true } },
     },
   });
 
