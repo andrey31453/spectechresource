@@ -16,6 +16,8 @@ export default defineNuxtConfig({
     leadsDryRun: process.env.LEADS_DRY_RUN || "true",
     // Редакция политики обработки ПДн, которую фиксируем в Lead.consentVersion.
     leadsConsentVersion: process.env.LEADS_CONSENT_VERSION || "2026-11-15",
+    // Ключ HMAC для хеша токенов сессий админки (ADR-19). Пусто — sha256 без ключа.
+    sessionSecret: process.env.SESSION_SECRET || "",
     public: {
       siteUrl: process.env.NUXT_PUBLIC_SITE_URL || "http://localhost:3000",
     },

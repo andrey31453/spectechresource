@@ -35,8 +35,8 @@
 | `Page` | статические страницы (политика ПДн) | `slug` unique |
 | `Redirect` | карта 301 при смене ЧПУ | `from` unique |
 | `Lead` | заявка (очередь в CRM) | `requestId` unique, `status`, `attempts` |
-| `AdminUser` | пользователь админки | `email` unique, `passwordHash` (argon2id) |
-| `AdminSession` | сессия админки в БД | `tokenHash` unique, `expiresAt` |
+| `AdminUser` | пользователь админки | `email` unique, `passwordHash` (scrypt, ADR-19) |
+| `AdminSession` | сессия админки в БД | `tokenHash` unique (HMAC-SHA256), `expiresAt` |
 
 ## Отклонения от плоской структуры §4 ТЗ (осознанные)
 

@@ -306,7 +306,7 @@ model Redirect {
 model AdminUser {
   id           String    @id @default(cuid())
   email        String    @unique
-  passwordHash String // argon2id
+  passwordHash String // scrypt (ADR-19): `scrypt$N$r$p$соль$хеш`
   name         String?
   role         AdminRole @default(EDITOR)
   isActive     Boolean   @default(true)
@@ -324,7 +324,7 @@ model AdminSession {
   id        String    @id @default(cuid())
   userId    String
   user      AdminUser @relation(fields: [userId], references: [id], onDelete: Cascade)
-  tokenHash String    @unique // sha256 от токена, сам токен только в cookie
+  tokenHash String    @unique // HMAC-SHA256 (SESSION_SECRET) от токена; сам токен только в cookie
   expiresAt DateTime
   ip        String?
   userAgent String?

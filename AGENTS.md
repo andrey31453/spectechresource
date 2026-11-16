@@ -55,7 +55,7 @@
 - **Node:** 24 LTS, зафиксирован в `.nvmrc` (ADR-3).
 - **БД локально:** `npm run db:up` → контейнер `spectech-postgres` (хост-порт **5433**, 5432 занят другим проектом).
 - **Команды:** `nvm use` в новом терминале → `npm run dev` · `npm run build` · `npm run preview` ·
-  `npm run db:migrate` · `npm run db:seed` · `npm run db:studio` · `npm run db:reset`.
+  `npm run db:migrate` · `npm run db:seed` · `npm run db:studio` · `npm run db:reset` · `npm run admin:create`.
 - **Prisma:** клиент создаётся **только с driver adapter** — `new PrismaClient({ adapter: new PrismaPg(...) })` (ADR-11);
   импорт из `generated/prisma/client` (папка генерируется `prisma generate`, в git не входит).
 - **Обязательные правила:** заявка сначала в БД, затем в CRM (ADR-5); `prisma`, `@prisma/client`, `@prisma/adapter-pg` —
@@ -64,10 +64,15 @@
   `shared/` (valibot-схемы и утилиты для клиента и сервера), `prisma/` (схема, миграции, сид), `tests/`, `docs/`.
   DTO публичного API описаны в `app/types/catalog.ts`.
 - **Слайсы:** ✅ `db-core` · ✅ `seo-routing` · ✅ `quality` (15.11.2026 — ESLint + Vitest) ·
-  ✅ `leads` (15.11.2026 — `POST /api/leads`, dry-run CRM, 85 unit-тестов; спека `docs/specs/leads.md`).
-  Дальше — `auth`/`admin-auth`, затем CRUD каталога и журнал заявок.
+  ✅ `leads` (15.11.2026 — `POST /api/leads`, dry-run CRM, 85 unit-тестов; спека `docs/specs/leads.md`) ·
+  ✅ `admin-auth` (15.11.2026 — сессия в БД, guard `/api/admin/**`, роли, 120 unit-тестов; спека `docs/specs/admin-auth.md`).
+  Дальше — CRUD каталога, затем журнал заявок (отложен, план — `TODO.md` в корне).
 - **Заявки:** валидация — `shared/schemas/leads.ts` (одна схема для формы и API); заявка сначала в БД,
   потом в CRM (ADR-5); `LEADS_DRY_RUN` по умолчанию `true` (ADR-18); досылка — `npx nuxi task run leads:send`.
+- **Админка:** сессия — строка в `admin_sessions`, cookie `admin_session` (HttpOnly, SameSite=Lax), в БД только
+  HMAC-SHA256-хеш токена (ADR-19); пароли — scrypt (`server/utils/password.ts`); новый администратор —
+  `npm run admin:create`. Все `/api/admin/**` и `/admin/**` закрыты `server/middleware/admin-auth.ts`,
+  в хэндлерах — `requireAdmin(event)` / `requireAdmin(event, "ADMIN")`.
 - **Проверки перед коммитом:** `npm run lint` · `npm run test` · `npm run typecheck` · `npm run build`.
   Тесты — Vitest на чистых функциях (`tests/`); тесты API с БД — через сервисный слой (ADR-16).
 

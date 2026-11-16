@@ -1,0 +1,96 @@
+# TODO — что делать дальше
+
+> Навигатор по бэкенду и админке. Спеки слайсов — `docs/specs/`, решения — `docs/stack.md` (ADR),
+> правила — `AGENTS.md`. Статус здесь — единственный источник правды о порядке работ.
+
+## Сделано
+
+- [x] `db-core` — схема PostgreSQL (17 моделей), миграция `20261115162119_init`, сид. `docs/specs/db-core.md`
+- [x] `seo-routing` — 39 ЧПУ из БД, sitemap/robots на Nitro, 301 без слеша, JSON-LD
+- [x] `quality` — ESLint (flat) + Vitest, `npm run lint` / `npm test`
+- [x] `leads` — `POST /api/leads`: valibot, запись в БД, dry-run CRM, задача `leads:send`. `docs/specs/leads.md`
+- [x] `admin-auth` (15.11.2026) — сессия в БД, `login`/`logout`/`me`, guard `/api/admin/**` и `/admin/**`,
+      роли `ADMIN`/`EDITOR`, лимит попыток, CSRF, скрипт `npm run admin:create`. `docs/specs/admin-auth.md`
+
+## 1. Следующий слайс: CRUD каталога в админке
+
+Цель: заказчик сам правит разделы, виды техники, модели, характеристики и цены — без разработчика.
+
+- [ ] Спека `docs/specs/admin-catalog.md`: ресурсы, поля, валидация, права (`EDITOR` — контент, `ADMIN` — удаление).
+- [ ] `GET/POST/PATCH/DELETE /api/admin/catalog/categories`
+- [ ] `GET/POST/PATCH/DELETE /api/admin/catalog/types` (включая `priceFrom`, `slug`, `nameGenitive`, `isPublished`)
+- [ ] `GET/POST/PATCH/DELETE /api/admin/catalog/types/:id/models` + `specs` (список строк, порядок)
+- [ ] `RelatedType` — выбор «похожей техники» (порядок сохраняется)
+- [ ] Схемы valibot в `shared/schemas/catalog.ts` (те же, что для админ-форм)
+- [ ] Защита: `requireAdmin(event)` на чтении, `requireAdmin(event, "ADMIN")` на удалении
+- [ ] Инвалидация публичных данных: после изменения — `revalidate`/сброс кэша страниц ЧПУ
+- [ ] UI: список + форма раздела, таблица видов, редактор моделей и характеристик
+- [ ] Тесты: схемы (валидность/нормализация), права, «slug меняется → запись в `Redirect`»
+- [ ] Проверка: раздел создан/отредактирован/удалён, публичная страница и sitemap обновились
+
+## 2. Отложено: журнал заявок (вернуться после CRUD каталога)
+
+Осознанно отложено 15.11.2026 — сначала вход и каталог, журнал после.
+
+- [ ] `GET /api/admin/leads` — список с фильтрами (статус, даты, поиск по телефону/e-mail), пагинация
+- [ ] Карточка заявки: все поля, UTM, страница, согласие (`consentVersion`, `consentAt`)
+- [ ] Кнопка «Повторить отправку» → `POST /api/admin/leads/:id/retry` (переиспользует `leads:send`-логику)
+- [ ] Статусы и попытки: `NEW` / `SENT` / `FAILED`, `attempts`, `lastError`, время последней попытки
+- [ ] Экспорт CSV (UTF-8 BOM для Excel, экранирование формул `= + - @`)
+- [ ] Срок хранения ПДн: автоудаление/анонимизация через `leads:purge` (срок согласовать — см. «Открытые вопросы»)
+- [ ] Уведомление о новой заявке (e-mail или Telegram) — решить с заказчиком
+- [ ] Тесты: фильтры, права, CSV-экранирование, повторная отправка
+
+## 3. Загрузка изображений
+
+- [ ] `POST /api/admin/uploads` — приём файла, лимит размера, проверка MIME по содержимому (не по расширению)
+- [ ] Хранение: локальная папка на первом этапе (`public/uploads`), позже — S3-совместимое хранилище
+- [ ] Ресайз/WebP и `<NuxtImg>` на фронтенде (`@nuxt/image` — отдельная зависимость, нужно согласие)
+- [ ] Привязка фото к `EquipmentType`/`EquipmentModel`, alt-тексты (SEO)
+- [ ] Очистка «сирот» при удалении модели
+
+## 4. Остальная админка
+
+- [ ] Настройки сайта (`SiteSettings`): телефон, мессенджеры, реквизиты, город — только `ADMIN`
+- [ ] Статические страницы (`Page`) и SEO-тексты разделов/видов — `EDITOR`
+- [ ] FAQ, преимущества, шаги, цифры доверия — `EDITOR`
+- [ ] Пользователи админки: список, приглашение, деактивация — `ADMIN`
+- [ ] Смена своего пароля из UI (`POST /api/admin/password`, отзывает другие сессии)
+- [ ] «Выйти на всех устройствах» + список активных сессий (`GET /api/admin/sessions`)
+
+## 5. Прод и эксплуатация
+
+- [ ] Хостинг (VPS в РФ, ADR-8), Docker-образ `node:24`, nginx + SSL, `SESSION_SECRET` в секретах
+- [ ] Бэкапы PostgreSQL (ежедневно + проверка восстановления)
+- [ ] Расписание Nitro: `scheduledTasks` для `leads:send` (каждые 5–10 минут) вместо ручного запуска
+- [ ] Мониторинг ошибок и логов без ПДн; health-check `/api/health`
+- [ ] CI (GitHub Actions): `lint` + `test` + `typecheck` + `build` на каждый PR — решить с заказчиком
+- [ ] Аналитика: обёртка над `reachGoal`, отключение в dev
+- [ ] Playwright: сквозной сценарий «форма → БД → CRM (mock)» и вход в админку
+
+## Открытые вопросы (нужны ответы заказчика)
+
+| # | Вопрос | Блокирует |
+|---|---|---|
+| Q-07 | Боевой вебхук Битрикс24, воронка и поля | `LEADS_DRY_RUN=false`, реальную отправку |
+| Q-10 | Финальный текст политики ПДн и версия согласия | `LEADS_CONSENT_VERSION`, страницу политики |
+| — | Срок хранения заявок (ПДн) и способ удаления | задачу `leads:purge`, retention |
+| — | Нужен ли экспорт CSV и кому | состав журнала заявок |
+| — | Куда уведомлять о новой заявке (e-mail/Telegram/только CRM) | уведомления |
+| Q-08 | Парк техники: модели, характеристики, цены, фото | наполнение каталога |
+
+## Команды
+
+```bash
+nvm use                 # Node 24 (ADR-3)
+npm run dev             # сайт + админка: http://localhost:3000
+npm run db:up           # PostgreSQL в Docker (порт 5433)
+npm run db:migrate      # миграции Prisma
+npm run db:seed         # справочник каталога + демо-контент
+npm run admin:create    # ADMIN_EMAIL=… ADMIN_PASSWORD='…' npm run admin:create
+npm test                # unit-тесты (Vitest)
+npm run lint            # ESLint
+npm run typecheck       # tsc по серверу и приложению
+npm run build           # прод-сборка
+npx nuxi task run leads:send --url http://localhost:3999   # только в dev
+```

@@ -37,7 +37,8 @@
 - [x] SEO-обвязка: `sitemap.xml` и `robots.txt` — Nitro-роуты, canonical/JSON-LD — композаблы, mini-markdown (ADR-13, ADR-14).
   Проверено 15.11.2026: 57 URL в sitemap, 301 со слеша и из таблицы `Redirect`, 404 на неизвестные адреса, один H1 на страницу.
 - [x] Город: отдельная таблица `City` + `SiteSettings.cityId` (ADR-10) — режим «один город» без Q-01.
-- [x] Авторизация админки: сессия в БД (`AdminSession`) + httpOnly-cookie, роли `admin` / `editor`.
+- [x] Авторизация админки (15.11.2026): сессия в БД (`AdminSession`) + httpOnly-cookie, роли `ADMIN`/`EDITOR`,
+      guard на `/api/admin/**`, лимит попыток, CSRF, `npm run admin:create` — `docs/specs/admin-auth.md`.
 - [ ] Слой аналитики: одна обёртка над `reachGoal`, отключение в dev.
 - [ ] Логи и ошибки: единый формат, без ПДн (телефон/имя) в тексте логов.
 - [ ] Git-процесс и CI: нужен ли GitHub Actions (lint + test + build) на каждый PR.

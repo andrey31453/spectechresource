@@ -1,5 +1,6 @@
 import * as v from "valibot";
 import { normalizePhone } from "#shared/utils/phone";
+import { toFieldErrors, type FieldError } from "./errors";
 
 /**
  * Схема заявки — одна для формы (клиент) и для `POST /api/leads` (сервер).
@@ -111,19 +112,7 @@ export const LeadSchema = v.object({
 
 export type LeadInput = v.InferOutput<typeof LeadSchema>;
 
-export interface LeadFieldError {
-  field: string;
-  message: string;
-}
+export type LeadFieldError = FieldError;
 
 /** Ошибки valibot → плоский список для ответа API и подсветки полей в форме. */
-export function toLeadFieldErrors(issues: readonly v.BaseIssue<unknown>[]): LeadFieldError[] {
-  return issues.map((issue) => ({
-    field:
-      (issue.path ?? [])
-        .map((item) => String(item.key))
-        .filter(Boolean)
-        .join(".") || "_form",
-    message: issue.message,
-  }));
-}
+export const toLeadFieldErrors = toFieldErrors;
