@@ -62,19 +62,30 @@
   только точными версиями (ADR-4); URL без завершающего слеша (ADR-6); деньги — `Decimal(12,2)` (ADR-9).
 - **Структура папок:** `app/` (Nuxt: страницы, компоненты, композаблы), `server/` (Nitro API, routes, задачи, утилиты),
   `shared/` (valibot-схемы и утилиты для клиента и сервера), `prisma/` (схема, миграции, сид), `tests/`, `docs/`.
-  DTO публичного API описаны в `app/types/catalog.ts`, админ-каталога — в `app/types/admin-catalog.ts`.
+  DTO публичного API описаны в `app/types/catalog.ts`, админ-каталога — в `app/types/admin-catalog.ts`,
+  админ-настроек — в `app/types/admin-settings.ts`.
 - **Слайсы:** ✅ `db-core` · ✅ `seo-routing` · ✅ `quality` (15.11.2026 — ESLint + Vitest) ·
   ✅ `leads` (15.11.2026 — `POST /api/leads`, dry-run CRM, 85 unit-тестов; спека `docs/specs/leads.md`) ·
   ✅ `admin-auth` (15.11.2026 — сессия в БД, guard `/api/admin/**`; спека `docs/specs/admin-auth.md`) ·
   ✅ `admin-catalog` (16.11.2026 — CRUD каталога, 161 unit-тест; спека `docs/specs/admin-catalog.md`) ·
   ✅ `admin-leads` (16.11.2026 — журнал заявок, повторная отправка, CSV, 199 unit-тестов;
-  спека `docs/specs/admin-leads.md`).
-  Дальше — загрузка изображений и остальные разделы админки, план — `TODO.md` в корне.
+  спека `docs/specs/admin-leads.md`) ·
+  ✅ `admin-uploads` (16.11.2026 — приём/отдача/удаление изображений, задача `uploads:cleanup`,
+  211 unit-тестов; спека `docs/specs/admin-uploads.md`) ·
+  ✅ `admin-settings` (16.11.2026 — настройки сайта и города, 227 unit-тестов;
+  спека `docs/specs/admin-settings.md`).
+  Дальше — остальные разделы админки, план — `TODO.md` в корне.
 - **Каталог:** один набор valibot-схем на форму и API — `shared/schemas/catalog.ts`; деньги в форме — строки,
   нормализуются в `Decimal`-строку; `PATCH` — `partial`-схема, отсутствующие поля не трогаются; смена `slug`
   пишет 301 в `Redirect` и сбрасывает кэш карты редиректов; публичные страницы кэша не имеют.
 - **Заявки:** валидация — `shared/schemas/leads.ts` (одна схема для формы и API); заявка сначала в БД,
   потом в CRM (ADR-5); `LEADS_DRY_RUN` по умолчанию `true` (ADR-18); досылка — `npx nuxi task run leads:send`.
+- **Изображения:** файлы — только через `POST /api/admin/uploads` (формат по magic bytes, ≤ 5 МБ, SVG нельзя),
+  лежат в `UPLOADS_DIR` (по умолчанию `.data/uploads`), отдаются `/uploads/…` (ADR-21); в БД — публичный адрес;
+  удаление используемого файла запрещено (`409`), «сироты» старше 24 ч убирает `uploads:cleanup`.
+- **Настройки и города:** `SiteSettings` — singleton `id="main"`; схемы — `shared/schemas/admin-settings.ts`
+  (переиспользуют правила каталога); город из настроек удалить нельзя, последний активный нельзя деактивировать
+  (`409`), `isDefault` снимается с остальных в транзакции; публичного кэша нет — изменения видны сразу.
 - **Админка:** сессия — строка в `admin_sessions`, cookie `admin_session` (HttpOnly, SameSite=Lax), в БД только
   HMAC-SHA256-хеш токена (ADR-19); пароли — scrypt (`server/utils/password.ts`); ролей нет, все администраторы
   равны (ADR-20); новый администратор — `npm run admin:create`. Все `/api/admin/**` и `/admin/**` закрыты

@@ -44,7 +44,8 @@ export function normalizeMoneyInput(value: unknown): string | null {
   return `${integer}.${(fraction + "00").slice(0, 2)}`;
 }
 
-function slugField() {
+/** Код в адресе. Общий для каталога и городов — правило одно. */
+export function slugField() {
   return v.pipe(
     v.string("Укажите код для адреса"),
     v.trim(),
@@ -55,7 +56,7 @@ function slugField() {
   );
 }
 
-function requiredText(max: number, what: string) {
+export function requiredText(max: number, what: string) {
   return v.pipe(
     v.string(`Укажите ${what}`),
     v.trim(),
@@ -65,7 +66,7 @@ function requiredText(max: number, what: string) {
 }
 
 /** Пустая строка от формы — это «поле не заполнено», а не значение. */
-function optionalText(max: number, what: string) {
+export function optionalText(max: number, what: string) {
   return v.optional(
     v.pipe(
       v.nullish(v.string()),
@@ -113,7 +114,7 @@ function photosField(what: string) {
   );
 }
 
-const sortOrderField = v.pipe(
+export const sortOrderField = v.pipe(
   v.number("Порядок — число"),
   v.integer("Порядок — целое число"),
   v.minValue(0, "Порядок — от 0"),
