@@ -78,13 +78,12 @@ function errorFor(field: string): string | undefined {
     <textarea v-model="form.worksPerformed" class="field__input field__textarea" name="worksPerformed" rows="5" />
   </AdminField>
 
-  <AdminField
+  <AdminGalleryField
+    v-model="form.gallery"
     label="Фотографии вида"
     :error="errorFor('gallery')"
-    hint="По одному адресу в строке. Загрузка файлов появится отдельным слайсом."
-  >
-    <textarea v-model="form.galleryText" class="field__input field__textarea" name="gallery" rows="3" />
-  </AdminField>
+    hint="Порядок в списке — порядок на сайте"
+  />
 
   <div class="admin-form__grid admin-form__grid--half">
     <label class="field field--check">

@@ -597,6 +597,30 @@ p {
   grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
 }
 
+/* Секция формы: подпись-легенда и отступ, без рамки — рамку дают карточки вокруг. */
+.admin-form__section {
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.admin-form__legend {
+  padding: 0;
+  margin-bottom: 10px;
+  font-size: 1.02rem;
+  font-weight: 600;
+}
+
+.admin-form__section > .field + .field {
+  margin-top: 14px;
+}
+
+/* Блок городов идёт сразу после формы настроек — отделяем его от кнопки сохранения. */
+.admin-form + .admin-subcard {
+  margin-top: 20px;
+}
+
 .admin-form__actions {
   display: flex;
   flex-wrap: wrap;
@@ -898,3 +922,62 @@ p {
   font-size: 0.9rem;
   overflow-wrap: anywhere;
 }
+/* ── Админка: изображения ── */
+.admin-images {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.admin-images__grid {
+  display: grid;
+  gap: 10px;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+}
+
+.admin-images__item {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 8px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--bg-soft);
+}
+
+.admin-images__item--single {
+  max-width: 320px;
+}
+
+.admin-images__thumb {
+  display: block;
+  width: 100%;
+  height: 100px;
+  object-fit: cover;
+  border-radius: calc(var(--radius) - 4px);
+  background: var(--bg);
+}
+
+.admin-images__url {
+  font-size: 0.72rem;
+  color: var(--muted);
+  overflow-wrap: anywhere;
+}
+
+.admin-images__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.admin-images__add {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+}
+
+.admin-images__input {
+  display: none;
+}
+

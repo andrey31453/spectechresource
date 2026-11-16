@@ -18,6 +18,8 @@ export default defineNuxtConfig({
     leadsConsentVersion: process.env.LEADS_CONSENT_VERSION || "2026-11-15",
     // Ключ HMAC для хеша токенов сессий админки (ADR-19). Пусто — sha256 без ключа.
     sessionSecret: process.env.SESSION_SECRET || "",
+    // Папка загруженных изображений (ADR-21). Пусто — `.data/uploads` от корня проекта.
+    uploadsDir: process.env.UPLOADS_DIR || "",
     public: {
       siteUrl: process.env.NUXT_PUBLIC_SITE_URL || "http://localhost:3000",
     },

@@ -8,15 +8,11 @@ import type { AdminCategoryDto, AdminModelDto, AdminSpecDto, AdminTypeDto } from
  * и массив вместо многострочного текста. Преобразования — здесь, чтобы страницы оставались тонкими.
  */
 
-const lines = (value: string): string[] =>
-  value
-    .split("\n")
-    .map((line) => line.trim())
-    .filter(Boolean);
-
-const joinLines = (value: string[]): string => value.join("\n");
-
 const text = (value: string | null): string => value ?? "";
+
+/** Адреса изображений: пустые строки в форме — «ещё не заполнили», а не адрес. */
+const cleanUrls = (values: string[]): string[] =>
+  values.map((value) => value.trim()).filter((value) => value !== "");
 
 /** «26000.00» → «26000»: в поле ввода хвостовые нули только мешают. */
 const priceInput = (value: string | null): string => {
@@ -108,7 +104,7 @@ export interface TypeForm {
   crewAvailable: boolean;
   withoutCrewAvailable: boolean;
   worksPerformed: string;
-  galleryText: string;
+  gallery: string[];
   seoTitle: string;
   seoDescription: string;
   seoText: string;
@@ -130,7 +126,7 @@ export function emptyTypeForm(categoryId = ""): TypeForm {
     crewAvailable: true,
     withoutCrewAvailable: false,
     worksPerformed: "",
-    galleryText: "",
+    gallery: [],
     seoTitle: "",
     seoDescription: "",
     seoText: "",
@@ -153,7 +149,7 @@ export function typeFormFrom(type: AdminTypeDto): TypeForm {
     crewAvailable: type.crewAvailable,
     withoutCrewAvailable: type.withoutCrewAvailable,
     worksPerformed: text(type.worksPerformed),
-    galleryText: joinLines(type.gallery),
+    gallery: [...type.gallery],
     seoTitle: text(type.seoTitle),
     seoDescription: text(type.seoDescription),
     seoText: text(type.seoText),
@@ -176,7 +172,7 @@ export function typeFormBody(form: TypeForm) {
     crewAvailable: form.crewAvailable,
     withoutCrewAvailable: form.withoutCrewAvailable,
     worksPerformed: emptyToNull(form.worksPerformed),
-    gallery: lines(form.galleryText),
+    gallery: cleanUrls(form.gallery),
     seoTitle: emptyToNull(form.seoTitle),
     seoDescription: emptyToNull(form.seoDescription),
     seoText: emptyToNull(form.seoText),
@@ -193,7 +189,7 @@ export interface ModelForm {
   model: string;
   pricePerShift: string;
   pricePerHour: string;
-  photosText: string;
+  photos: string[];
   isAvailable: boolean;
   sortOrder: number;
   specs: AdminSpecDto[];
@@ -205,7 +201,7 @@ export function emptyModelForm(): ModelForm {
     model: "",
     pricePerShift: "",
     pricePerHour: "",
-    photosText: "",
+    photos: [],
     isAvailable: true,
     sortOrder: 10,
     specs: [{ name: "", value: "" }],
@@ -218,7 +214,7 @@ export function modelFormFrom(model: AdminModelDto): ModelForm {
     model: model.model,
     pricePerShift: priceInput(model.pricePerShift),
     pricePerHour: priceInput(model.pricePerHour),
-    photosText: joinLines(model.photos),
+    photos: [...model.photos],
     isAvailable: model.isAvailable,
     sortOrder: model.sortOrder,
     specs: model.specs.length ? model.specs.map((spec) => ({ ...spec })) : [{ name: "", value: "" }],
@@ -232,7 +228,7 @@ export function modelFormBody(form: ModelForm) {
     model: form.model.trim(),
     pricePerShift: emptyToNull(form.pricePerShift),
     pricePerHour: emptyToNull(form.pricePerHour),
-    photos: lines(form.photosText),
+    photos: cleanUrls(form.photos),
     isAvailable: form.isAvailable,
     sortOrder: Number(form.sortOrder) || 0,
     specs: form.specs

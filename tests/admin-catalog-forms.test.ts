@@ -96,7 +96,7 @@ describe("формы вида техники", () => {
 
     expect(form.priceFrom).toBe("26000");
     expect(form.deliveryPrice).toBe("5000");
-    expect(form.galleryText).toBe("/uploads/type-1.jpg\n/uploads/type-2.jpg");
+    expect(form.gallery).toEqual(["/uploads/type-1.jpg", "/uploads/type-2.jpg"]);
   });
 
   it("обратное преобразование собирает массив фото и сохраняет числа", () => {
@@ -113,7 +113,7 @@ describe("формы вида техники", () => {
   });
 
   it("пустые строки в тексте и фото не создают пустых значений", () => {
-    const body = typeFormBody({ ...emptyTypeForm("cat-1"), priceFrom: "   ", galleryText: "\n  \n" });
+    const body = typeFormBody({ ...emptyTypeForm("cat-1"), priceFrom: "   ", gallery: [" ", ""] });
 
     expect(body.priceFrom).toBeNull();
     expect(body.gallery).toEqual([]);
@@ -138,8 +138,8 @@ describe("формы модели", () => {
     expect(body.specs).toEqual([{ name: "Масса, т", value: "7,2" }]);
   });
 
-  it("фотографии разбираются по строкам", () => {
-    const body = modelFormBody({ ...emptyModelForm(), photosText: "/a.jpg\n\n  /b.jpg  \n" });
+  it("фотографии обрезаются и пустые адреса отбрасываются", () => {
+    const body = modelFormBody({ ...emptyModelForm(), photos: ["/a.jpg", "", "  /b.jpg  "] });
 
     expect(body.photos).toEqual(["/a.jpg", "/b.jpg"]);
   });

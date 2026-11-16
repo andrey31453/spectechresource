@@ -103,9 +103,12 @@ async function remove() {
         </AdminField>
       </div>
 
-      <AdminField label="Фотографии" :error="errorFor('photos')" hint="По одному адресу в строке">
-        <textarea v-model="form.photosText" class="field__input field__textarea" name="photos" rows="2" />
-      </AdminField>
+      <AdminGalleryField
+        v-model="form.photos"
+        label="Фотографии модели"
+        :error="errorFor('photos')"
+        hint="Порядок в списке — порядок в карточке модели"
+      />
 
       <div class="field">
         <span class="field__label">Характеристики</span>

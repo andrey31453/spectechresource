@@ -144,9 +144,12 @@ async function remove(category: AdminCategoryDto) {
           <textarea v-model="form.shortDesc" class="field__input field__textarea" name="shortDesc" />
         </AdminField>
 
-        <AdminField label="Адрес изображения" :error="fieldErrors.image">
-          <input v-model="form.image" class="field__input" type="text" name="image" placeholder="/uploads/…">
-        </AdminField>
+        <AdminImageField
+          v-model="form.image"
+          label="Изображение раздела"
+          :error="fieldErrors.image"
+          hint="Показывается в каталоге и на странице раздела"
+        />
 
         <label class="field field--check">
           <input v-model="form.isPublished" type="checkbox" name="isPublished">
