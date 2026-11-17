@@ -50,7 +50,8 @@
 
 - **Задача:** сайт-каталог аренды спецтехники ООО «СПЕЦТЕХРЕСУРС» (8 разделов, 39 SEO-лендингов, заявки в Битрикс24).
 - **Документы:** `docs/tz-original.md` (ТЗ дословно), `docs/tz-structured.md` (**контракт требований: ID + приёмка**),
-  `docs/stack.md` (стек и журнал решений ADR), `docs/checklist-before-start.md` (что сделать до старта).
+  `docs/stack.md` (стек и журнал решений ADR), `docs/checklist-before-start.md` (что сделать до старта),
+  `docs/specs/front.md` (**текущий этап: фронтенд** — состояние, правила стилей, очередь работ, грабли окружения).
 - **Стек:** Nuxt 4.6 (Vue 3, SSR/Nitro) + TypeScript + Prisma 7.10 + PostgreSQL; админка **своя** на Nuxt (ADR-1).
 - **Стили:** Tailwind CSS 4 через `@tailwindcss/vite` (ADR-7); дизайн-токены — `app/assets/css/tailwind.css`,
   публичные компоненты — утилиты Tailwind; `app/assets/css/main.css` — стили админки и остатки SEO-каркаса,
