@@ -52,6 +52,9 @@
 - **Документы:** `docs/tz-original.md` (ТЗ дословно), `docs/tz-structured.md` (**контракт требований: ID + приёмка**),
   `docs/stack.md` (стек и журнал решений ADR), `docs/checklist-before-start.md` (что сделать до старта).
 - **Стек:** Nuxt 4.6 (Vue 3, SSR/Nitro) + TypeScript + Prisma 7.10 + PostgreSQL; админка **своя** на Nuxt (ADR-1).
+- **Стили:** Tailwind CSS 4 через `@tailwindcss/vite` (ADR-7); дизайн-токены — `app/assets/css/tailwind.css`,
+  публичные компоненты — утилиты Tailwind; `app/assets/css/main.css` — стили админки и остатки SEO-каркаса,
+  которые переносятся на утилиты по мере переверстки. Новые глобальные CSS-классы для публичных страниц не добавляем.
 - **Node:** 24 LTS, зафиксирован в `.nvmrc` (ADR-3).
 - **БД локально:** `npm run db:up` → контейнер `spectech-postgres` (хост-порт **5433**, 5432 занят другим проектом).
 - **Команды:** `nvm use` в новом терминале → `npm run dev` · `npm run build` · `npm run preview` ·

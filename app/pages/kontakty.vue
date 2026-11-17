@@ -46,7 +46,7 @@ const requisites = computed(() =>
     <div class="grid" style="margin: 24px 0">
       <div class="card">
         <span class="card__title">Телефон</span>
-        <a :href="telHref(site.phone)" class="site-header__phone">{{ site.phone }}</a>
+        <a :href="telHref(site.phone)" class="text-lg font-bold text-ink transition-colors hover:text-brand">{{ site.phone }}</a>
         <p v-if="site.workingHours" class="card__meta" style="margin: 6px 0 0">
           {{ site.workingHours }}
         </p>

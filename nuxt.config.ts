@@ -1,8 +1,14 @@
+import tailwindcss from "@tailwindcss/vite";
+
 export default defineNuxtConfig({
   compatibilityDate: "2026-11-15",
   devtools: { enabled: true },
   modules: ["@nuxt/eslint"],
-  css: ["~/assets/css/main.css"],
+  css: ["~/assets/css/tailwind.css", "~/assets/css/main.css"],
+  vite: {
+    // Tailwind CSS 4 подключается Vite-плагином, отдельный Nuxt-модуль не нужен (ADR-7).
+    plugins: [tailwindcss()],
+  },
   nitro: {
     // Задачи Nitro (`server/tasks/`): досылка заявок в CRM, будущая чистка и импорт.
     experimental: { tasks: true },

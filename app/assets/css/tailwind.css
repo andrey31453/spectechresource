@@ -1,0 +1,67 @@
+/* Точка входа Tailwind CSS 4 (ADR-7).
+ *
+ * Здесь только дизайн-токены и то, что должно быть раньше остальных стилей.
+ * Публичные классы SEO-каркаса пока живут в `main.css` и постепенно заменяются утилитами;
+ * стили админки остаются в `main.css` до отдельной чистки.
+ */
+@import "tailwindcss";
+
+@theme {
+  /* Шрифт: системный стек — без внешних запросов и без ожидания загрузки. */
+  --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+
+  /* Палитра: холодный синий бренд, нейтральная типографика, светлые подложки. */
+  --color-brand: #0f5c9c;
+  --color-brand-dark: #0b4575;
+  --color-brand-soft: #e9f1f8;
+  --color-ink: #1b1f24;
+  --color-muted: #5b6773;
+  --color-line: #dfe4ea;
+  --color-surface: #ffffff;
+  --color-surface-soft: #f4f6f8;
+  --color-accent: #e8a33d;
+
+  /* Ширина контента: 1180px — как в текущем каркасе, чтобы страницы не «прыгали». */
+  --container-site: 73.75rem;
+
+  /* Радиусы и тени: сдержанные, как у существующих карточек. */
+  --radius-card: 10px;
+  --radius-field: 8px;
+  --shadow-card: 0 1px 2px rgb(27 31 36 / 6%), 0 8px 24px rgb(27 31 36 / 6%);
+  --shadow-bar: 0 1px 0 rgb(27 31 36 / 6%);
+}
+
+/* Базовая линия: сглаживание и перенос длинных слов в заголовках. */
+@layer base {
+  html {
+    -webkit-text-size-adjust: 100%;
+    scroll-behavior: smooth;
+  }
+
+  body {
+    font-family: var(--font-sans);
+    color: var(--color-ink);
+    background-color: var(--color-surface);
+  }
+
+  h1,
+  h2,
+  h3 {
+    text-wrap: balance;
+  }
+
+  p {
+    text-wrap: pretty;
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--color-brand);
+    outline-offset: 2px;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    html {
+      scroll-behavior: auto;
+    }
+  }
+}
