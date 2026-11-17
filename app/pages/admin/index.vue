@@ -48,6 +48,10 @@ async function logout() {
         характеристики и цены. Изменения сразу видны на сайте.
       </p>
       <p>
+        <NuxtLink to="/admin/services"><strong>Услуги</strong></NuxtLink> — земляные работы, вывоз грунта,
+        демонтаж и другие услуги: описание, SEO-текст, изображение и публикация.
+      </p>
+      <p>
         <NuxtLink to="/admin/settings"><strong>Настройки</strong></NuxtLink> — телефон и мессенджеры, адрес,
         реквизиты, счётчик Метрики и города. Изменения сразу видны на сайте.
       </p>
@@ -55,7 +59,10 @@ async function logout() {
         <NuxtLink to="/admin/pages"><strong>Страницы</strong></NuxtLink> — политика ПДн и другие статические
         страницы: markdown-текст, SEO-поля и публикация. Адрес — корневой: <code>/код</code>.
       </p>
-      <p>Услуги и контентные блоки — следующие слайсы, план в <code>TODO.md</code> в корне проекта.</p>
+      <p>
+        <NuxtLink to="/admin/content"><strong>Контент</strong></NuxtLink> — FAQ для главной, видов и услуг,
+        преимущества, порядок работы и цифры доверия. Изменения сразу видны на сайте.
+      </p>
     </section>
   </div>
 </template>

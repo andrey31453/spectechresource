@@ -63,7 +63,8 @@
 - **Структура папок:** `app/` (Nuxt: страницы, компоненты, композаблы), `server/` (Nitro API, routes, задачи, утилиты),
   `shared/` (valibot-схемы и утилиты для клиента и сервера), `prisma/` (схема, миграции, сид), `tests/`, `docs/`.
   DTO публичного API описаны в `app/types/catalog.ts`, админ-каталога — в `app/types/admin-catalog.ts`,
-  админ-настроек — в `app/types/admin-settings.ts`, админ-страниц — в `app/types/admin-pages.ts`.
+  админ-настроек — в `app/types/admin-settings.ts`, админ-страниц — в `app/types/admin-pages.ts`,
+  админ-услуг — в `app/types/admin-services.ts`, админ-контента — в `app/types/admin-content.ts`.
 - **Слайсы:** ✅ `db-core` · ✅ `seo-routing` · ✅ `quality` (15.11.2026 — ESLint + Vitest) ·
   ✅ `leads` (15.11.2026 — `POST /api/leads`, dry-run CRM, 85 unit-тестов; спека `docs/specs/leads.md`) ·
   ✅ `admin-auth` (15.11.2026 — сессия в БД, guard `/api/admin/**`; спека `docs/specs/admin-auth.md`) ·
@@ -75,7 +76,11 @@
   ✅ `admin-settings` (16.11.2026 — настройки сайта и города, 227 unit-тестов;
   спека `docs/specs/admin-settings.md`) ·
   ✅ `admin-pages` (16.11.2026 — статические страницы, 243 unit-теста;
-  спека `docs/specs/admin-pages.md`).
+  спека `docs/specs/admin-pages.md`) ·
+  ✅ `admin-services` (16.11.2026 — услуги: CRUD, 301 при смене кода, 254 unit-теста;
+  спека `docs/specs/admin-services.md`) ·
+  ✅ `admin-content` (16.11.2026 — FAQ (главная/вид/услуга), преимущества, шаги, цифры доверия,
+  273 unit-теста; спека `docs/specs/admin-content.md`).
   Дальше — остальные разделы админки, план — `TODO.md` в корне.
 - **Каталог:** один набор valibot-схем на форму и API — `shared/schemas/catalog.ts`; деньги в форме — строки,
   нормализуются в `Decimal`-строку; `PATCH` — `partial`-схема, отсутствующие поля не трогаются; смена `slug`
@@ -91,6 +96,13 @@
 - **Страницы:** корневой адрес `/{slug}`, коды разделов сайта (`katalog`, `uslugi`, `kontakty`, …) и префикс
   `arenda-` отклоняет схема; markdown рендерит мини-парсер `server/utils/markdown.ts`; смена кода — 301,
   удаление страницы чистит редиректы, ведущие на её адрес.
+- **Услуги:** адрес `/uslugi/{slug}`, схема — `shared/schemas/admin-services.ts` (правила каталога); смена кода
+  пишет 301; услугу с привязанными вопросами `FAQ` удалить нельзя (`409`), список отдаёт `faqCount`.
+- **Контент:** FAQ — один список на три места (`GLOBAL` главная и запасной для вида, `TYPE` вид,
+  `SERVICE` услуга), схема `shared/schemas/admin-content.ts`; `PATCH` собирает итоговую привязку
+  (`mergeFaqTarget`) и проверяет её (`faqTargetIssue`), лишние ссылки сбрасываются; существование
+  вида/услуги проверяется в БД (`400`); преимущества, шаги и цифры — плоские списки с `sortOrder`
+  и `isPublished`; публичного кэша нет — сохранение видно сразу.
 - **Админка:** сессия — строка в `admin_sessions`, cookie `admin_session` (HttpOnly, SameSite=Lax), в БД только
   HMAC-SHA256-хеш токена (ADR-19); пароли — scrypt (`server/utils/password.ts`); ролей нет, все администраторы
   равны (ADR-20); новый администратор — `npm run admin:create`. Все `/api/admin/**` и `/admin/**` закрыты

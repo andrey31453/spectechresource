@@ -578,6 +578,47 @@ p {
   gap: 8px;
 }
 
+/* Вкладки экрана контента: ссылки с параметром `?tab=`, поэтому работают без JS. */
+.admin-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.admin-tab {
+  display: inline-flex;
+  gap: 8px;
+  align-items: center;
+  padding: 7px 12px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  font-size: 0.9rem;
+  color: var(--text);
+  text-decoration: none;
+}
+
+.admin-tab:hover,
+.admin-tab:focus-visible {
+  border-color: var(--accent);
+  color: var(--text);
+  text-decoration: none;
+}
+
+.admin-tab--active {
+  border-color: var(--text);
+  background: var(--bg-soft);
+  font-weight: 600;
+}
+
+/* Длинный ответ FAQ или текст преимущества в таблице — две строки и многоточие. */
+.admin-clamp {
+  display: -webkit-box;
+  overflow: hidden;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
 .admin-breadcrumbs {
   display: flex;
   flex-wrap: wrap;

@@ -27,6 +27,13 @@ export function typeSlugRedirect(oldSlug: string, newSlug: string, citySlug: str
   return { from: `/arenda-${oldSlug}-v-${citySlug}`, to: `/arenda-${newSlug}-v-${citySlug}` };
 }
 
+/** Услуга живёт в разделе `/uslugi/{slug}` — старый адрес после смены кода ведёт 301 на новый. */
+export function serviceSlugRedirect(oldSlug: string, newSlug: string): SlugRedirect | null {
+  if (oldSlug === newSlug) return null;
+
+  return { from: `/uslugi/${oldSlug}`, to: `/uslugi/${newSlug}` };
+}
+
 /**
  * Запись редиректа и сброс кэша таблицы `redirects` — иначе старый адрес
  * продолжит отдавать 404 ещё до минуты (TTL кэша в `redirects.ts`).

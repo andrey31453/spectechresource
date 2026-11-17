@@ -6,11 +6,13 @@ useSeoMeta({
 
 const route = useRoute();
 
-// Каталог, журнал заявок, настройки и редактор страниц — таблицы и формы в несколько колонок,
+// Каталог, услуги, журнал заявок, настройки и редактор страниц — таблицы и формы в несколько колонок,
 // им тесно в узкой колонке входа.
 const wide = computed(
   () =>
     route.path.startsWith("/admin/catalog") ||
+    route.path.startsWith("/admin/services") ||
+    route.path.startsWith("/admin/content") ||
     route.path.startsWith("/admin/leads") ||
     route.path.startsWith("/admin/pages") ||
     route.path.startsWith("/admin/settings"),
@@ -24,6 +26,8 @@ const wide = computed(
       <nav class="admin-shell__nav" aria-label="Разделы админки">
         <NuxtLink to="/admin/leads" class="admin-shell__link">Заявки</NuxtLink>
         <NuxtLink to="/admin/catalog" class="admin-shell__link">Каталог</NuxtLink>
+        <NuxtLink to="/admin/services" class="admin-shell__link">Услуги</NuxtLink>
+        <NuxtLink to="/admin/content" class="admin-shell__link">Контент</NuxtLink>
         <NuxtLink to="/admin/pages" class="admin-shell__link">Страницы</NuxtLink>
         <NuxtLink to="/admin/settings" class="admin-shell__link">Настройки</NuxtLink>
         <NuxtLink to="/" class="admin-shell__link">На сайт</NuxtLink>
