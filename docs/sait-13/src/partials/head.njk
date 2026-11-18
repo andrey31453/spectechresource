@@ -1,0 +1,47 @@
+{# ============================================================
+   head.njk — <head> страницы: meta, canonical, OG/Twitter, JSON-LD.
+   title/description берутся ТОЛЬКО из pages.json (page приходит из плагина).
+   ============================================================ #}
+{% macro head(pg) -%}
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{{ pg.title }}</title>
+  <meta name="description" content="{{ pg.description }}">
+  <link rel="canonical" href="{{ site.baseUrl }}{{ href(pg.slug) }}">
+  <meta name="robots" content="{{ 'noindex, nofollow' if (pg.noindex or site.staging) else 'index, follow' }}">
+  <meta name="theme-color" content="{{ site.themeColor }}">
+  <meta name="format-detection" content="telephone=no">
+
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="{{ site.brand }}">
+  <meta property="og:locale" content="ru_RU">
+  <meta property="og:title" content="{{ pg.title }}">
+  <meta property="og:description" content="{{ pg.description }}">
+  <meta property="og:url" content="{{ site.baseUrl }}{{ href(pg.slug) }}">
+  <meta property="og:image" content="{{ site.baseUrl }}{{ site.ogImage }}">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="{{ pg.title }}">
+  <meta name="twitter:description" content="{{ pg.description }}">
+  <meta name="twitter:image" content="{{ site.baseUrl }}{{ site.ogImage }}">
+
+  {# Иконки: файлы собирает favicon/build.mjs, имена — из site.json (site.icons) #}
+  <link rel="icon" href="{{ site.icons.svg }}" type="image/svg+xml">
+  <link rel="icon" href="{{ site.icons.png32 }}" sizes="32x32" type="image/png">
+  <link rel="icon" href="{{ site.icons.png16 }}" sizes="16x16" type="image/png">
+  <link rel="shortcut icon" href="{{ site.icons.ico }}">
+  <link rel="apple-touch-icon" sizes="180x180" href="{{ site.icons.appleTouch }}">
+  <link rel="mask-icon" href="{{ site.icons.safariPinnedTab }}" color="{{ site.brandColor }}">
+  <link rel="manifest" href="{{ site.icons.manifest }}">
+  <meta name="application-name" content="{{ site.brand }}">
+  <meta name="apple-mobile-web-app-title" content="{{ site.brand }}">
+  <meta name="msapplication-TileColor" content="{{ site.themeColor }}">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  {# 1,400 — курсив Inter: им набрано примечание в блоке практики #}
+  <link href="https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
+
+  {# Класс js ставим до отрисовки: reveal-анимации не скрывают контент без JS #}
+  <script>document.documentElement.classList.add('js');</script>
+  <script type="module" src="/src/js/main.js"></script>
+  <script type="application/ld+json">{{ jsonLd(pg) | safe }}</script>
+{%- endmacro %}

@@ -1,0 +1,67 @@
+{# ============================================================
+   landing.njk — сборка лендинга целиком из JSON-данных страницы.
+   Порядок блоков — по каркасу из ТЗ директолога (docs/Запросы для лендингов.txt, п. 5.2):
+   первый экран → проблема → узлы → конструкции → ограничения → материалы →
+   услуги → нормативы → уровни → категорирование → подтверждения → примеры →
+   заказчики → документация → CTA → тендеры → стоимость → FAQ → форма.
+   CTA-полоса стоит сразу после документации (по просьбе владельца): полоса
+   закрывает тему «что заказчик получает на руки» прямым призывом, а не
+   собирает подводки в самом низу. Полосы при этом не сливаются:
+   документация (тёмная) → CTA (оранжевая) → тендеры (светлая) →
+   стоимость (тёмная) → FAQ (светлая) → форма (ночное небо).
+   Дополнительно (в ТЗ блоков нет) под первым экраном может идти оранжевая
+   фотогалерея объектов — включается записью objects в data/landing-<slug>.json,
+   а также тёмная полоса параметров (facts → sFeatures, та же, что «Полный
+   комплекс» на главной) и светлая сводка работ (works → sBrief).
+   ============================================================ #}
+{% from "macros/ui.njk" import ctaBand %}
+{% from "partials/hero.njk" import hero %}
+{% from "partials/form.njk" import form %}
+{% from "partials/blocks.njk" import sProblem, sNodes, sConstructions, sLimits, sMaterials, sServices, sNormatives, sPractice, sLevels, sCategory, sProof, sCases, sClients, sDocs, sTenders, sPrices, sFaq, sObjects, sFeatures, sBrief %}
+
+{% macro landing(slug, pg) -%}
+{% set L = data['landing-' + slug] %}
+{% if L %}
+  {{ hero(L.hero, pg) }}
+  {# ПАРАМЕТРЫ ОБЪЕКТА: тёмная полоса сразу под баннером — бывшая фактическая
+     рамка первого экрана (hero.frame): типовые объекты, материалы, ориентиры
+     стоимости, срок службы. Идёт той же полосой «Полный комплекс», что на
+     главной (sFeatures): чёрная подложка (--color-void) и ряд пунктов с иконками.
+     Включается записью facts в data/landing-<slug>.json. Порядок блоков ТЗ это не
+     меняет: сама секция в каркасе п.5.2 не описана. #}
+  {% if L.facts %}{{ sFeatures(L.facts, 'kompleks') }}{% endif %}
+  {# ЧТО ДЕЛАЕМ НА ОБЪЕКТЕ: светлая секция под полосой параметров — кикер, видимый
+     заголовок, вводный лид и перечень этапов работ (бывшие hero.lead и
+     hero.bullets) на фоне крупного бледного знака-глифа (bgGlyph). Иконка и угол
+     секции приходят данными, поле bg у блока works: у каждого направления свой
+     знак объекта и своё место в секции. Включается записью works в
+     data/landing-<slug>.json. #}
+  {% if L.works %}{{ sBrief(L.works, true, 'raboty') }}{% endif %}
+  {# ОБЪЕКТЫ: оранжевая фотогалерея сразу под первым экраном. В ТЗ такого блока
+     нет — это наш дополнительный блок, порядок блоков ТЗ он не меняет.
+     Показывается, если у направления есть свой набор фото (L.objects). #}
+  {% if L.objects %}{{ sObjects(L.objects, 'obekty') }}{% endif %}
+  {% if L.problem %}{{ sProblem(L.problem, false, 'zadacha') }}{% endif %}
+  {% if L.nodes %}{{ sNodes(L.nodes, true, 'uzly') }}{% endif %}
+  {% if L.constructions %}{{ sConstructions(L.constructions, false, 'konstrukcii') }}{% endif %}
+  {% if L.limits %}{{ sLimits(L.limits, true, 'ogranicheniya') }}{% endif %}
+  {% if L.materials %}{{ sMaterials(L.materials, false, 'materialy') }}{% endif %}
+  {% if L.services %}{{ sServices(L.services, true, 'uslugi') }}{% endif %}
+  {% if L.normatives %}{{ sNormatives(L.normatives, slug, false, 'normativy') }}{{ sPractice('praktika') }}{% endif %}
+  {% if L.levels %}{{ sLevels(L.levels, slug, true, 'urovni') }}{% endif %}
+  {% if L.category %}{{ sCategory(L.category, false, 'kategorizaciya') }}{% endif %}
+  {% if L.proof %}{{ sProof(L.proof, true, 'podtverzhdeniya') }}{% endif %}
+  {% if L.cases %}{{ sCases(L.cases, false, 'keysy') }}{% endif %}
+  {% if L.clients %}{{ sClients(L.clients, true, 'zakazchiki') }}{% endif %}
+  {% if L.docs %}{{ sDocs(L.docs, false, 'dokumentaciya') }}{% endif %}
+  {# CTA-полоса: сразу после документации — порядок блоков лендинга из ТЗ
+     директолога, изменённый по просьбе владельца (раньше полоса стояла
+     между FAQ и формой). #}
+  {% if L.cta %}{{ ctaBand(L.cta) }}{% endif %}
+  {% if L.tenders %}{{ sTenders(L.tenders, true, 'tendery') }}{% endif %}
+  {% if L.prices %}{{ sPrices(L.prices, false, 'ceny') }}{% endif %}
+  {{ sFaq(slug, true, 'faq') }}
+  {{ form(slug) }}
+{% endif %}
+{%- endmacro %}
+

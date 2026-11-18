@@ -1,0 +1,424 @@
+// ============================================================
+// nunjucks-plugin.mjs — композиция разметки на этапе сборки.
+//
+// Плагин рендерит входные *.html (в них только {% extends %} и
+// уникальные блоки) через Nunjucks: в dist/ попадает обычный
+// статический HTML. Все повторяющиеся данные лежат в src/data/*.json
+// и подставляются в шаблоны: меню, крошки, title/description,
+// canonical, JSON-LD, sitemap.xml, robots.txt.
+//
+// JS на клиенте ничего не рендерит — только прогрессивное улучшение.
+// ============================================================
+import nunjucks from 'nunjucks'
+import { readdirSync, readFileSync } from 'node:fs'
+import { join } from 'node:path'
+
+export function nunjucksPlugin(siteRoot) {
+	const srcDir = join(siteRoot, 'src')
+	const dataDir = join(srcDir, 'data')
+
+	let data = {}
+	let env = null
+
+	// ---------- данные ----------
+	const loadData = () => {
+		const out = {}
+		for (const file of readdirSync(dataDir).sort()) {
+			if (!file.endsWith('.json')) continue
+			out[file.replace(/\.json$/, '')] = JSON.parse(
+				readFileSync(join(dataDir, file), 'utf8')
+			)
+		}
+		return out
+	}
+
+	const pageList = () => (data.pages && data.pages.items) || []
+	const findPage = (slug) => pageList().find((p) => p.slug === slug) || null
+	const linkTo = (slug, hash) =>
+		(slug === 'index' ? '/' : `/${slug}.html`) +
+		(hash ? `#${String(hash).replace(/^#/, '')}` : '')
+
+	// ---------- шкала разделов (.rail) ----------
+	// Состав шкалы собирается во время рендера страницы: каждая секция
+	// регистрирует себя в момент вывода — общая обёртка секций wrap
+	// (partials/blocks.njk), полоса CTA (macros/ui.njk) и первый экран
+	// (partials/hero.njk). Поэтому точки стоят ровно в том порядке, в каком
+	// секции идут на странице, и состав шкалы не дублируется вторым перечнем,
+	// который надо править при каждой перестановке блоков.
+	//
+	// Подпись точки — первый заголовок секции в её же разметке: кикер, а если
+	// кикера нет — ближайший h1–h3 (у полосы параметров заголовок sr-only).
+	// Исключение одно — первая точка: у баннера подпись короче, это имя страницы
+	// из pages.json (nav), потому что H1 на внутренних страницах набран целой
+	// строкой (см. partials/hero.njk). Разметку отдаёт сама секция, поэтому
+	// подпись точки и заголовок на странице — одно и то же значение, а не два
+	// похожих текста.
+	//
+	// Рендер страницы идёт в два прохода (transformIndexHtml): первый собирает
+	// состав шкалы, его вывод отбрасывается, второй — окончательный, в нём шкала
+	// уже знает свои точки. Регистрация работает только в первом проходе, иначе
+	// список точек удвоился бы.
+	const rail = { collecting: false, items: [] }
+
+	// Сущности, которые Nunjucks оставляет в разметке: подпись точки идёт в
+	// HTML как текст, поэтому их надо вернуть в символы, а не экранировать
+	// второй раз. Разметка внутри заголовка (span-ы этапов у баннера)
+	// отбрасывается: подпись — строка, а не фрагмент вёрстки.
+	const railEntities = {
+		'&nbsp;': ' ',
+		'&laquo;': '«',
+		'&raquo;': '»',
+		'&mdash;': '—',
+		'&ndash;': '–',
+		'&hellip;': '…',
+		'&quot;': '"',
+		'&#39;': "'",
+		'&lt;': '<',
+		'&gt;': '>',
+		'&amp;': '&',
+	}
+	const railText = (source) => {
+		const raw = String(source || '')
+		// Строка без тегов — уже готовая подпись; в разметке ищем заголовок
+		const inner = raw.includes('<')
+			? (
+					/<span class="kicker">([\s\S]*?)<\/span>/.exec(raw) ||
+					/<h[1-3][^>]*>([\s\S]*?)<\/h[1-3]>/.exec(raw) ||
+					['']
+				)[1]
+			: raw
+		return String(inner)
+			.replace(/&[a-z#0-9]+;/gi, (entity) => railEntities[entity.toLowerCase()] || entity)
+			.replace(/<[^>]*>/g, ' ')
+			.replace(/\s+/g, ' ')
+			.trim()
+	}
+	const railAdd = (id, source) => {
+		if (!rail.collecting || !id) return ''
+		const label = railText(source)
+		if (!label) return ''
+		rail.items.push({ id: String(id), label })
+		return ''
+	}
+	const railItems = () => rail.items
+
+	const groupList = () => {
+		const groups = []
+		for (const page of pageList()) {
+			if (!page.nav || !page.group) continue
+			let group = groups.find((g) => g.label === page.group)
+			if (!group) {
+				group = { label: page.group, items: [] }
+				groups.push(group)
+			}
+			group.items.push(page)
+		}
+		return groups
+	}
+
+	// footerGroup — колонка подвала, которой нет в шапке. Нужна там, где раздел
+	// не должен попадать в верхнее меню (так сделана «О компании»: её ссылка
+	// живёт в подвале и в кнопке на главной). Страница получает group: null и
+	// footerGroup: '<подпись колонки>'; порядок пунктов — как в pages.json.
+	const footerGroupList = () => {
+		const groups = []
+		for (const page of pageList()) {
+			if (!page.nav || !page.footerGroup) continue
+			let group = groups.find((g) => g.label === page.footerGroup)
+			if (!group) {
+				group = { label: page.footerGroup, items: [] }
+				groups.push(group)
+			}
+			group.items.push(page)
+		}
+		return groups
+	}
+
+	// ---------- site.webmanifest ----------
+	// Собирается из тех же данных, что <head> и JSON-LD: brand, themeColor и
+	// список файлов иконок берутся из site.json, поэтому не дублируются.
+	// start_url и scope относительные — сайт работает и из подпапки (GitHub Pages).
+	const manifest = () => {
+		const s = data.site
+		const icons = s.icons || {}
+		const rel = (path) => './' + String(path).replace(/^\//, '')
+		const png = (src, sizes, purpose) => ({
+			src: rel(src),
+			sizes,
+			type: 'image/png',
+			purpose,
+		})
+
+		return (
+			JSON.stringify(
+				{
+					name: `${s.brand} — ${s.tagline}`,
+					short_name: s.brand,
+					description: s.description,
+					lang: 'ru',
+					start_url: './',
+					scope: './',
+					display: 'standalone',
+					background_color: s.themeColor,
+					theme_color: s.themeColor,
+					icons: [
+						{ src: rel(icons.svg), sizes: 'any', type: 'image/svg+xml', purpose: 'any' },
+						png(icons.android192, '192x192', 'any'),
+						png(icons.android512, '512x512', 'any'),
+						png(icons.maskable192, '192x192', 'maskable'),
+						png(icons.maskable512, '512x512', 'maskable'),
+					],
+				},
+				null,
+				2,
+			) + '\n'
+		)
+	}
+
+	// ---------- JSON-LD ----------
+	const jsonLd = (page) => {
+		const site = data.site
+		const base = String(site.baseUrl).replace(/\/$/, '')
+		const url = base + linkTo(page.slug)
+		const crumbItems = [
+			{
+				'@type': 'ListItem',
+				'position': 1,
+				'name': 'Главная',
+				'item': base + '/',
+			},
+			...(page.group && page.slug !== 'index'
+				? [{ '@type': 'ListItem', 'position': 2, 'name': page.group }]
+				: []),
+			{
+				'@type': 'ListItem',
+				'position': page.group && page.slug !== 'index' ? 3 : 2,
+				'name': page.nav || page.title,
+				'item': url,
+			},
+		]
+
+		const graph = [
+			{
+				'@type': 'Organization',
+				'@id': `${base}/#org`,
+				'name': site.brand,
+				'url': base + '/',
+				'telephone': site.phone.display,
+				'email': site.email,
+				'description': site.description,
+				'areaServed': 'Россия',
+				'logo': `${base}${(site.icons || {}).android512 || ''}`,
+			},
+			{ '@type': 'BreadcrumbList', 'itemListElement': crumbItems },
+		]
+
+		if (page.service) {
+			graph.push({
+				'@type': 'Service',
+				'name': page.nav || page.title,
+				'serviceType': page.service,
+				'description': page.description,
+				'provider': { '@id': `${base}/#org` },
+				'areaServed': 'Россия',
+				url,
+			})
+		}
+
+		const faqFile = data['faq-' + page.slug]
+		if (faqFile && faqFile.items && faqFile.items.length) {
+			graph.push({
+				'@type': 'FAQPage',
+				'mainEntity': faqFile.items.map((item) => ({
+					'@type': 'Question',
+					'name': item.q,
+					'acceptedAnswer': { '@type': 'Answer', 'text': item.a },
+				})),
+			})
+		}
+
+		if (page.slug === 'index' && data.products) {
+			graph.push({
+				'@type': 'ItemList',
+				'name': 'Направления защиты объектов от БПЛА',
+				'itemListElement': data.products.items.map((item, index) => ({
+					'@type': 'ListItem',
+					'position': index + 1,
+					'name': item.title,
+					'url': base + linkTo(String(item.href).replace(/\.html$/, '')),
+				})),
+			})
+		}
+
+		return JSON.stringify({ '@context': 'https://schema.org', '@graph': graph })
+	}
+
+	// ---------- экранирование ----------
+	// Нужно фильтру accent: он возвращает готовую разметку и поэтому обходит
+	// автоэкранирование Nunjucks, так что текст из данных экранируем сами.
+	const escapeHtml = (value) =>
+		String(value)
+			.replace(/&/g, '&amp;')
+			.replace(/</g, '&lt;')
+			.replace(/>/g, '&gt;')
+			.replace(/"/g, '&quot;')
+			.replace(/'/g, '&#39;')
+
+	// ---------- площадка сборки: прод или стейдж ----------
+	// Домен боевого сайта ещё не прикреплён к серверу, поэтому адрес площадки и
+	// режим индексации можно переопределить окружением при сборке — их выставля-
+	// ет workflow .github/workflows/deploy-hosting.yml из saits/sait-XX/hosting.json:
+	//   SITE_BASE_URL — адрес, по которому сайт открыт сейчас (canonical, OG,
+	//                   sitemap.xml, robots.txt, JSON-LD);
+	//   SITE_STAGING=1 — стейдж: страницы noindex, robots.txt закрыт, счётчик
+	//                   Метрики не выводится (см. partials/metrika.njk).
+	// Источником правды остаётся src/data/site.json (п. 4.2 правил проекта):
+	// окружение только подменяет значения для не-боевой сборки, а сборка без
+	// переменных даёт тот же результат, что и раньше.
+	const applySiteEnv = () => {
+		const baseUrl = String(process.env.SITE_BASE_URL || data.site.baseUrl || '').replace(
+			/\/+$/,
+			''
+		)
+		const staging = String(process.env.SITE_STAGING || '') === '1'
+		data.site = { ...data.site, baseUrl, staging }
+	}
+
+	// ---------- окружение Nunjucks ----------
+	const setup = () => {
+		data = loadData()
+		applySiteEnv()
+		env = new nunjucks.Environment(
+			new nunjucks.FileSystemLoader([srcDir], { noCache: true }),
+			{ autoescape: true, trimBlocks: true, lstripBlocks: true }
+		)
+		env.addGlobal('site', data.site)
+		env.addGlobal('data', data)
+		env.addGlobal('pages', pageList())
+		env.addGlobal('navGroups', groupList())
+		env.addGlobal('footerGroups', footerGroupList())
+		env.addGlobal('pageBySlug', findPage)
+		env.addGlobal('href', linkTo)
+		env.addGlobal('railAdd', railAdd)
+		env.addGlobal('railItems', railItems)
+		env.addGlobal('jsonLd', jsonLd)
+		env.addGlobal('year', new Date().getFullYear())
+
+		// ---------- акцент внутри текста из данных ----------
+		// Фрагмент, который на странице выделен акцентом, помечается в JSON парой
+		// звёздочек: «Работаем по договору: … — **один подрядчик на весь комплекс**.»
+		// Фильтр accent превращает пару в <strong> с классом из аргумента
+		// ({{ cta.keyNote | accent('cta-key__hi') }}), остальной текст экранирует и
+		// отдаёт готовую разметку: в данных остаётся читаемая строка, а не HTML.
+		// Так выделение описано данными (п. 4.2 правил проекта), а вид фрагмента —
+		// классом в style.css, а не разметкой в шаблоне.
+		env.addFilter('accent', (value, className = '') => {
+			const attrs = className ? ` class="${escapeHtml(className)}"` : ''
+			const html = String(value ?? '')
+				.split(/\*\*(.+?)\*\*/s)
+				.map((part, index) =>
+					index % 2
+						? `<strong${attrs}>${escapeHtml(part)}</strong>`
+						: escapeHtml(part)
+				)
+				.join('')
+			return new nunjucks.runtime.SafeString(html)
+		})
+	}
+
+	setup()
+
+	const render = (html, locals) => env.renderString(html, locals || {})
+
+	// ---------- sitemap.xml / robots.txt ----------
+	const sitemap = () => {
+		const base = String(data.site.baseUrl).replace(/\/$/, '')
+		const today = new Date().toISOString().slice(0, 10)
+		const urls = [
+			{ loc: base + '/', priority: 1.0, changefreq: 'weekly', lastmod: today },
+			...pageList()
+				.filter((p) => p.slug !== 'index' && !p.noindex)
+				.map((p) => ({
+					loc: base + linkTo(p.slug),
+					priority: p.priority || 0.8,
+					changefreq: p.changefreq || 'monthly',
+					lastmod: today,
+				})),
+		]
+		const body = urls
+			.map(
+				(u) =>
+					`  <url>\n    <loc>${u.loc}</loc>\n    <lastmod>${u.lastmod}</lastmod>\n    <changefreq>${u.changefreq}</changefreq>\n    <priority>${u.priority.toFixed(1)}</priority>\n  </url>`
+			)
+			.join('\n')
+		return `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${body}\n</urlset>\n`
+	}
+
+	const robots = () => {
+		const base = String(data.site.baseUrl).replace(/\/$/, '')
+		// Стейдж живёт по временному адресу и в поиск попадать не должен:
+		// закрываем весь сайт целиком, ссылку на sitemap не даём.
+		if (data.site.staging) {
+			return `User-agent: *\nDisallow: /\n`
+		}
+		return `User-agent: *\nAllow: /\n\nSitemap: ${base}/sitemap.xml\n`
+	}
+
+	return {
+		name: 'forttex-nunjucks',
+		enforce: 'pre',
+
+		transformIndexHtml: {
+			order: 'pre',
+			handler(html, ctx) {
+				const slug =
+					String((ctx && ctx.path) || '/')
+						.replace(/^\//, '')
+						.replace(/\.html$/, '') || 'index'
+				const page = findPage(slug)
+				const locals = { page: page || { slug, title: '', description: '' } }
+				// Два прохода (см. rail выше): первый собирает состав шкалы
+				// разделов, его разметку выбрасываем, второй отдаёт страницу
+				// со шкалой, которая уже знает свои точки.
+				rail.collecting = true
+				rail.items = []
+				render(html, locals)
+				rail.collecting = false
+				return render(html, locals)
+			},
+		},
+
+		generateBundle() {
+			this.emitFile({
+				type: 'asset',
+				fileName: 'sitemap.xml',
+				source: sitemap(),
+			})
+			this.emitFile({ type: 'asset', fileName: 'robots.txt', source: robots() })
+			this.emitFile({
+				type: 'asset',
+				fileName: 'site.webmanifest',
+				source: manifest(),
+			})
+		},
+
+		configureServer(server) {
+			// В dev-режиме манифест тоже генерируется из данных, а не берётся из public/
+			server.middlewares.use((req, res, next) => {
+				if (!req.url || req.url.split('?')[0] !== '/site.webmanifest') return next()
+				res.setHeader('Content-Type', 'application/manifest+json; charset=utf-8')
+				res.end(manifest())
+			})
+
+			const touch = (file) => {
+				if (file.endsWith('.njk') || file.endsWith('.json')) {
+					setup()
+					server.ws.send({ type: 'full-reload' })
+				}
+			}
+			server.watcher.on('change', touch)
+			server.watcher.on('add', touch)
+			server.watcher.on('unlink', touch)
+		},
+	}
+}

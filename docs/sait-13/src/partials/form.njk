@@ -1,0 +1,85 @@
+{# ============================================================
+   form.njk — блок заявки: имя, телефон и комментарий
+   (состав полей — src/data/form.json). Раздел сайта подставляется
+   скрытым полем из pages.json, поэтому выпадающих списков в форме нет.
+   Без серверной части: нативный submit ведёт в почтовый клиент,
+   JS проверяет поля и показывает статус (прогрессивное улучшение).
+
+   Секция идёт «ночным небом»: поле звёзд лежит декоративным слоем под
+   контентом (классы .stars-bg / .stars в src/stars.css, рисунок собирает
+   генератор stars/build.mjs). Подводки и примечания про отказ формы в
+   блоке нет намеренно — вместо них контакты набраны крупнее, а порядок
+   действий объясняет сама форма.
+   ============================================================ #}
+{% import "macros/ui.njk" as ui %}
+
+{% macro field(item) -%}
+{% set ac = { name: 'name', phone: 'tel' } %}
+{% if item.type == 'textarea' %}
+<div class="field">
+  <label for="f-{{ item.name }}">{{ item.label }}</label>
+  <textarea id="f-{{ item.name }}" name="{{ item.name }}" rows="{{ item.rows | default(3) }}" placeholder="{{ item.placeholder }}"{% if item.required %} required{% endif %}></textarea>
+</div>
+{% else %}
+<div class="field">
+  <label for="f-{{ item.name }}">{{ item.label }}</label>
+  <input id="f-{{ item.name }}" name="{{ item.name }}" type="{{ item.type | default('text') }}" placeholder="{{ item.placeholder }}"{% if item.required %} required{% endif %} autocomplete="{{ ac[item.name] | default('off') }}">
+</div>
+{% endif %}
+{%- endmacro %}
+
+{% macro form(slug) -%}
+{% set f = data.form %}
+{% set pg = pageBySlug(slug) %}
+{# Точка шкалы разделов: секция заявки рисует обёртку сама, а не через общую
+   обёртку секций (wrap), поэтому регистрируется здесь. Подпись — кикер формы,
+   то же значение, что стоит над её заголовком (см. nunjucks-plugin.mjs). #}
+{{ railAdd('zayavka', f.kicker) }}
+<section class="band band--stars" id="zayavka">
+  {# Подложка блока: поле звёзд. Слой декоративный — текста не несёт,
+     поэтому aria-hidden в разметке и pointer-events: none в CSS, а
+     z-index: -1 внутри stacking context секции держит звёзды под контентом. #}
+  <div class="stars-bg" aria-hidden="true">
+    <div class="stars stars--far"></div>
+    <div class="stars stars--mid"></div>
+    <div class="stars stars--near"></div>
+    <div class="stars stars--spark"></div>
+    {# Самый крупный слой идёт последним: порядок DOM = порядок наложения,
+       поэтому редкие крупные звёзды не перекрываются мелкими. #}
+    <div class="stars stars--giant"></div>
+  </div>
+  <div class="shell grid gap-10 lg:grid-cols-[1fr_minmax(0,430px)] lg:items-start lg:gap-14">
+    <div>
+      <span class="kicker">{{ f.kicker }}</span>
+      <h2 class="h2 mt-4">{{ f.title }}</h2>
+
+      {# Контакты крупнее обычного текста: после того как подводку убрали,
+         это главное в колонке, и её нужно прочитать раньше, чем началась
+         форма. Значения — из site.json, размер — из шкалы Tailwind. #}
+      <ul class="mt-9 space-y-4 text-base md:text-lg">
+        <li><a class="inline-flex items-center gap-4 font-medium text-snow transition-colors hover:text-flame" href="tel:{{ site.phone.href }}">{{ ui.icon('phone', 'h-5 w-5 shrink-0 text-flame md:h-6 md:w-6') }}{{ site.phone.display }}</a></li>
+        <li><a class="inline-flex items-center gap-4 font-medium text-snow transition-colors hover:text-flame" href="mailto:{{ site.email }}">{{ ui.icon('mail', 'h-5 w-5 shrink-0 text-flame md:h-6 md:w-6') }}{{ site.email }}</a></li>
+        <li class="flex items-center gap-4 text-mist">{{ ui.icon('clock', 'h-5 w-5 shrink-0 text-flame md:h-6 md:w-6') }}{{ site.workhours }}</li>
+        <li class="flex items-center gap-4 text-mist">{{ ui.icon('pin', 'h-5 w-5 shrink-0 text-flame md:h-6 md:w-6') }}{{ site.region }}</li>
+      </ul>
+    </div>
+
+    <form class="panel panel--accent panel--form p-5 md:p-6" method="post" action="mailto:{{ site.email }}" enctype="text/plain" data-form data-form-slug="{{ slug }}">
+      {# Контекст заявки уходит в письмо скрытым полем: спрашивать тип объекта в форме не нужно #}
+      <input type="hidden" name="{{ f.hidden.name }}" value="{{ pg.nav if pg and pg.nav else f.hidden.fallback }}">
+
+      <div class="grid gap-4">
+        {% for item in f.base %}{{ field(item) }}{% endfor %}
+        {{ field({ name: f.comment.name, label: f.comment.label, type: 'textarea', rows: f.comment.rows, placeholder: f.comment.placeholder }) }}
+      </div>
+
+      <p class="form-status mt-4" data-form-status data-form-error="{{ f.error }}" role="status" aria-live="polite">{{ f.success }}</p>
+
+      <div class="mt-5 flex flex-col gap-4 sm:flex-row sm:items-center">
+        <button class="btn btn--primary btn--wide" type="submit">{{ f.submit }}{{ ui.icon('arrow', 'h-4 w-4') }}</button>
+        <span class="form-note max-w-[22rem]">{{ f.consent }}</span>
+      </div>
+    </form>
+  </div>
+</section>
+{%- endmacro %}

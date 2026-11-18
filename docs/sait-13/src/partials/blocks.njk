@@ -1,0 +1,945 @@
+{# ============================================================
+   blocks.njk — секции страниц. Каждая секция собирается из JSON-данных
+   и повторно используется на разных страницах (лендинги, каталог, услуги).
+   Фактические значения (таблицы, списки, нормы) берутся из общих файлов
+   data/materials.json, data/levels.json, data/normatives.json, data/products.json.
+   ============================================================ #}
+{% import "macros/ui.njk" as ui %}
+{% from "partials/plan.njk" import sitePlan %}
+{% from "partials/ctxbg.njk" import ctxBg %}
+
+{# Декор светлой секции: выборочные угловые акценты. Включается полем deco
+   у конкретного блока данных, поэтому соседние светлые секции декора не
+   получают. Варианты (kind):
+     corner — уголок с пульсирующей точкой в вершине;
+     glyph  — крупная контурная иконка (поле icon) у нижней кромки;
+     scan   — медный луч, медленно проходящий по нижней кромке;
+     ticks  — ряд мигающих рисок у кромки;
+     seal   — иллюстрация «бланк с печатью» (см. sealPlate ниже) по кромке,
+              а ряд рисок уходит на противоположную кромку, чтобы не спорить
+              с иллюстрацией.
+   Положение задаёт поле corner: bl (низ-лево), br (низ-право), tr (верх-право).
+   Слой декоративный: aria-hidden и pointer-events: none, текста не содержит. #}
+
+{# Иллюстрация «бланк с печатью» для декора kind=seal. Пропорции взяты с
+   референса заказчика: скруглённый лист с загнутым углом и четырьмя строками
+   текста, поверх правого нижнего угла — печать из двух колец с галочкой.
+   Рисуется контуром в viewBox 132×168 (лист по пропорции А4, ниже кромки листа
+   остаётся место для выступающих колец печати), поэтому токен --deco-seal
+   задаёт высоту, а ширину CSS выводит из отношения 132/168.
+   Последняя строка короче и обрывается до кольца печати, чтобы линии не
+   складывались в сетку. Толщины — от токена --deco-seal-stroke (единицы
+   viewBox), печать и галочка кратны ему и не «жирнеют» при смене размера. #}
+{% macro sealPlate() -%}
+<svg class="deco__seal-svg" viewBox="0 0 132 168" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+  {# лист: скруглённый прямоугольник со срезанным верхним правым углом #}
+  <path class="deco__seal-line" d="M24 8h66l26 26v108a16 16 0 0 1-16 16H24a16 16 0 0 1-16-16V24a16 16 0 0 1 16-16Z"/>
+  {# загнутый угол: скруглённый клапан между срезом и листом #}
+  <path class="deco__seal-line" d="M90 8c0 12 1 18 6 22 5 4 12 4 20 4"/>
+  {# строки текста: последняя короче и обрывается до кольца печати #}
+  <path class="deco__seal-line" d="M28 58h70M28 78h64M28 98h58M28 118h20"/>
+  {# печать: два кольца и галочка, центр — у правого нижнего угла листа.
+     Кольца выступают за нижнюю кромку листа, поэтому viewBox выше листа (168) #}
+  <circle class="deco__seal-ring" cx="85" cy="132" r="30"/>
+  <circle class="deco__seal-ring" cx="85" cy="132" r="19"/>
+  <path class="deco__seal-check" d="M72 132l7.5 7.5 20-14.8"/>
+</svg>
+{%- endmacro %}
+
+{# Схема «контур защиты над объектом» — фоновый слой блока нормативов: три кольца
+   зоны вокруг объекта, купол защитного контура над зданием с линиями этажей и
+   пунктирная траектория подлёта с точкой. Геометрия перенесена с референса
+   заказчика; координаты даны в viewBox 560×560 с центральной осью 280.
+   Слой намеренно бледный (токен --bg-scheme-opacity) и уходит под контент
+   секции (z-index: -1), поэтому работает фактурой фона, а не иллюстрацией;
+   оформление — классы .bg-scheme* в style.css. Кольца и купол рисуются
+   нейтральным серым и медью — читаются на любом фоне, а здание зависит от
+   фона секции: на тёмных секциях лендингов --color-snow, на светлой главной
+   (.on-light) — --color-steel, иначе белый контур на песке исчезает.
+   Декоративный и статичный: aria-hidden, без анимации, текста не содержит. #}
+{% macro bgScheme() -%}
+<div class="bg-scheme" aria-hidden="true">
+  <svg class="bg-scheme__svg" viewBox="0 0 560 560" fill="none" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+    {# кольца зоны вокруг объекта: самый тихий слой схемы #}
+    <g class="bg-scheme__ring">
+      <circle cx="280" cy="280" r="254"/>
+      <circle cx="280" cy="280" r="198"/>
+      <circle cx="280" cy="280" r="142"/>
+    </g>
+    {# купол защитного контура над зданием и его образующие #}
+    <path class="bg-scheme__contour" d="M128 300 C 128 150, 432 150, 432 300"/>
+    <path class="bg-scheme__contour" d="M280 300 V156"/>
+    <path class="bg-scheme__contour" d="M156 232 H404"/>
+    <path class="bg-scheme__contour" d="M192 300 V190"/>
+    <path class="bg-scheme__contour" d="M368 300 V190"/>
+    {# здание: контур, линии этажей и вертикальные оси #}
+    <rect class="bg-scheme__object" x="152" y="300" width="256" height="208" rx="8"/>
+    <path class="bg-scheme__object" d="M152 348 H408M152 396 H408M152 444 H408"/>
+    <path class="bg-scheme__object" d="M216 300 V508M344 300 V508"/>
+    {# траектория подлёта с точкой на ней и центр контура #}
+    <path class="bg-scheme__path" d="M452 118 C 430 160, 360 180, 300 178"/>
+    <circle class="bg-scheme__dot" cx="452" cy="118" r="7"/>
+    <circle class="bg-scheme__dot" cx="280" cy="300" r="6"/>
+  </svg>
+</div>
+{%- endmacro %}
+
+{# Фоновый знак секции работ (sBrief, лендинги): крупная бледная контурная
+   иконка в углу секции. Собственного рисунка у слоя нет — иконка берётся из
+   общего набора ui.icon (строгие контурные знаки), а имя иконки, угол секции и
+   размер приходят данными, поле bg у блока works (works.bg). По правке
+   владельца: одна и та же иконка на всех направлениях читалась повтором, теперь
+   у каждого направления свой знак объекта и своё место в секции.
+   Поля: icon — имя иконки набора (мост, резервуар, здание, окно, опора);
+   corner — угол секции br / bl / tr / tl (по умолчанию br);
+   size — 'sm' включает мелкий знак, в правых углах он крупный по умолчанию,
+   в левых мелкий всегда (у левой кромки начинается колонка текста).
+   Без данных слой выглядит как раньше: кран у нижней правой кромки.
+   Толщина контура задаётся токеном --bg-glyph-stroke в единицах viewBox 24×24:
+   иконка набора масштабируется целиком, и без этого штрих «жирнел» бы вместе
+   с размером (тот же приём у .deco__svg, где stroke-width: 0.8).
+   Оформление — классы .bg-glyph* в style.css; слой вставляется параметром bg
+   макроса wrap, то есть вне .shell, и позиционируется от кромок секции.
+   Декоративный и статичный: aria-hidden, без текста, pointer-events выключены. #}
+{% macro bgGlyph(cfg) -%}
+{% set g = cfg | default({}) %}
+<div class="bg-glyph bg-glyph--{{ g.corner | default('br') }}{{ ' bg-glyph--sm' if g.size == 'sm' }}" aria-hidden="true">{{ ui.icon(g.icon | default('crane'), 'bg-glyph__svg') }}</div>
+{%- endmacro %}
+
+{# Фоновые шкалы того же блока нормативов: четыре ряда горизонтальных серых рисок
+   по полям секции — сверху слева, снизу справа и двумя шкалами у боковых кромок.
+   Разметка переиспользует декор сайта (.deco__ticks + .deco__tick), а вид задают
+   классы --a…--d и токены --bg-ticks-* в style.css; длина шкал разная, чтобы ряды
+   не читались четырьмя одинаковыми. Слой — под контентом (z-index: -1),
+   декоративный: aria-hidden, без текста, pointer-events выключены. #}
+{% macro bgTicks() -%}
+<div class="bg-ticks" aria-hidden="true">
+  <span class="deco__ticks deco__ticks--a">{% for i in range(0, 5) %}<i class="deco__tick"></i>{% endfor %}</span>
+  <span class="deco__ticks deco__ticks--b">{% for i in range(0, 5) %}<i class="deco__tick"></i>{% endfor %}</span>
+  <span class="deco__ticks deco__ticks--c">{% for i in range(0, 8) %}<i class="deco__tick"></i>{% endfor %}</span>
+  <span class="deco__ticks deco__ticks--d">{% for i in range(0, 4) %}<i class="deco__tick"></i>{% endfor %}</span>
+</div>
+{%- endmacro %}
+
+{# Фоновый слой блока нормативов целиком: бледная схема «контур защиты» и четыре
+   шкалы рисок. Отдаётся в wrap (см. ниже) как макрос, а не рисуется внутри
+   caller, потому что .shell — тоже система координат (.on-light > .shell
+   position: relative), и внутри него слои прижались бы к колонке контента,
+   а не к кромкам секции. Текста не содержит, aria-hidden внутри макросов. #}
+{% macro bgNormatives() -%}
+{{ bgScheme() }}
+{{ bgTicks() }}
+{%- endmacro %}
+
+{% macro decoLayer(d) -%}
+{% if d and d.kind %}
+<div class="deco deco--{{ d.kind }} deco--{{ d.corner | default('br') }}" aria-hidden="true">
+  {% if d.kind == 'corner' %}<span class="deco__angle"></span><span class="deco__dot"></span>{% endif %}
+  {% if d.kind == 'glyph' %}<span class="deco__glyph">{{ ui.icon(d.icon | default('target'), 'deco__svg') }}</span>{% endif %}
+  {% if d.kind == 'seal' %}
+  {# дуги за печатью идут первыми: печать рисуется поверх них, как на референсе #}
+  <span class="deco__seal"><span class="deco__rings" aria-hidden="true"><i class="deco__ring deco__ring--near"></i><i class="deco__ring deco__ring--far"></i><i class="deco__ring-dot"></i></span>{{ sealPlate() }}</span>
+  {% endif %}
+  {% if d.kind == 'scan' %}<span class="deco__scan"></span>{% endif %}
+  {% if d.kind == 'ticks' or d.kind == 'seal' %}<span class="deco__ticks">{% for i in range(0, 11) %}<i class="deco__tick"></i>{% endfor %}</span>{% endif %}
+</div>
+{% endif %}
+{%- endmacro %}
+
+{# обёртка секции: id + тёмный/светлый фон.
+   variant переопределяет фон целиком — например 'flame-band' (оранжевая полоса, как CTA).
+   deco — необязательный угловой декор светлой секции (см. decoLayer выше).
+   bg — необязательный макрос фонового слоя секции. Рендерится до .shell (вне него),
+   поэтому слой позиционируется от самой секции: у .band position: relative, а
+   .on-light > .shell тоже сдвигает систему координат, и внутри .shell фоновый
+   слой прижался бы к колонке контента, а не к кромкам секции.
+   bgArg — необязательные данные этого слоя: макрос вызывается как bg(bgArg).
+   Слои, которые параметров не принимают (ctxBg, bgNormatives, bgTicks), лишний
+   аргумент игнорируют; он нужен там, где слой настраивается данными (bgGlyph:
+   иконка, угол и размер — поле bg у блока works).
+
+   Разметку секции считаем один раз в переменную body: её же отдаём шкале
+   разделов (railAdd). Секция регистрирует себя в момент вывода, поэтому точки
+   шкалы стоят в порядке секций страницы, а подпись точки — первый заголовок
+   самой секции (кикер, иначе h1–h3). Так состав шкалы не дублируется вторым
+   перечнем, который пришлось бы править при каждой перестановке блоков —
+   см. nunjucks-plugin.mjs. #}
+{% macro wrap(id, light, variant, deco, bg, bgArg) -%}
+{%- set body = caller() -%}
+{{ railAdd(id, body) }}
+<section class="band {{ variant or ('on-light' if light else 'grid-bg') }}"{% if id %} id="{{ id }}"{% endif %}>
+  {% if bg %}{{ bg(bgArg) }}{% endif %}
+  <div class="shell">{{ body }}</div>
+  {{ decoLayer(deco) }}
+</section>
+{%- endmacro %}
+
+{# ---------- 1. Проблема объекта ---------- #}
+{% macro sProblem(b, light, id) -%}
+{% call wrap(id, light, none, b.deco) %}
+  {{ ui.head(b) }}
+  {{ ui.cards(b.items, 'md:grid-cols-2 lg:grid-cols-3') }}
+{% endcall %}
+{%- endmacro %}
+
+{# ---------- 2. Узлы объекта (таблица) ---------- #}
+{% macro sNodes(b, light, id) -%}
+{% call wrap(id, light, none, b.deco) %}
+  {{ ui.head(b) }}
+  {{ ui.tbl(b.head, b.rows) }}
+{% endcall %}
+{%- endmacro %}
+
+{# ---------- 3. Типы конструкций ---------- #}
+{% macro sConstructions(b, light, id) -%}
+{% call wrap(id, light, none, b.deco) %}
+  {{ ui.head(b) }}
+  {{ ui.cards(b.items, 'md:grid-cols-2 lg:grid-cols-3') }}
+{% endcall %}
+{%- endmacro %}
+
+{# ---------- 4. Ограничения: таблица или карточки ---------- #}
+{% macro sLimits(b, light, id) -%}
+{% call wrap(id, light, none, b.deco) %}
+  {{ ui.head(b) }}
+  {% if (b.head | length) and (b.rows | length) %}{{ ui.tbl(b.head, b.rows) }}{% endif %}
+  {% if b.items | length %}{{ ui.cards(b.items, 'md:grid-cols-2 lg:grid-cols-3') }}{% endif %}
+{% endcall %}
+{%- endmacro %}
+
+{# ---------- 5. Материалы: один переключатель — материалы, сравнение и «почему не используем» ---------- #}
+{# Внимание: переменные из {% set %} в теле макроса НЕ видны внутри его
+   собственного {% call %} — поэтому set стоит внутри блока.
+   Блок собран как один переключатель (data-tabs), вкладки идут по массиву
+   data.materials.tabs, а поле kind решает, что внутри панели:
+     material — фото (свободная лицензия, автор в подписи), пояснение и
+                параметры из общей таблицы (колонка берётся по полю col, чтобы
+                порядок материалов в данных можно было менять, не правя таблицу);
+     compare  — сводная таблица по всем материалам;
+     whyNot   — разбор «почему не применяем полипропилен и поликарбонат».
+   Состав, порядок и подписи вкладок задаются только данными: новая вкладка —
+   одна запись в materials.json. Текст и таблица лежат в HTML статически, а
+   модуль tabs.js лишь переключает классы, поэтому без JS виден весь блок
+   целиком, а поиск получает таблицу и формулировки без исполнения скриптов. #}
+{% macro sMaterials(b, light, id) -%}
+{% call wrap(id, light, none, b.deco) %}
+  {% set m = data.materials %}
+  {{ ui.head(b) }}
+  <div class="tabs mt-10" data-tabs>
+    <div class="tabs__list" role="tablist" aria-label="Материалы защитных конструкций">
+      {% for t in m.tabs %}
+      {# Подпись вкладки: обычно короткое nav из данных; у сравнения отдельного
+         короткого имени нет, поэтому там берём заголовок самой панели
+         (m.compare.title), чтобы формулировка не дублировалась в materials.json.
+         Флаг strong в данных делает вкладку-итог постоянно выделенной: CSS даёт
+         ей полужирный шрифт, оранжевое подчёркивание и оранжевый тон. #}
+      <button type="button" class="tabs__tab{% if t.strong %} tabs__tab--strong{% endif %}" role="tab" id="mat-tab-{{ t.id }}" aria-controls="mat-panel-{{ t.id }}">{% if t.nav %}{{ t.nav }}{% else %}{{ m[t.kind].title }}{% endif %}</button>
+      {% endfor %}
+    </div>
+    <div class="tabs__panels">
+      {% for t in m.tabs %}
+      <section class="tabs__panel" role="tabpanel" id="mat-panel-{{ t.id }}" aria-labelledby="mat-tab-{{ t.id }}">
+        {% if t.kind == 'compare' %}
+        {# Сводная таблица — тот же источник, что и вкладки: один факт в одном месте #}
+        <h3 class="h3">{{ m.compare.title }}</h3>
+        {% if m.compare.lead %}<p class="lead mt-3">{{ m.compare.lead }}</p>{% endif %}
+        {{ ui.tbl(m.head, m.rows) }}
+        {% elif t.kind == 'whyNot' %}
+        <div class="panel panel--accent p-6 md:p-8">
+          <h3 class="h3">{{ m.whyNot.title }}</h3>
+          {{ ui.tick(m.whyNot.reasons) }}
+          {{ ui.note(m.whyNot.verdict, 'accent') }}
+        </div>
+        {% else %}
+        <div class="matpanel">
+          {{ ui.media(t.photo, 'matpanel__media') }}
+          <div class="matpanel__body">
+            <h3 class="matpanel__title">{{ ui.icon(t.icon, 'h-5 w-5 text-flame') }}<span>{{ m.head[t.col] }}</span></h3>
+            <p class="matpanel__text">{{ t.text }}</p>
+            <dl class="spec">
+              {% for row in m.rows %}
+              <div class="spec__row"><dt>{{ row[0] }}</dt><dd>{{ row[t.col] }}</dd></div>
+              {% endfor %}
+            </dl>
+          </div>
+        </div>
+        {% endif %}
+      </section>
+      {% endfor %}
+    </div>
+  </div>
+  {% if b.note %}{{ ui.note(b.note) }}{% endif %}
+{% endcall %}
+{%- endmacro %}
+
+{# ---------- 6. Состав работ / услуги ---------- #}
+{% macro sServices(b, light, id) -%}
+{% call wrap(id or 'uslugi', light, none, b.deco) %}
+  {{ ui.head(b) }}
+  <ol class="numlist mt-10">
+    {% for item in b.items %}
+    <li class="reveal">
+      <div class="flex items-center gap-3">
+        {{ ui.icon(item.icon | default('gear'), 'h-5 w-5 text-flame') }}
+        <h3 class="h3">{{ item.title }}</h3>
+      </div>
+      <p class="panel__meta mt-3">{{ item.text }}</p>
+    </li>
+    {% endfor %}
+  </ol>
+{% endcall %}
+{%- endmacro %}
+
+{# ---------- 6a. Этапы работ: нумерованные карточки ---------- #}
+{# Визуал блока: слева кикер, заголовок, лид и короткий список того, что
+   заказчик получает по итогу, справа — сетка карточек с порядковыми номерами.
+   Номер шага берётся из позиции в данных (loop.index), поэтому порядок этапов
+   меняется правкой одного JSON, без пересчёта номеров в разметке.
+   Секция — своя тёмная полоса с медным градиентом (вариант process-band, как
+   flame-band у галереи «Объекты»): фон и карточки заданы стилями .process-band
+   и .stepcard, светлой инверсии у блока нет. Поэтому параметр light макросу не
+   нужен и фон всегда переопределяется вариантом — как у sObjects. #}
+{% macro sProcess(b, id) -%}
+{% call wrap(id or 'poryadok', false, 'process-band') %}
+  <div class="process">
+    <div class="process__aside">
+      {{ ui.head(b) }}
+      {% if b.bullets | length %}
+      <ul class="process__points">
+        {% for point in b.bullets %}
+        <li class="process__point">
+          <span class="process__mark">{{ ui.icon('check', 'h-3 w-3') }}</span>
+          <span>{{ point }}</span>
+        </li>
+        {% endfor %}
+      </ul>
+      {% endif %}
+    </div>
+    <ol class="process__grid">
+      {% for item in b.items %}
+      <li class="stepcard reveal">
+        <div class="stepcard__head">
+          <span class="stepcard__num">{{ ('0' + loop.index) if loop.index < 10 else loop.index }}</span>
+          {{ ui.icon(item.icon | default('gear'), 'stepcard__icon') }}
+        </div>
+        <h3 class="stepcard__title">{{ item.title }}</h3>
+        <p class="stepcard__text">{{ item.text }}</p>
+      </li>
+      {% endfor %}
+    </ol>
+  </div>
+{% endcall %}
+{%- endmacro %}
+
+{# ---------- 6b. Контекст объекта: схема площадки и что учитываем ---------- #}
+{# Блок «Вокруг конструкции продолжается работа». Композиция и подписи строк
+   пришли с сайта-прототипа saits/sait-03 по разовому разрешению владельца
+   (исключение из п.1 AGENTS.md — только этот блок, соседние сайты не читались).
+   Дальше блок сделан своими средствами:
+     • секция светлая (.on-light), а схема лежит на отдельной серой подложке
+       (--color-cement) — холодный серый на песочном фоне читается как
+       техническая подложка и даёт секции то самое «разнообразие», не ломая
+       светлую полосу сайта;
+     • схема площадки нарисована заново в палитре сайта (partials/plan.njk),
+       геометрия прототипа не переносилась;
+     • строки — пересказ наших источников (docs/texts/01 и docs/texts/05):
+       проезды, трассы коммуникаций, зона обслуживания, несущая способность,
+       свет, вентиляция, эвакуация. Чисел и обещаний результата нет.
+   Все подписи, строки и легенда — data/context.json, поэтому блок ставится на
+   любую страницу одной строкой, как остальные секции.
+   Фон секции — свой слой (partials/ctxbg.njk, макрос ctxBg): бледный съёмочный
+   инструмент у правой кромки плюс более плотная точечная фактура участка
+   (см. «контекст объекта» в style.css). Слой идёт параметром bg у wrap, то есть
+   рендерится вне .shell и позиционируется от кромок секции.
+   Раскладка: до 1024px одна колонка и текст идёт первым (схема — ниже, как
+   приложение к тексту), от 1024px — две колонки: подложка слева, текст справа.
+   Порядок задан грид-координатами, поэтому в разметке текст остаётся первым
+   и на десктопе (иначе на узком экране чтение начиналось бы со схемы). #}
+{% macro sContext(b, light, id) -%}
+{% call wrap(id or 'kontekst', light, none, b.deco, ctxBg) %}
+  <div class="context">
+    <div class="context__copy">
+      {{ ui.head(b) }}
+      {% if b.rows | length %}
+      <ol class="context__rows">
+        {% for row in b.rows %}
+        <li class="context__row reveal">
+          <span class="context__num">{{ ('0' + loop.index) if loop.index < 10 else loop.index }}</span>
+          <div>
+            <h3 class="context__title">{{ row.title }}</h3>
+            <p class="context__text">{{ row.text }}</p>
+          </div>
+        </li>
+        {% endfor %}
+      </ol>
+      {% endif %}
+      {% if b.note %}{{ ui.note(b.note) }}{% endif %}
+    </div>
+    <figure class="context__visual reveal">
+      <figcaption class="context__caption">
+        <span>{{ b.plan.caption }}</span>
+        <span class="context__hint" aria-hidden="true">{{ ui.icon('chev', 'h-4 w-4') }}</span>
+      </figcaption>
+      <div class="context__scene">{{ sitePlan(b.plan) }}</div>
+      <div class="context__legend">
+        {% for item in b.plan.legend %}
+        <span class="context__legend-item">
+          {% if item.kind != 'scale' %}<i class="context__swatch context__swatch--{{ item.kind }}" aria-hidden="true"></i>{% endif %}
+          {{ item.label }}
+        </span>
+        {% endfor %}
+      </div>
+    </figure>
+  </div>
+{% endcall %}
+{%- endmacro %}
+
+{# ---------- 7. Нормативная база: реестр документов с выходом на первоисточник ---------- #}
+{# Блок собран как рабочий реестр, а не как перечень кодов: деление на группы
+   (законы и подзаконные акты / своды правил и стандарты / отраслевые
+   документы), официальное название, роль документа в проекте и кнопка к тексту.
+   Три группы подряд растягивали секцию на несколько экранов, поэтому группы
+   собраны в один переключатель (data-tabs) — как материалы и цены. Разметка
+   остаётся статической: в HTML лежат все панели целиком, поэтому документы и
+   ссылки видны поиску без исполнения JS, а без JS виден весь список подряд.
+   Подписи вкладок и счётчик на них берутся из data/normatives.json (groups),
+   новая группа — одна запись в groups плюс ключ group у нужных документов.
+   Заголовок панели дублирует подпись вкладки только для случая без JS: при
+   работающем переключателе он скрыт (см. .docpanel__head в style.css), и имя
+   панели даёт вкладка.
+   Над вкладками — строка-комментарий о составе базы (тихий курсив вместо плашки
+   со счётчиком: счётчики уже стоят на вкладках).
+   Надстройка ниже — панель о патентной чистоте, экспертизе, закупках и допуске
+   на объект: расширяет тему документов до того, что заказчик видит на проверке.
+   Кнопка карточки ведёт на первоисточник (ФГИС Росстандарта, официальный портал
+   опубликования правовых актов, справочная правовая система); там, где карточки
+   в открытом доступе нет, — на форму заявки: редакцию с изменениями выдаём
+   вместе с расчётом.
+   Все данные, порядок групп и формулировки — data/normatives.json (_note). #}
+{% macro sNormatives(b, slug, light, id) -%}
+{% call wrap(id or 'normativy', light, none, b.deco, bgNormatives) %}
+  {% set n = data.normatives %}
+  {{ ui.head(b or n.block) }}
+  {# отбор по scope выполняем один раз: этот же список идёт и в сводку, и в группы #}
+  {% set shown = [] %}
+  {% for item in n.items %}
+    {% if slug == 'index' or ('all' in item.scope) or (slug in item.scope) %}
+      {% set shown = shown.concat([item]) %}
+    {% endif %}
+  {% endfor %}
+  {# Сводка о составе базы — тихий курсив-комментарий: счётчики по группам уже
+     видны на вкладках, поэтому крупное число над переключателем не нужно.
+     Общее число документов показываем только там, где оно отличается от числа
+     по направлению, иначе строка дублировала бы один и тот же счётчик. #}
+  {% set docsShown = shown | length %}
+  {% set docsTotal = n.items | length %}
+  <p class="note note--comment mt-6">{{ docsShown }} {{ n.summary.countLabel }}{% if docsShown != docsTotal %}, {{ docsTotal }} {{ n.summary.totalLabel }}{% endif %}. {{ n.summary.sourceLabel }}</p>
+  {% set grouped = shown | groupby('group') %}
+  <div class="tabs mt-8" data-tabs>
+    <div class="tabs__list" role="tablist" aria-label="{{ n.block.tabsLabel }}">
+      {% for g in n.groups %}
+      {% set gitems = grouped[g.key] | default([]) %}
+      {% if gitems | length %}
+      <button type="button" class="tabs__tab" role="tab" id="{{ id or 'normativy' }}-tab-{{ g.key }}" aria-controls="{{ id or 'normativy' }}-panel-{{ g.key }}">{{ g.title }}<span class="tabs__count">{{ gitems | length }}</span></button>
+      {% endif %}
+      {% endfor %}
+    </div>
+    <div class="tabs__panels">
+      {% for g in n.groups %}
+      {% set gitems = grouped[g.key] | default([]) %}
+      {% if gitems | length %}
+      <section class="tabs__panel" role="tabpanel" id="{{ id or 'normativy' }}-panel-{{ g.key }}" aria-labelledby="{{ id or 'normativy' }}-tab-{{ g.key }}">
+        <div class="docpanel__head">
+          <h3 class="docpanel__title">{{ g.title }}</h3>
+          <span class="docpanel__count">{{ gitems | length }}</span>
+        </div>
+        <p class="docpanel__note">{{ g.note }}</p>
+        <div class="docgrid">
+          {% for item in gitems %}{{ ui.docCard(item) }}{% endfor %}
+        </div>
+      </section>
+      {% endif %}
+      {% endfor %}
+    </div>
+  </div>
+  {% if n.summary.note %}{{ ui.note(n.summary.note, 'accent') }}{% endif %}
+  {% if b.note %}{{ ui.note(b.note) }}{% endif %}
+{% endcall %}
+{%- endmacro %}
+
+{# ---------- 7б. Патентная чистота и согласования ---------- #}
+{# Секция идёт оранжевой полосой (.flame-band) от края до края — тем же акцентом,
+   что CTA-полоса и галерея объектов. Внутри две зоны: слева на оранжевом текст
+   (kicker, заголовок, лид, примечание), справа — белый «лист» нумерованных
+   пунктов. Оранжевый работает цветным корешком дела, а не рамкой вокруг белого
+   пятна, поэтому лист прижат к правому краю сетки, а не висит в её середине.
+   Пункты идут строками с тонкими разделителями: четыре вложенные рамки при
+   таком объёме текста давали лишний визуальный шум. Отвечает на вопрос
+   «а пройдёт ли это у нас на согласовании и проверке».
+   Данные — data/normatives.json (practice): состав пунктов и формулировки
+   правятся в одном месте. #}
+{% macro sPractice(id) -%}
+{% call wrap(id, false, 'flame-band') %}
+  {% set p = data.normatives.practice %}
+  <div class="practice-split">
+    <div class="practice-intro">
+      <span class="kicker">{{ p.kicker }}</span>
+      {# Секция самостоятельная, поэтому заголовок — h2 (визуальный размер берём классом h3) #}
+      <h2 class="h3 mt-4">{{ p.title }}</h2>
+      <p class="lead mt-4">{{ p.lead }}</p>
+      {% if p.note %}<p class="note practice-intro__note">{{ p.note }}</p>{% endif %}
+    </div>
+    <ol class="panel panel--practice practice-sheet">
+      {% for item in p.items %}
+      <li class="practice reveal">
+        <span class="practice__num">{{ ('0' + loop.index) if loop.index < 10 else loop.index }}</span>
+        <div class="practice__body">
+          <div class="practice__head">
+            {{ ui.icon(item.icon | default('doc'), 'h-5 w-5 practice__icon') }}
+            <h3 class="practice__title">{{ item.title }}</h3>
+          </div>
+          <p class="practice__text">{{ item.text }}</p>
+        </div>
+      </li>
+      {% endfor %}
+    </ol>
+  </div>
+{% endcall %}
+{%- endmacro %}
+
+{# ---------- 8. Уровни защиты по СП 542 ---------- #}
+{# Один источник — data/levels.json, две подачи:
+   • по умолчанию таблица на секции страницы (светлой или тёмной);
+   • variant 'flame' — оранжевая полоса (.flame-band), как у патентной чистоты
+     и CTA, а строки собраны в тёмные плитки — ступени шкалы уровней. Ставится
+     там, где блок должен читаться акцентом (главная), а не ещё одной таблицей.
+   Плитка берёт поверхность у .panel--practice: она уже сделана для тёмных
+   «обложек» на оранжевом, поэтому плитки идут одной семьёй с панелью патентной
+   чистоты, а медная риска .panel::before даёт каждой свой акцент. Плитка
+   максимального уровня дополнительно акцентная (.panel--accent): у блока
+   должен быть главный, а не четыре равные карточки.
+   labels из data/levels.json — подписи к колонкам таблицы и к строкам плитки:
+   один источник на две подачи, чтобы формулировки не разъезжались. #}
+{% macro sLevels(b, slug, light, id, variant) -%}
+{% call wrap(id or 'urovni', light, 'flame-band' if variant == 'flame' else none, b.deco) %}
+  {# set внутри блока call: переменные, объявленные до него, внутри call не видны —
+     то же правило отмечено выше у sMaterials #}
+  {% set L = data.levels %}
+  {{ ui.head(b or L.block) }}
+  {% if variant == 'flame' %}
+  <ol class="levels mt-10">
+    {% for row in L.rows %}
+    <li class="panel panel--practice levelcard reveal{{ ' panel--accent' if row.num == '1' }}">
+      <h3 class="levelcard__title">{{ row.num }}-й уровень</h3>
+      <span class="levelcard__rank">{{ row.rank }}</span>
+      <dl class="levelcard__specs">
+        <div class="levelcard__spec">
+          <dt class="levelcard__label">{{ L.labels.drone }}</dt>
+          <dd class="levelcard__value">{{ row.drone }}</dd>
+        </div>
+        <div class="levelcard__spec">
+          <dt class="levelcard__label">{{ L.labels.structure }}</dt>
+          <dd class="levelcard__value">{{ row.structure }}</dd>
+        </div>
+      </dl>
+    </li>
+    {% endfor %}
+  </ol>
+  {% else %}
+  <div class="table-scroll mt-8">
+    <table class="tbl">
+      <thead><tr>{% for th in [L.labels.level, L.labels.drone, L.labels.structure] %}<th scope="col">{{ th }}</th>{% endfor %}</tr></thead>
+      <tbody>
+        {% for row in L.rows %}
+        <tr><td>{{ row.num }}-й ({{ row.rank }})</td><td>{{ row.drone }}</td><td>{{ row.structure }}</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% endif %}
+  {% set lnote = L.notes[slug] %}
+  {# На оранжевой полосе примечание не выводим: оно встаёт по низу полосы, а там
+     градиент уходит в тёмную медь (#cf4418) — мелкий текст на ней не добирает
+     AA. Оговорку о том, что уровень определяется расчётом, несёт лид блока. #}
+  {% if lnote and variant != 'flame' %}{{ ui.note(lnote, 'accent') }}{% endif %}
+  {% if b.note %}{{ ui.note(b.note) }}{% endif %}
+{% endcall %}
+{%- endmacro %}
+
+{# ---------- 9. Категорирование объекта ---------- #}
+{% macro sCategory(b, light, id) -%}
+{% call wrap(id or 'kategorizaciya', light, none, b.deco) %}
+  {{ ui.head(b) }}
+  {{ ui.tbl(b.head, b.rows) }}
+  {% if b.note %}{{ ui.note(b.note, 'accent') }}{% endif %}
+{% endcall %}
+{%- endmacro %}
+
+{# ---------- 10. Сертификаты, испытания, гарантия ---------- #}
+{% macro sProof(b, light, id) -%}
+{% call wrap(id or 'podtverzhdeniya', light, none, b.deco) %}
+  {{ ui.head(b) }}
+  {{ ui.cards(b.items, 'md:grid-cols-2 lg:grid-cols-4') }}
+  {% if b.note %}{{ ui.note(b.note) }}{% endif %}
+{% endcall %}
+{%- endmacro %}
+
+{# ---------- 11. Примеры работ / решения ---------- #}
+{% macro caseRow(label, text) -%}
+<p class="mt-4">
+  <span class="font-mono text-[10px] uppercase tracking-[0.18em] text-flame">{{ label }}</span>
+  <span class="mt-1 block text-sm text-mist">{{ text }}</span>
+</p>
+{%- endmacro %}
+
+{% macro sCases(b, light, id) -%}
+{% call wrap(id or 'keysy', light, none, b.deco) %}
+  {{ ui.head(b) }}
+  <div class="mt-10 grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+    {% for c in b.items %}
+    <article class="panel p-6 reveal">
+      <h3 class="h3">{{ c.title }}</h3>
+      {{ caseRow('Задача', c.task) }}
+      {{ caseRow('Решение', c.solution) }}
+      {{ caseRow('Сроки', c.term) }}
+      {{ caseRow('Результат', c.result) }}
+    </article>
+    {% endfor %}
+  </div>
+  {% if b.note %}{{ ui.note(b.note) }}{% endif %}
+{% endcall %}
+{%- endmacro %}
+
+{# ---------- 12. Заказчики и сегменты ---------- #}
+{% macro sClients(b, light, id) -%}
+{% call wrap(id or 'zakazchiki', light, none, b.deco) %}
+  {{ ui.head(b) }}
+  {{ ui.tiles(b.segments, 'md:grid-cols-2 lg:grid-cols-3') }}
+  {% if b.note %}{{ ui.note(b.note) }}{% endif %}
+{% endcall %}
+{%- endmacro %}
+
+{# ---------- 13. Документация по итогам работ ---------- #}
+{% macro sDocs(b, light, id) -%}
+{% call wrap(id or 'dokumentaciya', light, none, b.deco) %}
+  {{ ui.head(b) }}
+  {{ ui.docrows(b.items) }}
+  {% if b.cta %}<div class="mt-9">{{ ui.button(b.cta, 'btn--primary') }}</div>{% endif %}
+{% endcall %}
+{%- endmacro %}
+
+{# ---------- 14. Тендеры и закупки ---------- #}
+{% macro sTenders(b, light, id) -%}
+{% call wrap(id or 'tendery', light, none, b.deco) %}
+  {{ ui.head(b) }}
+  {{ ui.tick(b.items) }}
+{% endcall %}
+{%- endmacro %}
+
+{# ---------- 15. Стоимость ---------- #}
+{% macro sPrices(b, light, id) -%}
+{% call wrap(id or 'ceny', light, none, b.deco) %}
+  {{ ui.head(b) }}
+  {% if b.table %}{{ ui.tbl(b.table.head, b.table.rows) }}{% elif b.head | length %}{{ ui.tbl(b.head, b.rows) }}{% endif %}
+  {% if b.factors | length %}
+  <h3 class="h3 mt-12">Что влияет на стоимость</h3>
+  {{ ui.tick(b.factors) }}
+  {% endif %}
+  {% if b.note %}{{ ui.note(b.note) }}{% endif %}
+  {% if b.cta %}<div class="mt-9">{{ ui.button(b.cta, 'btn--primary') }}</div>{% endif %}
+{% endcall %}
+{%- endmacro %}
+
+{# ---------- 16. FAQ страницы ---------- #}
+{% macro sFaq(slug, light, id) -%}
+{% if data['faq-' + slug] and (data['faq-' + slug].items | length) %}
+{% call wrap(id or 'faq', light, none, data['faq-' + slug].deco) %}
+  {# set внутри блока call: см. пояснение у sMaterials #}
+  {% set f = data['faq-' + slug] %}
+  <span class="kicker">Частые вопросы</span>
+  <h2 class="h2 mt-4">{{ f.title }}</h2>
+  <p class="lead mt-4 max-w-4xl">{{ f.lead }}</p>
+  <div class="mt-10">{{ ui.faq(f) }}</div>
+{% endcall %}
+{% endif %}
+{%- endmacro %}
+
+{# ---------- 17. Универсальные блоки ---------- #}
+{% macro sCards(b, light, id, cols) -%}
+{% call wrap(id, light, none, b.deco) %}
+  {{ ui.head(b) }}
+  {{ ui.cards(b.items, cols or 'md:grid-cols-2 lg:grid-cols-3') }}
+  {% if b.note %}{{ ui.note(b.note) }}{% endif %}
+  {% if b.cta %}<div class="mt-9">{{ ui.button(b.cta, 'btn--primary') }}</div>{% endif %}
+{% endcall %}
+{%- endmacro %}
+
+{# типы конструкций из всех направлений — для страницы «Конструкции и материалы» #}
+{% macro sTypesAll(b, light, id) -%}
+{% call wrap(id or 'tipy', light, none, b.deco) %}
+  {{ ui.head(b) }}
+  <div class="mt-10 grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+    {% for p in pages %}
+    {% set lp = data['landing-' + p.slug] %}
+    {% if lp and lp.constructions %}
+    {% for item in lp.constructions.items %}
+    <article class="panel flex flex-col p-6 reveal">
+      {{ ui.icon(item.icon | default('shield'), 'h-7 w-7 text-flame') }}
+      <h3 class="h3 mt-5">{{ item.title }}</h3>
+      <p class="panel__meta mt-3">{{ item.text }}</p>
+      <div class="mt-auto pt-5">{{ ui.chips([p.nav]) }}</div>
+    </article>
+    {% endfor %}
+    {% endif %}
+    {% endfor %}
+  </div>
+{% endcall %}
+{%- endmacro %}
+
+{% macro sTick(b, light, id) -%}
+{% call wrap(id, light, none, b.deco) %}
+  {{ ui.head(b) }}
+  {{ ui.tick(b.items) }}
+  {% if b.note %}{{ ui.note(b.note) }}{% endif %}
+{% endcall %}
+{%- endmacro %}
+
+{# ---------- показатели (company.kpi) — отдельная полоса цифр ---------- #}
+{# На главной секция стоит сразу после «Уровни защиты по СП 542.1325800.2024»:
+   первый показатель — про уровень защиты, поэтому полоса продолжает тему уровней
+   и читается как факты о системе. Раньше эта строка замыкала секцию «О компании»
+   (блок .about__stats внутри sAbout); вынесена в самостоятельную секцию, чтобы
+   цифры были своим блоком и не спорили с карточками состава работ.
+
+   Светлая подложка (light = true) выбрана осознанно: карточки .stat рассчитаны на
+   светлую секцию (.on-light .stat — белая карточка с рамкой и мягкой тенью), а
+   между оранжевой полосой уровней и тёмной полосой гарантий светлая полоса даёт
+   воздух.
+
+   Заголовок у полосы есть: без него блок выглядел безымянной россыпью чисел, а по
+   kicker и h2 сразу видно, что это за цифры. Title «Ключевые цифры»
+   (company.kpi.title) берёт формулировку из ТЗ директолога; kicker «Показатели» —
+   нейтральная рамка («характеристики и сроки изделий», не обещание результата).
+   Слово «Ориентиры» в kicker не берём: на той же странице оно уже стоит у секции
+   стоимости (#ceny), а два одинаковых кикера на одной странице читаются как опечатка.
+   Текст заголовка — навигационный, а не заявление о продукте, поэтому живёт в
+   данных, а не в разметке. Заголовок выводит общий ui.head — тот же, что у
+   остальных секций, поэтому типографика и отступы совпадают.
+
+   id по умолчанию — pokazateli: тот же анкер, что был у строки внутри секции
+   о компании, поэтому внешние ссылки на #pokazateli продолжают работать. #}
+{% macro sKpi(b, light, id) -%}
+{% if b.items | length %}
+{% call wrap(id or 'pokazateli', light) %}
+  {{ ui.head(b) }}
+  {{ ui.stats(b.items, 'mt-10') }}
+{% endcall %}
+{% endif %}
+{%- endmacro %}
+
+{# карточка линии предложения: фото сверху, под ним иконка, заголовок, лид,
+   список и кнопка. Обе линии собираются одной карточкой, поэтому идут в
+   одинаковом порядке и читаются как пара. #}
+{% macro lineCard(item) -%}
+<article class="linecard reveal">
+  {{ ui.media(item.photo, 'linecard__media') }}
+  <div class="linecard__body">
+    {% if item.icon %}{{ ui.icon(item.icon, 'h-8 w-8 text-flame') }}{% endif %}
+    <h3 class="h3{{ ' mt-5' if item.icon else '' }}">{{ item.title }}</h3>
+    <p class="panel__meta mt-3">{{ item.lead | default(item.text) }}</p>
+    {% if item.bullets %}{{ ui.tick(item.bullets) }}{% endif %}
+    {% if item.cta %}<div class="mt-7">{{ ui.button(item.cta, 'btn--ghost') }}</div>{% endif %}
+  </div>
+</article>
+{%- endmacro %}
+
+{# две линии предложения: вынесенный рубеж и локальная защита #}
+{% macro sLines(b, light, id) -%}
+{% call wrap(id or 'linii', light, none, b.deco) %}
+  {{ ui.head(b) }}
+  <div class="mt-10 grid gap-4 md:grid-cols-2">
+    {% for item in b.items %}{{ lineCard(item) }}{% endfor %}
+  </div>
+{% endcall %}
+{%- endmacro %}
+
+{# каталог направлений из data/products.json. На главной стоит сразу после секции
+   о компании: сначала «что защищаем и как», ниже (после «Контекста объекта») —
+   оранжевая галерея «как это выглядит на объектах». Порядок — index.html. #}
+{% macro sCatalog(light, id) -%}
+{% call wrap(id or 'napravleniya', light, none, data.products.block.deco) %}
+  {{ ui.head(data.products.block) }}
+  <div class="mt-10 grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+    {% for item in data.products.items %}
+    <article class="panel flex flex-col p-6 reveal">
+      {{ ui.icon(item.icon, 'h-7 w-7 text-flame') }}
+      <h3 class="h3 mt-5">{{ item.title }}</h3>
+      <p class="panel__meta mt-3">{{ item.lead }}</p>
+      {{ ui.tick(item.bullets) }}
+      {{ ui.chips(item.tags) }}
+      {# Подвал карточки: линия — отдельным div, кнопка — под ним.
+         mt-auto прижимает подвал к нижней кромке карточки (карточки в ряду
+         выравниваются по самой высокой), поэтому между чипами и линией
+         оставался не зазор, а случайный остаток высоты: у самой высокой карточки
+         ряда он равен нулю — линия слипалась с чипами. Свой отступ у border-top
+         этого не лечит: паддинг ложится ВНУТРЬ блока, то есть ниже линии.
+         Поэтому зазор сверху даёт обёртка (pt-5), а отступ до кнопки — сам
+         блок линии (pt-5 у пустого div = 1 px линии + 20 px воздуха под ней).
+         Слой декоративный: линии, кроме вида, ничего не несут — aria-hidden. #}
+      <div class="mt-auto pt-5">
+        <div class="border-t border-flame/30 pt-5" aria-hidden="true"></div>
+        <a class="btn btn--ghost" href="{{ href(item.slug) }}">{{ item.cta }}{{ ui.icon('arrow', 'h-4 w-4') }}</a>
+      </div>
+    </article>
+    {% endfor %}
+  </div>
+{% endcall %}
+{%- endmacro %}
+
+{# сводные цены по направлениям: данные берём из цен лендингов, не дублируем.
+   Пять таблиц подряд занимали несколько экранов, поэтому направления собраны в
+   один блок с переключателем: имена направлений — по одной записи pages.json,
+   содержимое панели — из landing-<slug>.json (поле prices).
+   Разметка остаётся статической: в HTML лежат все панели целиком, поэтому
+   таблицы и ссылки видны поиску без исполнения JS. Классы переключает модуль
+   tabs.js; без него (нет класса js) панели показываются списком, как раньше. #}
+{% macro sPricesAll(light) -%}
+{% call wrap('ceny', light, none, data.ceny.prices.deco) %}
+  {{ ui.head(data.ceny.prices) }}
+  <div class="tabs mt-10" data-tabs>
+    <div class="tabs__list" role="tablist" aria-label="Направления защиты">
+      {% for p in pages %}
+      {% set lp = data['landing-' + p.slug] %}
+      {% if lp and lp.prices %}
+      <button type="button" class="tabs__tab" role="tab" id="ceny-tab-{{ p.slug }}" aria-controls="ceny-panel-{{ p.slug }}">{{ p.nav }}</button>
+      {% endif %}
+      {% endfor %}
+    </div>
+    <div class="tabs__panels">
+      {% for p in pages %}
+      {% set lp = data['landing-' + p.slug] %}
+      {% if lp and lp.prices %}
+      <section class="tabs__panel" role="tabpanel" id="ceny-panel-{{ p.slug }}" aria-labelledby="ceny-tab-{{ p.slug }}">
+        <p class="lead">{{ lp.prices.lead }}</p>
+        {% if lp.prices.table %}{{ ui.tbl(lp.prices.table.head, lp.prices.table.rows) }}{% elif lp.prices.head | length %}{{ ui.tbl(lp.prices.head, lp.prices.rows) }}{% endif %}
+        {% if lp.prices.note %}{{ ui.note(lp.prices.note) }}{% endif %}
+        <div class="mt-6">
+          <a class="btn btn--ghost" href="{{ href(p.slug, 'zayavka') }}">Расчёт по этому направлению{{ ui.icon('arrow', 'h-4 w-4') }}</a>
+        </div>
+      </section>
+      {% endif %}
+      {% endfor %}
+    </div>
+  </div>
+  {{ ui.note(data.ceny.prices.note, 'accent') }}
+{% endcall %}
+{%- endmacro %}
+
+{# ---------- 18. Объекты: как выглядят защитные конструкции на объектах (галерея) ---------- #}
+{# Набор фотографий лежит в data/objects.json. Направление может передать свой
+   набор (например data['landing-mosty'].objects): тогда items берутся из него,
+   а data.objects.block остаётся набором по умолчанию.
+   На главной секция стоит в средней части страницы: выше — светлый «Контекст
+   объекта», ниже — светлая «Вокруг конструкции продолжается работа». Между двумя
+   светлыми блоками галерея оформлена оранжевой полосой — тем же фоном, что и CTA
+   («Пришлите данные по объекту»): так она читается акцентом. #}
+{% macro sObjects(b, id) -%}
+{% call wrap(id or 'obekty', false, 'flame-band') %}
+  {# set внутри блока call: см. пояснение у sMaterials #}
+  {% set o = b if b else data.objects.block %}
+  {{ ui.head(o) }}
+  <div class="shots mt-10">
+    {% for item in o.items %}{{ ui.shot(item) }}{% endfor %}
+  </div>
+  {% if o.note %}{{ ui.note(o.note, 'ink') }}{% endif %}
+{% endcall %}
+{%- endmacro %}
+
+
+{# ---------- 19. О компании и состав работ (главная) ---------- #}
+{# Секция идёт сразу под первым экраном: слева короткий рассказ о компании,
+   справа белые карточки состава работ. Строки показателей в секции больше нет:
+   цифры (company.kpi.items) вынесены отдельной секцией sKpi и стоят ниже — после
+   «Уровни защиты по СП 542.1325800.2024» (пояснение — у макроса sKpi).
+
+   Ссылок в карточках нет намеренно: это компетенции, а не разделы сайта, и
+   обещать переход там нечем — поэтому разметка без <a> (оформление — .catcard
+   в style.css). Тексты — company.about, числа — company.kpi.items; имя бренда
+   берётся из site.json (brandParts), чтобы название компании не дублировалось.
+
+   У каждой карточки сверху — кадр по теме блока (ui.cardMedia, company.about.items),
+   ниже иконка с заголовком и текст: иконка остаётся смысловой меткой карточки,
+   фото — иллюстрацией темы. Кадры лежат в public/images/kompetencii/.
+
+   Карточки идут в порядке ведения работ (он задан порядком company.about.items):
+   проектирование → производство конструкций → монтаж → противоосколочные блоки →
+   документация → сопровождение. Номер карточки (его выводит ui.cardMedia поверх
+   кадра) — loop.index, то есть позиция в этом же массиве: цифры не могут
+   разойтись с порядком, а перестановка пунктов в данных переставляет и их. #}
+{% macro sAbout(b, id) -%}
+{% call wrap(id or 'o-kompanii', true, none, b.deco) %}
+  <div class="about">
+    <div class="about__intro">
+      <span class="kicker">{{ b.kicker }}</span>
+      <h2 class="h2 about__title mt-4">
+        <span class="about__brand">{{ site.brandParts.head }}<span class="brand__accent">{{ site.brandParts.accent }}</span>{{ site.brandParts.tail }}</span>
+        {{ b.titleSuffix }}
+      </h2>
+      <p class="lead mt-4">{{ b.lead }}</p>
+      {# Кнопка «Подробнее о компании» ведёт на страницу o-kompanii.html: href и
+         подпись приходят из company.about.cta, как у остальных кнопок сайта.
+         Пока страницы не было, кнопка была <span> без цели с погашенным
+         наведением — это правило убрано из style.css вместе с её появлением. #}
+      {{ ui.button(b.cta, 'btn--ink about__cta') }}
+    </div>
+    <div class="catcards">
+      {% for item in b.items %}
+      <article class="catcard reveal">
+        {% if item.img %}{{ ui.cardMedia(item, loop.index) }}{% endif %}
+        <div class="catcard__head">
+          {{ ui.icon(item.icon | default('shield'), 'catcard__icon') }}
+          <h3 class="catcard__title">{{ item.title }}</h3>
+        </div>
+        <p class="catcard__text">{{ item.text }}</p>
+      </article>
+      {% endfor %}
+    </div>
+  </div>
+{% endcall %}
+{%- endmacro %}
+
+{# ---------- 20. Полоса «Полный комплекс» (главная) ---------- #}
+{# Отдельная секция с чёрной подложкой сразу под баннером: пять пунктов
+   комплекса работ — от расчёта до передачи документации. Идёт самостоятельной
+   полосой, а не частью первого экрана: чёрный (--color-void) отделяет кадр
+   баннера от светлой секции «О компании» и на стыке видно, что это другой блок.
+   Заголовок только для структуры документа (sr-only): видимого заголовка у
+   полосы нет, роль заголовка играет крупная строка этапов на первом экране,
+   дублировать её текстом здесь не нужно. Пункты — company.features.items. #}
+{% macro sFeatures(b, id) -%}
+{% call wrap(id or 'kompleks', false, 'feat-band') %}
+  <h2 class="sr-only">{{ b.title }}</h2>
+  {{ ui.featureRow(b.items) }}
+{% endcall %}
+{%- endmacro %}
+
+{# ---------- 21. Краткая сводка по объекту (лендинги) ---------- #}
+{# Светлая секция сразу под полосой параметров (sFeatures): кикер, видимый
+   заголовок, вводный лид и перечень этапов работ. Заголовок — настоящий H2 в
+   структуре документа (по правке владельца; раньше секция шла без видимого
+   заголовка, а title жил только в sr-only-заголовке). Заголовок и лид
+   собирает общий ui.head — тот же, что у секций «Узлы», «Ограничения»,
+   «Услуги», поэтому кикер, кегль и отбивки совпадают с соседними блоками.
+   Заголовок без завершающей точки — см. п.3 требований к стилистике.
+   Фон секции — крупный бледный знак-глиф в углу секции (bgGlyph выше): угол
+   задаётся данными (works.bg.corner) — правые углы там, куда не доходят лид
+   (max-w-4xl) и строки перечня, у левых знак входит в кадр только частью.
+   Данные — блок works в data/landing-<slug>.json; li рисует ui.tick, поэтому
+   на светлой полосе цвет пунктов берёт .on-light .tick li. #}
+{% macro sBrief(b, light, id) -%}
+{% call wrap(id or 'raboty', light, none, b.deco, bgGlyph, b.bg) %}
+  {{ ui.head(b) }}
+  {% if b.items | length %}{{ ui.tick(b.items) }}{% endif %}
+{% endcall %}
+{%- endmacro %}
+
