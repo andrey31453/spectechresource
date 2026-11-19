@@ -17,7 +17,7 @@
 | Экран | Файл | Данные |
 |---|---|---|
 | Оболочка сайта | `app/layouts/default.vue` | `useSite()`, Organization JSON-LD |
-| Главная | `app/pages/index.vue` | `GET /api/home` |
+| Главная | `app/pages/index.vue` | `useSite()` (мета) + контент макета `docs/sait-13` в разметке; `GET /api/home` на главной больше не используется |
 | Каталог | `app/pages/katalog/index.vue` | `GET /api/catalog` |
 | Раздел каталога | `app/pages/katalog/[category].vue` | `GET /api/catalog/{slug}` |
 | Посадочная (39) | `app/pages/arenda-[slug].vue` | `GET /api/landing?typeSlug=&citySlug=` |
@@ -30,11 +30,27 @@
 Остальные публичные роуты: `GET /api/site`, `POST /api/leads`, `/robots.txt`, `/sitemap.xml`, `/uploads/**`.
 Заявка пишется в БД и уходит в CRM (ADR-5), `LEADS_DRY_RUN=true` по умолчанию (ADR-18).
 
+**Целевая структура главной — `docs/specs/home.md`:** 18 блоков, готовые тексты, источники данных, приоритеты
+P0–P2 и открытые вопросы. Там же зафиксировано, что из этого уже есть, а что расходится с ТЗ (форма в hero,
+цена в карточке вида, CTA до FAQ).
+
 **DTO** — `app/types/catalog.ts` (`SiteDto`, `HomeDto`, `CategoryDetailDto`, `LandingDto`, `ServiceDetailDto`, `PageDto`).
 **Композаблы:** `useSite`, `usePageSeo` (мета + canonical), `useJsonLd`, `throwIfError`.
 **Утилиты:** `price.ts` (`formatPrice`, `formatPriceFrom`, `PRICE_UNIT_LABEL`), `routes.ts` (`typePath`, `categoryPath`,
-`servicePath`), `phone.ts` (`telHref`).
-**Компоненты:** `SiteHeader`, `SiteFooter`, `SiteBreadcrumbs`, `CatalogGrid`, `CtaBlock`, `FaqList`.
+`servicePath`), `phone.ts` (`telHref`), `plural.ts` (`pluralRu` — «3 вида», «12 видов»).
+**Компоненты:** `SiteHeader`, `SiteFooter`, `SiteBreadcrumbs`, `CatalogGrid`, `CtaBlock`, `FaqList`,
+`SiteButton` (внутренняя ссылка — `to`, внешняя и `tel:` — `href`; `variant` `primary`/`ghost`,
+`tone` `light`/`dark`/`on-brand`), `SiteIcon` (встроенный набор контурных иконок, неизвестное имя → `shield`),
+`SectionHead` (моно-кикер с линией, `h2` и лид; `h1` остаётся только в hero страницы).
+
+Главная объявляет `definePageMeta({ layout: false })`: вёрстка макета приносит свою шапку и подвал, глобальный
+layout на главной не участвует. Остальные страницы живут в `layout` с `.page-main > .container`.
+
+**Состояние на 19.11.2026 (контрольная точка).** Главная — точный перенос `docs/sait-13/dist/index.html`
+(разметка, классы, порядок секций, свой `style.css` из `public/landing/`), поведение — `app/utils/landing.ts`,
+заявка — в `POST /api/leads`. Каскад выправлен: правила каркаса, пересекавшиеся с макетом, лежат в `@layer`
+и под меткой `body.landing-page`. **Следующий шаг — замена контента макета (фортТех, защита от БПЛА) на
+контент ООО «СПЕЦТЕХРЕСУРС» по `docs/specs/home.md` без изменения вёрстки и стилей.**
 
 ## 3. Стили и токены
 
@@ -50,17 +66,32 @@ Tailwind CSS 4.3.5 через `@tailwindcss/vite` (ADR-7). Порядок CSS в
 | `--color-line` | `#dfe4ea` | `border-line`, `divide-line` |
 | `--color-surface` / `-soft` | `#ffffff` / `#f4f6f8` | `bg-surface`, `bg-surface-soft` |
 | `--color-accent` | `#e8a33d` | `text-accent`, `bg-accent` (акценты CTA) |
-| `--container-site` | `73.75rem` (1180px) | `max-w-site` |
+| `--color-brand-light` | `#2f8fd8` | `bg-brand-light`, моно-номера и акценты на тёмных полосах |
+| `--color-brand-bright` | `#1a6fb5` | светлый край градиента кнопок (с белым текстом 5.2:1) |
+| `--color-void` / `--color-night` / `--color-night-2` | `#04070a` / `#070c12` / `#0c141c` | `bg-void`, `bg-night`, `bg-night-2` — тёмные полосы |
+| `--color-panel` / `--color-line-dark` | `#111d28` / `#22303c` | `bg-panel`, `border-line-dark` — карточки и разделители на тёмном |
+| `--color-mist` / `--color-snow` | `#93a6b5` / `#eef4f8` | `text-mist` (вторичный текст), `text-snow` (заголовки на тёмном) |
+| `--color-concrete` | `#f1f4f6` | `bg-concrete` — холодная светлая полоса (каталог, FAQ) |
+| `--container-site` | `77.5rem` (1240px) | `max-w-site`; боковые поля страниц — `px-5` (20px) → `md:px-8` (32px) |
 | `--radius-card` / `--radius-field` | `10px` / `8px` | `rounded-card`, `rounded-field` |
 | `--shadow-card` / `--shadow-bar` | мягкая тень / линия | `shadow-card`, `shadow-bar` |
+
+Фоновая «инженерная» сетка тёмных полос — переменные `:root` `--site-grid` (шаг 72px) и `--site-grid-brand`
+(поверх синей CTA-полосы); подключаются утилитой `[background-image:var(--site-grid)]`, отдельного класса нет.
+Палитра и порядок полос — по референсу заказчика `docs/sait-13`, решение — ADR-22.
 
 **Правила:**
 - Публичные компоненты — только утилиты Tailwind; новые глобальные классы для сайта не добавляем.
 - `app/assets/css/main.css` — стили админки и остатки каркаса. Переверстанный блок сразу удаляем из него.
 - Остатки публичных классов в `main.css`: `.container`, `.page-main`, `.muted`, `.lead`, `.grid`, `.card`,
-  `.table-wrap`, `.table`, `.price`, `.badge`, `.breadcrumbs`, `.faq`, `.cta`, `.button`, `.error-page`,
-  `.stats`, `.stat`, `.section`. Их время ещё не пришло — не удалять, пока экран не переверстан.
+  `.table-wrap`, `.table`, `.price`, `.badge`, `.breadcrumbs`, `.button`, `.error-page`, `.section`.
+  Их время ещё не пришло — не удалять, пока экран не переверстан.
 - Mobile-first; брейкпоинты Tailwind: `sm` 640, `md` 768, `lg` 1024, `xl` 1280.
+- **Базовая типографика каркаса живёт в `@layer base`** (`main.css`: `h1`…`h3`, `p`). Правила вне слоёв
+  сильнее любых утилит Tailwind (утилиты лежат в `@layer utilities`), поэтому размеры и `margin` заголовков
+  без слоя молча перебивали `text-[clamp(…)]` и `mt-*`. Значения в `base` оставлены прежними — они держат
+  ещё не переверстанные страницы; переверстанные задают размеры и отступы утилитами (`mb-0` там, где
+  нужен сброс базового отступа).
 - Доступность: `:focus-visible` уже задан в базе, аккордеоны — `<details>`, мобильное меню — тоже `<details>`
   (работает без JS), интерактив — не меньше 44×44 px.
 
@@ -68,13 +99,33 @@ Tailwind CSS 4.3.5 через `@tailwindcss/vite` (ADR-7). Порядок CSS в
 
 - [x] Tailwind 4 + токены (`app/assets/css/tailwind.css`)
 - [x] Каркас: `SiteHeader` (мобильное меню на `<details>`) и `SiteFooter` на утилитах; CSS шапки/подвала удалён
-- [ ] `SiteBreadcrumbs`, `CtaBlock`, `.button`, `error.vue` — на утилиты; убрать `.breadcrumbs`, `.cta`, `.button`, `.error-page`
-- [ ] Главная по блокам: hero (H1 + кнопки + цифры) → каталог → услуги → преимущества → шаги → FAQ → CTA
+- [ ] `SiteBreadcrumbs`, `.button`, `error.vue` — на утилиты; убрать `.breadcrumbs`, `.button`, `.error-page`
+- [x] Главная по брифу `docs/specs/home.md` (19.11.2026): блоки в порядке ТЗ, форма в hero и CTA
+  (`LeadForm` → `POST /api/leads`), «Какие задачи закрываем», «Парк и база», «Как устроена аренда»,
+  «Стоимость аренды» (таблица «раздел → видов → цена от» + факторы), «Договор, документы и гарантии»,
+  «Работаем в Москве и области», FAQ из 11 вопросов, CTA до FAQ. Тексты блоков — из брифа,
+  демо-контент (услуги, преимущества, шаги, цифры, FAQ, цены «от») живёт в `prisma/seed.ts`
+  и обновляется повторным `npm run db:seed`
+  - ⚠️ Ответы FAQ про ГСМ, НДС, подмену и физлиц, таблица условий и гарантии про ТО/простой —
+    проект решения: публикуем после подтверждения заказчиком (см. §8 и `TODO.md`)
+  - 19.11.2026 — метрики приведены к числам `docs/sait-13/src/style.css`: контейнер 1240 + поля 20/32,
+    ритм секций 56 → 84, hero 40/56 → 64/84, H1 `clamp(1.9rem,5.2vw,3.5rem)`, акцент hero
+    `clamp(1.6rem,3.6vw,2.6rem)`, H2 `clamp(1.5rem,3.4vw,2.35rem)`, лид `clamp(1rem,1.4vw,1.115rem)`,
+    полоса условий `py-[clamp(1.5rem,3.2vw,2.5rem)]` с иконкой 25.6px без плашки,
+    цифры — отдельными карточками (radius 14, padding 24/20, центр)
+  - 19.11.2026 — главная переведена на перенос макета 1:1: `app/pages/index.vue` повторяет
+    `docs/sait-13/dist/index.html` (разметка, классы, тексты, порядок секций) со своими шапкой и подвалом,
+    `layout: false`, стили — `/landing/style.css` (сборка референса без изменений, `public/landing/`),
+    поведение — `app/utils/landing.ts` (reveal, `<details>`-меню, табы, маска телефона, форма, шкала разделов).
+    Форма в `#zayavka` отправляется в `POST /api/leads` (`place="landing-form"`), статус — из макета.
+    Композиция по брифу `home.md` остаётся планом наполнения: тексты и фото макета — заглушки (Q-08)
 - [ ] Каталог: `/katalog` и раздел — карточки с ценой, `seoTextHtml`, крошки
 - [ ] Посадочная `/arenda-{type}-v-{city}`: цена и условия, таблица моделей, работы, похожая техника, FAQ, SEO-текст
 - [ ] Услуги: список и карточка (изображение, `contentHtml`, FAQ)
 - [ ] Контакты, политика ПДн (страница из БД), 404
-- [ ] Формы заявок: `POST /api/leads`, схема `shared/schemas/leads.ts`, honeypot, состояния успеха/ошибки, UTM из адреса
+- [~] Формы заявок: `POST /api/leads` + `LeadForm` (honeypot, состояния успеха/ошибки, UTM из адреса)
+  готовы; на главной работает форма макета (`place="landing-form"`), `LeadForm` ждёт подключения
+  на контактах и посадочных
 - [ ] Изображения: `@nuxt/image` 2.2.1 + `<NuxtImg>` (ресайз, WebP, `sizes`, ленивая загрузка); источники — `/uploads/**` и `photos[]` моделей
 - [ ] Аналитика: `site.metrikaId` (сейчас `NUXT_PUBLIC_METRIKA_ID` не используется), цели на формы и клики, отключение в dev
 - [ ] Playwright: «форма → БД → CRM (mock)» и «вход в админку»
@@ -110,6 +161,12 @@ npm run lint && npm run test && npm run typecheck && npm run build
   `/arenda-gusenichnogo-ekskavatora-v-moskva`, `/uslugi`, `/uslugi/zemlyanye-raboty`, `/kontakty`,
   `/admin/login`, `/robots.txt`, `/sitemap.xml` — все должны отдавать 200.
 - Шаблонные проверки: `curl -s -o /dev/null -w '%{http_code}'`; HTML — `grep -o '<h1[^>]*>[^<]*'`.
+- Замеры вёрстки без зрения (адаптив, размеры, отступы): временный скрипт во `/tmp` по CDP —
+  `"/Applications/Google Chrome.app/Contents/MacOS/Google Chrome" --headless=new --remote-debugging-port=9222
+  --user-data-dir=/tmp/chrome-measure about:blank`, затем Node 24 (`WebSocket` встроен) с
+  `Emulation.setDeviceMetricsOverride` (375/768/1280) и `Runtime.evaluate` по `getBoundingClientRect()`
+  и `getComputedStyle()`. Проверка горизонтали — `documentElement.scrollWidth` против `innerWidth`.
+  В репозиторий такой скрипт не кладём: приёмка дизайна всё равно за владельцем.
 
 ## 7. Definition of Done для итерации
 
@@ -135,6 +192,8 @@ npm run lint && npm run test && npm run typecheck && npm run build
 - 15.11.2026 — `seo-routing`: публичные страницы, API, мета, JSON-LD, 301, robots и sitemap; вёрстка техническая.
 - 16.11.2026 — `admin-*` слайсы закрыты; все публичные данные редактируются в админке.
 - 16.11.2026 — коммит `c3b99b0`: Tailwind 4.3.5, токены, `SiteHeader` и `SiteFooter` на утилитах.
+- 19.11.2026 — главная пересобрана по метрикам `docs/sait-13` (контейнер 1240, ритм 56/84, шкала H1/H2/лида,
+  полоса преимуществ, карточки цифр); базовая типографика `main.css` перенесена в `@layer base`.
 - Дальше — по очереди §4.
 
 ## 10. Старт нового чата
@@ -155,6 +214,10 @@ npm run lint && npm run test && npm run typecheck && npm run build
 |---|---|---|
 | 16.11.2026 | Tailwind 4.3.5, токены `@theme`, шапка и подвал на утилитах | `c3b99b0` |
 | 17.11.2026 | Эта спека: зафиксировано состояние, правила, очередь и грабли окружения | — |
+| 18.11.2026 | Главная: тёмный hero с цифрами доверия, полоса преимуществ, каталог карточками, услуги, шаги, FAQ, CTA; компоненты `SiteButton`, `SiteIcon`, `SectionHead`, `fullBleed` в layout; `CatalogGrid`, `CtaBlock`, `FaqList` на утилитах | — |
+| 19.11.2026 | Главная по числам референса: контейнер `1240px` + поля 20/32, ритм секций 56 → 84, hero 40/56 → 64/84, H1 `1.9→3.5rem`, акцент `1.6→2.6rem`, H2 `1.5→2.35rem`, лид `1→1.115rem`, полоса условий с иконкой 25.6px, карточки цифр (radius 14). Типографика `main.css` перенесена в `@layer base` — утилиты больше не перебиваются; замеры 375/768/1280 через headless Chrome | — |
+| 19.11.2026 | Главная по брифу `home.md`: `LeadForm` в hero (`place="hero"`) и в `#zayavka` (`place="callback"`), блоки «Задачи», «Парк и база», «Как устроена аренда», «Стоимость аренды», «Документы и гарантии», «География», FAQ 11 вопросов после CTA; тексты заголовков и лидов приведены к брифу, демо-контент синхронизирован в `prisma/seed.ts` (идемпотентный сид). Проверки: `test` 292 ✅, `typecheck` ✅, `lint` ✅, `/` 200 и все блоки в SSR | — |
+| 19.11.2026 | Главная — перенос макета `docs/sait-13` 1:1 и починка каскада. Причина «поехавшей» вёрстки: правила `main.css` вне `@layer` (`body`, `a`, `img`, `.lead`, `.grid`, `.field`) перебивали макет — страница рисовалась системным шрифтом на белом фоне, ссылки синими, сетки — `auto-fill`. Что сделано: правила переведены в `@layer base`/`@layer components`, `.lead`/`.grid` и `text-wrap` ограничены `body:not(.landing-page)`; ссылка на `/landing/style.css` ставится последней в `<head>` (`moveStyleLast`) — иначе dev-режим Vite вставляет CSS приложения тегами `<style>` после неё; импорт CSS через сборщик отклонён: он попадал в общий чанк страниц и тёмный `body` макета протекал на `/uslugi` и другие маршруты. Плюс исправлены пути картинок `images/kompetencii/*` → `/landing/images/…` (были 404) и форма `#zayavka` подключена к `POST /api/leads` (`place="landing-form"`). Сверка через CDP `getComputedStyle`: `body`, ссылки, `.lead`, `.grid`, `.field`, `.panel--form`, `.shot__img` — совпадают с `docs/sait-13/dist/index.html` в dev и в `preview`; `/uslugi` не получает стилей макета; маска, табы, успешная и ошибочная отправка проверены в headless Chrome (`test` 292 ✅, `typecheck` ✅, `lint` ✅, `build` ✅) | — |
 
 При завершении итерации — добавить строку сюда и отметить пункт в §4.
 

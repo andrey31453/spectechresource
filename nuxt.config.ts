@@ -32,7 +32,9 @@ export default defineNuxtConfig({
   },
   app: {
     head: {
-      htmlAttrs: { lang: "ru" },
+      // Класс `js` включает прогрессивные улучшения главной (макет `docs/sait-13`):
+      // без него блоки `.reveal` видны сразу, а табы показывают все панели.
+      htmlAttrs: { lang: "ru", class: "js" },
       meta: [{ name: "format-detection", content: "telephone=no" }],
     },
   },

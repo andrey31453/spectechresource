@@ -13,7 +13,7 @@ const navLinkStrong = "whitespace-nowrap font-semibold text-ink transition-color
 
 <template>
   <header class="sticky top-0 z-40 border-b border-line bg-surface/95 backdrop-blur">
-    <div class="mx-auto flex max-w-site flex-wrap items-center justify-between gap-3 px-4 py-3">
+    <div class="mx-auto flex max-w-site flex-wrap items-center justify-between gap-3 px-5 py-3 md:px-8">
       <NuxtLink to="/" class="group flex flex-col leading-tight hover:no-underline">
         <span class="text-base font-bold tracking-tight text-ink transition-colors group-hover:text-brand">
           {{ site.companyName }}
@@ -39,6 +39,10 @@ const navLinkStrong = "whitespace-nowrap font-semibold text-ink transition-color
         >
           {{ site.email }}
         </a>
+
+        <SiteButton to="/#zayavka" variant="primary" tone="dark" size="sm">
+          Заказать технику
+        </SiteButton>
       </div>
 
       <a
@@ -50,7 +54,7 @@ const navLinkStrong = "whitespace-nowrap font-semibold text-ink transition-color
     </div>
 
     <nav aria-label="Каталог и разделы сайта" class="hidden border-t border-line md:block">
-      <div class="mx-auto flex max-w-site flex-wrap items-center gap-x-5 gap-y-1 px-4 py-2 text-sm">
+      <div class="mx-auto flex max-w-site flex-wrap items-center gap-x-5 gap-y-1 px-5 py-2 text-sm md:px-8">
         <NuxtLink to="/katalog" :class="navLinkStrong">Каталог</NuxtLink>
         <NuxtLink
           v-for="category in categories"
@@ -67,13 +71,13 @@ const navLinkStrong = "whitespace-nowrap font-semibold text-ink transition-color
 
     <details class="group border-t border-line md:hidden">
       <summary
-        class="mx-auto flex max-w-site cursor-pointer list-none items-center justify-between px-4 py-3 text-sm font-semibold text-ink [&::-webkit-details-marker]:hidden"
+        class="mx-auto flex max-w-site cursor-pointer list-none items-center justify-between px-5 py-3 text-sm font-semibold text-ink md:px-8 [&::-webkit-details-marker]:hidden"
       >
         Меню
         <span aria-hidden="true" class="text-muted transition-transform group-open:rotate-180">▾</span>
       </summary>
 
-      <nav aria-label="Мобильное меню" class="mx-auto max-w-site px-4 pb-3">
+      <nav aria-label="Мобильное меню" class="mx-auto max-w-site px-5 pb-3 md:px-8">
         <ul class="flex flex-col divide-y divide-line text-sm">
           <li>
             <NuxtLink to="/katalog" class="block py-2 font-semibold text-ink">Каталог</NuxtLink>
@@ -88,6 +92,11 @@ const navLinkStrong = "whitespace-nowrap font-semibold text-ink transition-color
           </li>
           <li>
             <NuxtLink to="/kontakty" class="block py-2 font-semibold text-ink">Контакты</NuxtLink>
+          </li>
+          <li>
+            <NuxtLink to="/#zayavka" class="block py-2 font-semibold text-brand">
+              Заказать технику
+            </NuxtLink>
           </li>
         </ul>
       </nav>

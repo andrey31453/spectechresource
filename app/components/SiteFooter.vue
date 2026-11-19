@@ -26,8 +26,8 @@ const requisites = computed(() =>
 </script>
 
 <template>
-  <footer class="mt-16 border-t border-line bg-surface-soft text-sm">
-    <div class="mx-auto grid max-w-site gap-8 px-4 py-10 sm:grid-cols-2 lg:grid-cols-4">
+  <footer class="border-t border-line bg-surface-soft text-sm">
+    <div class="mx-auto grid max-w-site gap-8 px-5 py-10 sm:grid-cols-2 md:px-8 lg:grid-cols-4">
       <section>
         <h2 class="mt-0 mb-3 text-base font-bold text-ink">{{ site.companyName }}</h2>
         <ul class="space-y-2">
@@ -85,7 +85,7 @@ const requisites = computed(() =>
     </div>
 
     <div class="border-t border-line">
-      <p class="mx-auto max-w-site px-4 py-4 text-xs text-muted">
+      <p class="mx-auto max-w-site px-5 py-4 text-xs text-muted md:px-8">
         © {{ year }} {{ site.companyName }}. {{ site.priceDisclaimer }}
       </p>
     </div>

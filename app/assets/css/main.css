@@ -9,7 +9,7 @@
   --accent: #0f5c9c;
   --accent-dark: #0b4575;
   --radius: 10px;
-  --container: 1180px;
+  --container: 1240px;
 }
 
 *,
@@ -18,56 +18,76 @@
   box-sizing: border-box;
 }
 
-body {
-  margin: 0;
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
-  line-height: 1.55;
-  color: var(--text);
-  background: var(--bg);
-  -webkit-text-size-adjust: 100%;
+/* Элементные правила — в @layer base. Правила вне слоёв перебивают любой слой,
+   поэтому раньше эти четыре блока глушили стили макета главной (`/landing/style.css`):
+   body терял тёмный фон и Inter, все ссылки становились синими, а img — с height: auto.
+   Теперь одноимённые правила макета из того же слоя подключаются позже и выигрывают. */
+@layer base {
+  body {
+    margin: 0;
+    font-family:
+      -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+    line-height: 1.55;
+    color: var(--text);
+    background: var(--bg);
+    -webkit-text-size-adjust: 100%;
+  }
+
+  a {
+    color: var(--accent);
+    text-decoration: none;
+  }
+
+  a:hover,
+  a:focus-visible {
+    color: var(--accent-dark);
+    text-decoration: underline;
+  }
+
+  img {
+    max-width: 100%;
+    height: auto;
+  }
 }
 
-a {
-  color: var(--accent);
-  text-decoration: none;
-}
+/* Базовая типографика каркаса — в слое base: правила вне слоёв перебивали
+   утилиты Tailwind (утилиты живут в @layer utilities). Значения прежние: на
+   непереверстанных страницах они остаются основой, а переверстанные страницы
+   задают размеры и отступы утилитами. Админка не меняется: её заголовки
+   (.admin-page__title и т.п.) задают размеры и margin собственными классами. */
+@layer base {
+  h1,
+  h2,
+  h3 {
+    line-height: 1.2;
+    margin: 0 0 0.5em;
+  }
 
-a:hover,
-a:focus-visible {
-  color: var(--accent-dark);
-  text-decoration: underline;
-}
+  h1 {
+    font-size: clamp(1.6rem, 1.2rem + 1.6vw, 2.4rem);
+  }
 
-img {
-  max-width: 100%;
-  height: auto;
-}
+  h2 {
+    font-size: clamp(1.3rem, 1.1rem + 0.9vw, 1.8rem);
+    margin-top: 1.6em;
+  }
 
-h1,
-h2,
-h3 {
-  line-height: 1.2;
-  margin: 0 0 0.5em;
-}
-
-h1 {
-  font-size: clamp(1.6rem, 1.2rem + 1.6vw, 2.4rem);
-}
-
-h2 {
-  font-size: clamp(1.3rem, 1.1rem + 0.9vw, 1.8rem);
-  margin-top: 1.6em;
-}
-
-p {
-  margin: 0 0 0.8em;
+  p {
+    margin: 0 0 0.8em;
+  }
 }
 
 .container {
   width: 100%;
   max-width: var(--container);
   margin: 0 auto;
-  padding: 0 16px;
+  padding: 0 20px;
+}
+
+@media (min-width: 768px) {
+  .container {
+    padding: 0 32px;
+  }
 }
 
 .page-main {
@@ -78,22 +98,29 @@ p {
   color: var(--muted);
 }
 
-.lead {
-  font-size: 1.05rem;
-  color: var(--muted);
-  max-width: 70ch;
+/* .lead и .grid — только для страниц сайта: у главной по макету `docs/sait-13`
+   одноимённые классы свои, и наши свойства, которых у макета нет (max-width лида,
+   сетка auto-fill с отступом у .grid), ломали её вёрстку. Метку `landing-page`
+   ставит главная на <body>. Слой components — чтобы утилиты Tailwind оставались
+   сильнее этих классов. */
+@layer components {
+  body:not(.landing-page) .lead {
+    font-size: 1.05rem;
+    color: var(--muted);
+    max-width: 70ch;
+  }
+
+  body:not(.landing-page) .grid {
+    display: grid;
+    gap: 14px;
+    grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+    margin: 0 0 8px;
+    padding: 0;
+    list-style: none;
+  }
 }
 
 /* ── Карточки и сетки ── */
-.grid {
-  display: grid;
-  gap: 14px;
-  grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
-  margin: 0 0 8px;
-  padding: 0;
-  list-style: none;
-}
-
 .card {
   display: block;
   height: 100%;
@@ -176,43 +203,7 @@ p {
   content: "";
 }
 
-/* ── FAQ ── */
-.faq {
-  display: grid;
-  gap: 8px;
-  margin: 0;
-  padding: 0;
-  list-style: none;
-}
-
-.faq details {
-  border: 1px solid var(--line);
-  border-radius: var(--radius);
-  padding: 12px 14px;
-}
-
-.faq summary {
-  cursor: pointer;
-  font-weight: 600;
-}
-
-.faq p {
-  margin: 10px 0 0;
-  color: var(--muted);
-}
-
-/* ── CTA ── */
-.cta {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 12px 18px;
-  align-items: center;
-  justify-content: space-between;
-  padding: 18px;
-  border-radius: var(--radius);
-  background: var(--bg-soft);
-}
-
+/* ── Кнопки общих страниц и админки ── */
 .button {
   display: inline-block;
   padding: 10px 18px;
@@ -255,7 +246,6 @@ p {
   color: var(--accent);
 }
 
-
 .card:hover {
   border-color: var(--accent);
   text-decoration: none;
@@ -269,26 +259,6 @@ p {
 .card__meta {
   font-size: 0.9rem;
   color: var(--muted);
-}
-
-.stats {
-  display: grid;
-  gap: 14px;
-  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-  margin: 0;
-  padding: 0;
-  list-style: none;
-}
-
-.stat {
-  padding: 16px;
-  border-radius: var(--radius);
-  background: var(--bg-soft);
-}
-
-.stat__value {
-  font-size: 1.7rem;
-  font-weight: 700;
 }
 
 .section {
@@ -363,10 +333,14 @@ p {
   font-size: 0.92rem;
 }
 
-.field {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
+/* Поля админки: имя .field есть и в форме макета главной (там display: grid),
+   поэтому правило живёт в слое components — макет подключается позже и выигрывает. */
+@layer components {
+  .field {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
 }
 
 .field__label {
@@ -396,7 +370,6 @@ p {
   font-size: 0.85rem;
   color: #c0392b;
 }
-
 
 .button:disabled {
   opacity: 0.6;
@@ -942,4 +915,3 @@ p {
 .admin-images__input {
   display: none;
 }
-

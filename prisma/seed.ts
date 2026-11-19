@@ -3,7 +3,8 @@
  *
  * Данные каталога (8 разделов, 39 видов) взяты из docs/tz-structured.md §6.
  * Идемпотентен: справочники пишутся через upsert по slug (модели — по `(typeId, brand, model)`),
- * блоки контента — только если таблица пуста, FAQ — если вопроса ещё нет.
+ * FAQ — по тексту вопроса (демо-ответы обновляются), блоки контента — по `sortOrder`
+ * (демо-тексты обновляются, строки с другими `sortOrder` из админки не трогаются).
  *
  * ⚠️ Всё, что помечено ДЕМО (телефон, цифры доверия, цены, модели, тексты),
  * подлежит замене реальными данными заказчика через админку.
@@ -87,39 +88,122 @@ const types: TypeSeed[] = [
   { categorySlug: "svaeboynaya-tehnika", slug: "svaeboynoy-ustanovki", name: "Сваебойные установки", nameGenitive: "сваебойной установки" },
 ];
 
-// ДЕМО: цены «от» только для двух видов, у остальных null → в UI «цена по запросу».
+// ДЕМО: цены «от» для шести видов (чтобы таблица цен на главной была видна),
+// у остальных null → в UI «цена по запросу». Ставим только если админ ещё не задал своё.
 const priceFromDemo: Record<string, string> = {
   "gusenichnogo-ekskavatora": "26000.00",
+  "kolesnogo-ekskavatora": "22000.00",
   "mini-ekskavatora": "13500.00",
+  "mini-pogruzchika": "9000.00",
+  "avtokrana": "18000.00",
+  "katka": "12000.00",
+  "samosvala": "14000.00",
+  "ilososa": "15000.00",
 };
 
+// ДЕМО: описания услуг — тексты из брифа главной (docs/specs/home.md §3.6).
 const services = [
-  { slug: "zemlyanye-raboty", title: "Земляные работы" },
-  { slug: "vyvoz-grunta", title: "Вывоз грунта" },
-  { slug: "demontazh", title: "Демонтаж" },
-  { slug: "planirovka-uchastka", title: "Планировка участка" },
-  { slug: "perevozka-tehniki-tralom", title: "Перевозка техники тралом" },
+  {
+    slug: "zemlyanye-raboty",
+    title: "Земляные работы",
+    description: "Разработка грунта, котлованы и траншеи, обратная засыпка. Экскаваторы от 1,5 до 20 т.",
+  },
+  {
+    slug: "vyvoz-grunta",
+    title: "Вывоз грунта",
+    description: "Самосвалы 10–30 т, погрузка экскаватором, утилизация по договору.",
+  },
+  {
+    slug: "demontazh",
+    title: "Демонтаж",
+    description: "Экскаваторы-разрушители, гидромолоты и грейферы; вывоз обломков.",
+  },
+  {
+    slug: "planirovka-uchastka",
+    title: "Планировка участка",
+    description: "Планировщики и грейдеры, уплотнение катком, подготовка под благоустройство.",
+  },
+  {
+    slug: "perevozka-tehniki-tralom",
+    title: "Перевозка техники тралом",
+    description: "Низкорамные платформы для доставки техники на объект и между площадками.",
+  },
 ];
 
+// ДЕМО: тексты преимуществ — бриф главной §3.7. Иконки — ключи из админки.
 const advantages = [
-  { title: "Собственный парк техники", text: "ДЕМО-текст: без посредников, техника в наличии.", icon: "fleet", sortOrder: 10 },
-  { title: "Подача от 4 часов", text: "ДЕМО-текст: сроки подачи по Москве и области.", icon: "clock", sortOrder: 20 },
-  { title: "Договор и закрывающие", text: "ДЕМО-текст: работаем с НДС и без, полный пакет документов.", icon: "docs", sortOrder: 30 },
-  { title: "Экипаж с допусками", text: "ДЕМО-текст: машинисты с удостоверениями и опытом.", icon: "crew", sortOrder: 40 },
+  {
+    title: "Собственный парк",
+    text: "120 единиц в наличии, без посредников и «машин от партнёров».",
+    icon: "fleet",
+    sortOrder: 10,
+  },
+  {
+    title: "Подача от 4 часов",
+    text: "Диспетчер на связи 08:00–20:00, срочные заявки согласуем по телефону.",
+    icon: "clock",
+    sortOrder: 20,
+  },
+  {
+    title: "Машинисты с допусками",
+    text: "Удостоверения, стаж от 5 лет, инструктаж на объекте.",
+    icon: "crew",
+    sortOrder: 30,
+  },
+  {
+    title: "Документы для юрлиц",
+    text: "Договор, счёт, УПД, акты, путевые листы. С НДС и без НДС.",
+    icon: "docs",
+    sortOrder: 40,
+  },
+  {
+    title: "Подмена при поломке",
+    text: "Если техника встала не по вине заказчика — подаём резервную машину.",
+    icon: "gear",
+    sortOrder: 50,
+  },
+  {
+    title: "Прозрачная цена",
+    text: "Смена 8 часов, час сверх — по тарифу. Доставку и ГСМ считаем заранее.",
+    icon: "shield",
+    sortOrder: 60,
+  },
 ];
 
+// ДЕМО: сроки в текстах шагов — бриф главной §3.9, заменить реальными SLA.
 const workSteps = [
-  { title: "Заявка", text: "Оставляете заявку на сайте или звоните.", sortOrder: 10 },
-  { title: "Расчёт", text: "Считаем стоимость и сроки, присылаем КП.", sortOrder: 20 },
-  { title: "Договор", text: "Подписываем договор, согласуем время подачи.", sortOrder: 30 },
-  { title: "Подача техники", text: "Техника приезжает на объект в согласованное время.", sortOrder: 40 },
+  {
+    title: "Заявка",
+    text: "Оставляете заявку на сайте или звоните. Уточняем задачу, объект и сроки — 5 минут.",
+    sortOrder: 10,
+  },
+  {
+    title: "Расчёт",
+    text: "Подбираем технику, считаем смену с доставкой, присылаем КП — до 1 часа.",
+    sortOrder: 20,
+  },
+  {
+    title: "Договор",
+    text: "Согласуем условия, выставляем счёт, готовим закрывающие документы — от 1 дня.",
+    sortOrder: 30,
+  },
+  {
+    title: "Подача",
+    text: "Машина приезжает на объект в согласованное время. Инструктаж и путевой лист — от 4 часов.",
+    sortOrder: 40,
+  },
 ];
 
 // ДЕМО: цифры-заглушки, заменить реальными значениями заказчика.
+// Порядок значим: первые три записи выводятся в первом экране (120 ед., 4 часа, 12 лет —
+// бриф §3.2), все шесть — в блоке «Парк и база» (§3.8).
 const trustStats = [
   { value: "120", unit: "ед.", label: "техники в парке", sortOrder: 10 },
   { value: "4", unit: "часа", label: "средняя подача", sortOrder: 20 },
   { value: "12", unit: "лет", label: "на рынке аренды", sortOrder: 30 },
+  { value: "39", unit: null, label: "видов техники", sortOrder: 40 },
+  { value: "8", unit: null, label: "разделов каталога", sortOrder: 50 },
+  { value: "6", unit: null, label: "механиков и машинистов в смене", sortOrder: 60 },
 ];
 
 const faqSeed: Array<{
@@ -129,17 +213,74 @@ const faqSeed: Array<{
   answer: string;
   sortOrder: number;
 }> = [
+  // ГЛАВНАЯ: 11 частых вопросов (бриф главной §3.17).
+  // ⚠️ Ответы про ГСМ, НДС, замену машины и работу с физлицами — проект решения:
+  // подтвердить у заказчика до запуска сайта.
   {
     scope: "GLOBAL",
-    question: "Как заказать технику?",
-    answer: "Оставьте заявку на сайте или позвоните — менеджер рассчитает стоимость и согласует время подачи.",
+    question: "Какая минимальная смена?",
+    answer: "Стандартная смена — 8 часов. Минимальный заказ — 4 часа; для тяжёлой техники условия уточняйте у менеджера.",
     sortOrder: 10,
   },
   {
     scope: "GLOBAL",
-    question: "Работаете ли вы с юридическими лицами?",
-    answer: "ДЕМО-ответ: работаем по договору, предоставляем полный пакет закрывающих документов.",
+    question: "Кто оплачивает топливо?",
+    answer: "ГСМ оплачивает заказчик, если в договоре не согласовано иное. Расход зависит от модели и режима работы.",
     sortOrder: 20,
+  },
+  {
+    scope: "GLOBAL",
+    question: "Можно ли арендовать технику без экипажа?",
+    answer: "Да, часть техники сдаём без экипажа — при наличии у арендатора допуска и ответственности за эксплуатацию. Гусеничную и тяжёлую технику, как правило, сдаём только с машинистом.",
+    sortOrder: 30,
+  },
+  {
+    scope: "GLOBAL",
+    question: "Как быстро подадите технику?",
+    answer: "По Москве — от 4 часов при наличии свободной машины; в область — в зависимости от адреса и габаритов. Срочные заявки согласуем по телефону.",
+    sortOrder: 40,
+  },
+  {
+    scope: "GLOBAL",
+    question: "Работаете ли вы с НДС?",
+    answer: "Да, работаем с НДС и без — по схеме заказчика. Предоставляем счёт, УПД и акты.",
+    sortOrder: 50,
+  },
+  {
+    scope: "GLOBAL",
+    question: "Какие документы получим?",
+    answer: "Договор, счёт, УПД, акт выполненных работ и путевые листы. Для тендера — карточку предприятия и реквизиты.",
+    sortOrder: 60,
+  },
+  {
+    scope: "GLOBAL",
+    question: "Что если техника сломается?",
+    answer: "Заменим машину или пересчитаем смену. Простой по нашей вине не оплачивается.",
+    sortOrder: 70,
+  },
+  {
+    scope: "GLOBAL",
+    question: "Можно ли заказать технику на неделю или месяц?",
+    answer: "Да. На длительный срок ставка ниже — считаем индивидуально, заявку лучше оставить заранее.",
+    sortOrder: 80,
+  },
+  {
+    scope: "GLOBAL",
+    question: "Доставляете ли в область?",
+    answer: "Да, тралом или самоходом. Стоимость доставки зависит от адреса, габаритов и времени подачи.",
+    sortOrder: 90,
+  },
+  {
+    scope: "GLOBAL",
+    question: "Работаете ли с физлицами?",
+    answer: "Основные клиенты — юрлица и ИП: договор, закрывающие документы, оплата по счёту. Частные заказы рассматриваем по конкретной задаче.",
+    sortOrder: 100,
+  },
+  {
+    scope: "GLOBAL",
+    question: "Участвуете ли в тендерах?",
+    answer: "Да: 44-ФЗ, 223-ФЗ и коммерческие закупки. Готовим КП и документы в сроки заказчика.",
+    sortOrder: 110,
   },
   {
     scope: "TYPE",
@@ -287,7 +428,8 @@ async function main() {
     categoryIds.set(c.slug, row.id);
   }
 
-  // 4. Виды техники (39). Цены в update не трогаем — их правит заказчик.
+  // 4. Виды техники (39). Цены, заданные админом, не затираем:
+  //    ДЕМО-цена «от» проставляется только там, где поле ещё пустое.
   const typeIds = new Map<string, string>();
   for (const [index, t] of types.entries()) {
     const categoryId = categoryIds.get(t.categorySlug);
@@ -312,6 +454,15 @@ async function main() {
         priceFrom: priceFromDemo[t.slug] ?? null,
       },
     });
+
+    const demoPrice = priceFromDemo[t.slug];
+    if (demoPrice && row.priceFrom === null) {
+      await prisma.equipmentType.update({
+        where: { slug: t.slug },
+        data: { priceFrom: demoPrice },
+      });
+    }
+
     typeIds.set(t.slug, row.id);
   }
 
@@ -344,39 +495,89 @@ async function main() {
     });
   }
 
-  // 6. FAQ — по вопросу, чтобы не дублировать
+  // 6. FAQ — сид обновляет ответы демо-вопросов и не дублирует их.
+  //    Вопросы прошлых версий сида удаляем, чтобы на главной не оставался мусор.
+  const legacyDemoQuestions = [
+    "Как заказать технику?",
+    "Работаете ли вы с юридическими лицами?",
+    "Сколько часов длится минимальная смена?",
+  ];
+  await prisma.faqItem.deleteMany({
+    where: { scope: "GLOBAL", question: { in: legacyDemoQuestions } },
+  });
+
   for (const f of faqSeed) {
-    const exists = await prisma.faqItem.findFirst({ where: { question: f.question } });
-    if (exists) continue;
-
-    await prisma.faqItem.create({
-      data: {
-        scope: f.scope,
-        equipmentTypeId: f.typeSlug ? (typeIds.get(f.typeSlug) ?? null) : null,
-        question: f.question,
-        answer: f.answer,
-        sortOrder: f.sortOrder,
-      },
+    const data = {
+      scope: f.scope,
+      equipmentTypeId: f.typeSlug ? (typeIds.get(f.typeSlug) ?? null) : null,
+      question: f.question,
+      answer: f.answer,
+      sortOrder: f.sortOrder,
+    };
+    const exists = await prisma.faqItem.findFirst({
+      where: { question: f.question, scope: f.scope },
     });
+
+    if (exists) {
+      await prisma.faqItem.update({ where: { id: exists.id }, data });
+      continue;
+    }
+
+    await prisma.faqItem.create({ data });
   }
 
-  // 7. Блоки контента — только если пусто (правки из админки не затираются)
-  if ((await prisma.advantage.count()) === 0) {
-    await prisma.advantage.createMany({ data: advantages });
+  // 7. Блоки контента — синхронизация по sortOrder: демо-тексты обновляются,
+  //    строки с другими sortOrder (добавленные в админке) не трогаем.
+  for (const item of advantages) {
+    const existing = await prisma.advantage.findFirst({
+      where: { sortOrder: item.sortOrder },
+      orderBy: { id: "asc" },
+    });
+
+    if (existing) {
+      await prisma.advantage.update({ where: { id: existing.id }, data: item });
+    } else {
+      await prisma.advantage.create({ data: item });
+    }
   }
-  if ((await prisma.workStep.count()) === 0) {
-    await prisma.workStep.createMany({ data: workSteps });
+
+  for (const item of workSteps) {
+    const existing = await prisma.workStep.findFirst({
+      where: { sortOrder: item.sortOrder },
+      orderBy: { id: "asc" },
+    });
+
+    if (existing) {
+      await prisma.workStep.update({ where: { id: existing.id }, data: item });
+    } else {
+      await prisma.workStep.create({ data: item });
+    }
   }
-  if ((await prisma.trustStat.count()) === 0) {
-    await prisma.trustStat.createMany({ data: trustStats });
+
+  for (const item of trustStats) {
+    const existing = await prisma.trustStat.findFirst({
+      where: { sortOrder: item.sortOrder },
+      orderBy: { id: "asc" },
+    });
+
+    if (existing) {
+      await prisma.trustStat.update({ where: { id: existing.id }, data: item });
+    } else {
+      await prisma.trustStat.create({ data: item });
+    }
   }
 
   // 8. Услуги
   for (const [index, s] of services.entries()) {
     await prisma.service.upsert({
       where: { slug: s.slug },
-      update: { title: s.title, sortOrder: (index + 1) * 10 },
-      create: { slug: s.slug, title: s.title, sortOrder: (index + 1) * 10 },
+      update: { title: s.title, description: s.description, sortOrder: (index + 1) * 10 },
+      create: {
+        slug: s.slug,
+        title: s.title,
+        description: s.description,
+        sortOrder: (index + 1) * 10,
+      },
     });
   }
 

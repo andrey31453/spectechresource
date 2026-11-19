@@ -21,17 +21,57 @@
   --color-surface-soft: #f4f6f8;
   --color-accent: #e8a33d;
 
-  /* Ширина контента: 1180px — как в текущем каркасе, чтобы страницы не «прыгали». */
-  --container-site: 73.75rem;
+  /* Ширина контента: 1240px — как контейнер референса заказчика (docs/sait-13,
+     `--shell`). Боковые поля страниц — 20px на мобильном и 32px от 768px. */
+  --container-site: 77.5rem;
 
   /* Радиусы и тени: сдержанные, как у существующих карточек. */
   --radius-card: 10px;
   --radius-field: 8px;
   --shadow-card: 0 1px 2px rgb(27 31 36 / 6%), 0 8px 24px rgb(27 31 36 / 6%);
   --shadow-bar: 0 1px 0 rgb(27 31 36 / 6%);
+
+  /* Тёмная графитовая база публичных полос: главная чередует тёмные
+     и светлые секции по формату референса заказчика (docs/sait-13). */
+  --color-void: #04070a;
+  --color-night: #070c12;
+  --color-night-2: #0c141c;
+  --color-panel: #111d28;
+  --color-line-dark: #22303c;
+  --color-mist: #93a6b5;
+  --color-snow: #eef4f8;
+
+  /* Светлая полоса каталога: холодный «бетонный» тон вместо чистого белого,
+     чтобы чередование полос читалось. */
+  --color-concrete: #f1f4f6;
+
+  /* Вторичный синий: градиент кнопок, цифры и акценты на тёмных полосах. */
+  --color-brand-light: #2f8fd8;
+
+  /* Светлый край градиента кнопок: #1a6fb5 даёт с белым текстом 5.2:1 (AA),
+     тогда как --color-brand-light в этой роли давал 3.5:1. */
+  --color-brand-bright: #1a6fb5;
 }
 
-/* Базовая линия: сглаживание и перенос длинных слов в заголовках. */
+:root {
+  /* Фоновая «инженерная» сетка тёмных секций: применяется утилитой
+     [background-image:var(--site-grid)], отдельный глобальный класс не нужен. */
+  --site-grid-line: rgb(255 255 255 / 4.5%);
+  --site-grid:
+    linear-gradient(to right, var(--site-grid-line) 1px, transparent 1px),
+    linear-gradient(to bottom, var(--site-grid-line) 1px, transparent 1px);
+
+  /* Та же сетка поверх синей CTA-полосы: линии светлее, шаг мельче. */
+  --site-grid-brand-line: rgb(255 255 255 / 7%);
+  --site-grid-brand:
+    linear-gradient(to right, var(--site-grid-brand-line) 1px, transparent 1px),
+    linear-gradient(to bottom, var(--site-grid-brand-line) 1px, transparent 1px);
+}
+
+/* Базовая линия: сглаживание и перенос длинных слов в заголовках.
+ * Правила переносов действуют только на страницах сайта: у главной по макету
+ * `docs/sait-13` (метка `landing-page` на <body>) переносы — часть вёрстки,
+ * а `text-wrap` перебил бы и `white-space: nowrap` его утилит. */
 @layer base {
   html {
     -webkit-text-size-adjust: 100%;
@@ -44,13 +84,11 @@
     background-color: var(--color-surface);
   }
 
-  h1,
-  h2,
-  h3 {
+  body:not(.landing-page) :is(h1, h2, h3) {
     text-wrap: balance;
   }
 
-  p {
+  body:not(.landing-page) p {
     text-wrap: pretty;
   }
 

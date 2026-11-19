@@ -3,6 +3,11 @@ import type { CategoryCardDto } from "~/types/catalog";
 
 const { data: site } = await useSite();
 
+const route = useRoute();
+
+/** Страницы с полноэкранными полосами объявляют `definePageMeta({ fullBleed: true })`. */
+const fullBleed = computed(() => route.meta.fullBleed === true);
+
 const { data: categories } = await useAsyncData<CategoryCardDto[]>(
   "nav-categories",
   () => $fetch<CategoryCardDto[]>("/api/catalog"),
@@ -43,7 +48,11 @@ if (site.value) {
   <div>
     <SiteHeader v-if="site" :site="site" :categories="navCategories" />
 
-    <main class="page-main">
+    <main v-if="fullBleed">
+      <slot />
+    </main>
+
+    <main v-else class="page-main">
       <div class="container">
         <slot />
       </div>
