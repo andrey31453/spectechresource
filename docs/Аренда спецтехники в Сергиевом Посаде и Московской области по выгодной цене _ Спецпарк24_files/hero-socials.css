@@ -1,0 +1,12 @@
+.hero-socials {
+    display: flex;
+    flex-direction:column;
+    gap:0.5rem;
+    align-items: flex-start;
+}
+
+@media screen and (max-width:768px){ 
+   .hero-socials {
+       align-items: center;
+   } 
+}

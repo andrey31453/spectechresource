@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { Decimalish } from "~~/server/utils/dto";
-import { money, toCity, toFaq, toSite, toTypeCard } from "~~/server/utils/dto";
+import { money, toCity, toFaq, toHomeModel, toSite, toTypeCard } from "~~/server/utils/dto";
 
 /** Prisma-`Decimal` в тестах не нужен: контракт `money` — любой объект с `toFixed`. */
 const decimal = (value: string): Decimalish => ({ toFixed: () => value });
@@ -43,7 +43,21 @@ describe("toTypeCard", () => {
       nameGenitive: "гусеничного экскаватора",
       priceFrom: "26000.00",
       priceUnit: "SHIFT",
+      image: null,
     });
+  });
+
+  it("первое фото галереи становится обложкой карточки", () => {
+    expect(
+      toTypeCard({
+        slug: "mini-ekskavatora",
+        name: "Мини-экскаваторы",
+        nameGenitive: "мини-экскаватора",
+        priceFrom: null,
+        priceUnit: "SHIFT",
+        gallery: ["/uploads/type-cover.webp", "/uploads/type-2.webp"],
+      }).image,
+    ).toBe("/uploads/type-cover.webp");
   });
 
   it("без цены отдаёт null, а не 0", () => {
@@ -56,6 +70,51 @@ describe("toTypeCard", () => {
         priceUnit: "PER_METER",
       }).priceFrom,
     ).toBeNull();
+  });
+});
+
+describe("toHomeModel", () => {
+  const model = {
+    id: "m1",
+    brand: "Hitachi",
+    model: "ZX200-5G",
+    pricePerShift: decimal("28000.00"),
+    pricePerHour: decimal("4000.00"),
+    photos: ["/uploads/model-cover.webp", "/uploads/model-2.webp"],
+    specs: [
+      { name: "Масса, т", value: "20" },
+      { name: "Глубина копания, м", value: "6,7" },
+    ],
+    type: {
+      slug: "gusenichnogo-ekskavatora",
+      name: "Гусеничные экскаваторы",
+      category: { slug: "zemlyanye-raboty" },
+    },
+  };
+
+  it("отдаёт цены строками, первое фото и характеристики без sortOrder", () => {
+    expect(toHomeModel(model)).toEqual({
+      id: "m1",
+      categorySlug: "zemlyanye-raboty",
+      typeSlug: "gusenichnogo-ekskavatora",
+      typeName: "Гусеничные экскаваторы",
+      brand: "Hitachi",
+      model: "ZX200-5G",
+      pricePerShift: "28000.00",
+      pricePerHour: "4000.00",
+      photo: "/uploads/model-cover.webp",
+      specs: [
+        { name: "Масса, т", value: "20" },
+        { name: "Глубина копания, м", value: "6,7" },
+      ],
+    });
+  });
+
+  it("без фото и без цены за час отдаёт null — карточка рисует заглушку", () => {
+    const dto = toHomeModel({ ...model, photos: [], pricePerHour: null });
+
+    expect(dto.photo).toBeNull();
+    expect(dto.pricePerHour).toBeNull();
   });
 });
 

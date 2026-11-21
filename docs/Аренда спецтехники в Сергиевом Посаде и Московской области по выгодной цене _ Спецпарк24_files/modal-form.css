@@ -1,0 +1,634 @@
+/* ==========================================================================
+   Premium callback modal (#modal-form) — Industrial Tech Minimalism
+   Keeps FetchIt / .telephone / .checkbox-container / .invalid-checkbox
+   ========================================================================== */
+
+:root {
+  --sp-modal-navy: #0F172A;
+  --sp-modal-yellow: #fdca00;
+  --sp-modal-yellow-2: #fdca00;
+  --sp-modal-radius: 20px;
+  --sp-modal-radius-sm: 12px;
+  --sp-modal-ink: #0F172A;
+  --sp-modal-muted: #64748B;
+}
+
+/* Fancybox chrome — only when this modal is open */
+.fancybox__container:has(#modal-form) .fancybox__backdrop {
+  background: rgba(15, 23, 42, 0.58);
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+}
+
+.fancybox__container:has(#modal-form) .fancybox__content {
+  padding: 0;
+  background: transparent;
+  box-shadow: none;
+  max-width: calc(100vw - 28px);
+}
+
+/* Hide default Fancybox close (v4/v5 class variants) — keep only in-card X */
+.fancybox__container:has(#modal-form) .f-button.is-close,
+.fancybox__container:has(#modal-form) .f-button.is-close-btn,
+.fancybox__container:has(#modal-form) .fancybox__button--close,
+.fancybox__container:has(#modal-form) .fancybox__toolbar .f-button.is-close,
+.fancybox__container:has(#modal-form) .fancybox__toolbar .f-button.is-close-btn,
+.fancybox__container:has(#modal-form) .fancybox__toolbar .fancybox__button--close,
+.fancybox__container:has(#modal-form) .carousel__button.is-close,
+.fancybox__container:has(#modal-form) .carousel__button.is-close-btn,
+.fancybox__container:has(#modal-form) button[data-fancybox-close]:not(.sp-modal__close),
+.fancybox__container:has(#modal-form) .fancybox__slide > .f-button.is-close-btn,
+.fancybox__container:has(#modal-form) .fancybox__content > .f-button.is-close-btn {
+  display: none !important;
+  opacity: 0 !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
+  width: 0 !important;
+  height: 0 !important;
+  overflow: hidden !important;
+}
+
+@keyframes sp-modal-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+#modal-form.sp-modal,
+.sp-modal#modal-form {
+  display: none;
+  max-width: 440px;
+  width: min(440px, calc(100vw - 28px));
+  padding: 0;
+  margin: 0;
+  background: transparent;
+  border: none;
+  box-shadow: none;
+}
+
+.fancybox__content #modal-form.sp-modal,
+.fancybox__slide #modal-form.sp-modal {
+  display: block;
+  animation: sp-modal-in 0.32s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+#modal-form .sp-modal__card.main-form,
+#modal-form.sp-modal .main-form.sp-modal__card {
+  position: relative;
+  z-index: 1;
+  max-width: none;
+  width: 100%;
+  margin: 0;
+  padding: 28px 28px 24px;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  box-sizing: border-box;
+  overflow: hidden;
+  isolation: isolate;
+  background: #fff;
+  border-radius: var(--sp-modal-radius);
+  box-shadow:
+    0 24px 56px rgba(15, 23, 42, 0.22),
+    0 2px 0 rgba(255, 255, 255, 0.65) inset;
+}
+
+#modal-form .sp-modal__accent {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  z-index: 2;
+  background: linear-gradient(90deg, var(--sp-modal-yellow) 0%, var(--sp-modal-yellow-2) 55%, #e5b800 100%);
+  pointer-events: none;
+}
+
+#modal-form .sp-modal__grid {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  opacity: 0.45;
+  background-image:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 480 360' fill='none'%3E%3Cpath stroke='%230F172A' stroke-width='1' opacity='0.35' d='M40 300H440M70 60V300M70 60H250M250 60L310 140M250 60L120 300M310 140H380M380 140V300'/%3E%3Cpath stroke='%230F172A' stroke-width='0.8' stroke-dasharray='3 5' opacity='0.28' d='M90 95H230M90 125H210M90 155H180'/%3E%3Ccircle cx='310' cy='140' r='4.5' fill='%23FDCA00' stroke='%230F172A' stroke-width='1'/%3E%3C/svg%3E"),
+    linear-gradient(to right, rgba(15, 23, 42, 0.035) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(15, 23, 42, 0.035) 1px, transparent 1px);
+  background-repeat: no-repeat, repeat, repeat;
+  background-position: right -20px bottom -10px, 0 0, 0 0;
+  background-size: min(320px, 78%) auto, 22px 22px, 22px 22px;
+  -webkit-mask-image: radial-gradient(ellipse 85% 75% at 78% 88%, #000 8%, transparent 70%);
+  mask-image: radial-gradient(ellipse 85% 75% at 78% 88%, #000 8%, transparent 70%);
+}
+
+#modal-form .sp-modal__close {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  z-index: 5;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  border: 1px solid #E2E8F0;
+  border-radius: 999px;
+  background: #fff;
+  color: var(--sp-modal-navy);
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(15, 23, 42, 0.08);
+  transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease, transform 0.2s ease;
+}
+
+#modal-form .sp-modal__close:hover {
+  background: var(--sp-modal-navy);
+  border-color: var(--sp-modal-navy);
+  color: #fff;
+  transform: scale(1.04);
+}
+
+#modal-form .sp-modal__close:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(253, 202, 0, 0.45);
+}
+
+#modal-form .sp-modal__head {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 10px;
+  margin: 0 36px 20px 0;
+  text-align: left;
+}
+
+#modal-form .sp-modal__badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 5px 11px;
+  border-radius: 999px;
+  background: rgba(253, 202, 0, 0.18);
+  color: var(--sp-modal-navy);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  line-height: 1.2;
+}
+
+#modal-form .sp-modal__title,
+#modal-form .main-form .sp-modal__title {
+  margin: 0;
+  color: var(--sp-modal-ink);
+  font-size: clamp(1.2rem, 2.4vw, 1.45rem);
+  font-weight: 800;
+  line-height: 1.28;
+  text-align: left;
+}
+
+#modal-form .sp-modal__subtitle,
+#modal-form .main-form .sp-modal__subtitle {
+  margin: 0;
+  color: var(--sp-modal-muted);
+  font-size: 0.95rem;
+  font-weight: 500;
+  line-height: 1.45;
+  text-align: left;
+}
+
+/* Product context from catalog «Заказать» — compact strip, not a nested card */
+#modal-form .sp-modal__product {
+  position: relative;
+  z-index: 1;
+  display: none;
+  align-items: center;
+  gap: 14px;
+  width: 100%;
+  margin: 0 0 18px;
+  padding: 12px 14px;
+  box-sizing: border-box;
+  background: #F4F6F9;
+  border: 1px solid #E2E8F0;
+  border-radius: var(--sp-modal-radius-sm);
+}
+
+#modal-form .sp-modal__product.is-visible,
+#modal-form .sp-modal__product:not([hidden]) {
+  display: flex;
+}
+
+#modal-form .sp-modal__product[hidden] {
+  display: none !important;
+}
+
+#modal-form .sp-modal__product-media {
+  flex: 0 0 auto;
+  width: 88px;
+  height: 66px;
+  border-radius: 10px;
+  overflow: hidden;
+  background: #fff;
+  border: 1px solid #E8EDF3;
+}
+
+#modal-form .sp-modal__product-media img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+}
+
+#modal-form .sp-modal__product-media img[hidden] {
+  display: none;
+}
+
+#modal-form .sp-modal__product-meta {
+  flex: 1 1 auto;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+#modal-form .sp-modal__product-title {
+  margin: 0;
+  color: var(--sp-modal-ink);
+  font-size: 0.92rem;
+  font-weight: 700;
+  line-height: 1.3;
+  text-align: left;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+#modal-form .sp-modal__product-prices {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 16px;
+}
+
+#modal-form .sp-modal__product-price {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+#modal-form .sp-modal__product-price-label {
+  color: var(--sp-modal-muted);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  line-height: 1.2;
+}
+
+#modal-form .sp-modal__product-price-value {
+  color: var(--sp-modal-navy);
+  font-size: 0.95rem;
+  font-weight: 800;
+  line-height: 1.2;
+  white-space: nowrap;
+}
+
+/* Kill legacy centered paragraph style if leftover */
+#modal-form .main-form > p {
+  display: none;
+}
+
+#modal-form .sp-modal__form,
+#modal-form .main-form form.sp-modal__form,
+#modal-form .main-form > form {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  max-width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 14px;
+  margin: 0;
+  box-sizing: border-box;
+}
+
+#modal-form .sp-modal__phone,
+.banner__form-form .sp-modal__phone {
+  position: relative;
+  width: 100%;
+}
+
+#modal-form .sp-modal__phone-icon,
+.banner__form-form .sp-modal__phone-icon {
+  position: absolute;
+  left: 16px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #94A3B8;
+  pointer-events: none;
+  display: flex;
+  z-index: 1;
+}
+
+#modal-form .sp-modal__phone input.telephone,
+#modal-form .main-form-input.telephone,
+#modal-form .main-form > form > input.telephone,
+.banner__form-form .sp-modal__phone input.telephone,
+.banner__form-form .main-form-input.telephone {
+  width: 100%;
+  max-width: 100%;
+  height: 54px;
+  margin: 0;
+  padding: 0 16px 0 48px;
+  box-sizing: border-box;
+  border: 1px solid #E2E8F0;
+  border-radius: var(--sp-modal-radius-sm);
+  outline: none;
+  background: #F8FAFC;
+  color: var(--sp-modal-ink);
+  font-size: 16px;
+  font-family: inherit;
+  font-weight: 600;
+  line-height: 1.2;
+  text-align: left;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
+}
+
+/* Phone without icon wrapper (legacy markup) */
+#modal-form .main-form > form > input.telephone {
+  padding-left: 16px;
+}
+
+#modal-form .sp-modal__phone input.telephone:focus,
+#modal-form .main-form-input.telephone:focus,
+#modal-form .main-form-input.telephone:active,
+.banner__form-form .sp-modal__phone input.telephone:focus,
+.banner__form-form .main-form-input.telephone:focus,
+.banner__form-form .main-form-input.telephone:active {
+  border-color: rgba(253, 202, 0, 0.95);
+  background: #fff;
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(253, 202, 0, 0.35);
+}
+
+/* Banner hero form: stretch FetchIt form so phone field is full-width */
+.banner__form-form.main-form > form.sp-modal__form {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 14px;
+}
+
+#modal-form .sp-modal__consents {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: 100%;
+}
+
+#modal-form .sp-modal__form .checkbox-container,
+#modal-form .checkbox-container {
+  position: relative;
+  display: block;
+  width: 100%;
+  max-width: none;
+  margin: 0;
+  padding: 11px 12px 11px 42px;
+  box-sizing: border-box;
+  border: 1px solid #E2E8F0;
+  border-radius: var(--sp-modal-radius-sm);
+  background: rgba(248, 250, 252, 0.9);
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 1.4;
+  color: #475569;
+  cursor: pointer;
+  text-align: left;
+  word-spacing: normal;
+  letter-spacing: normal;
+  min-height: 0;
+}
+
+#modal-form .checkbox-container a {
+  color: var(--sp-modal-navy);
+  font-size: inherit;
+  font-weight: 700;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+#modal-form .checkbox-container a:hover {
+  color: #1E293B;
+}
+
+#modal-form .checkbox-container input[type="checkbox"] {
+  position: absolute;
+  opacity: 0;
+  width: 1px;
+  height: 1px;
+  cursor: pointer;
+}
+
+#modal-form .checkbox-container .checkmark {
+  position: absolute;
+  left: 12px;
+  top: 12px;
+  width: 20px;
+  height: 20px;
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  border: 1.5px solid #CBD5E1;
+  border-radius: 6px;
+  background: #fff;
+  background-image: none;
+  transform: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 0;
+}
+
+/* Centered ✓ — override general.css SVG / absolute offsets */
+#modal-form .checkbox-container .checkmark::after,
+#modal-form .checkbox-container .checkmark:after {
+  content: "" !important;
+  position: static !important;
+  left: auto !important;
+  top: auto !important;
+  display: none;
+  width: 5px;
+  height: 9px;
+  margin: -1px 0 0 0;
+  border: solid #0a1620;
+  border-width: 0 2px 2px 0;
+  background: none !important;
+  background-image: none !important;
+  transform: rotate(45deg);
+  box-sizing: border-box;
+}
+
+#modal-form .checkbox-container input:checked ~ .checkmark {
+  background: var(--sp-modal-yellow-2);
+  background-image: none;
+  border-color: var(--sp-modal-yellow-2);
+}
+
+#modal-form .checkbox-container input:checked ~ .checkmark::after,
+#modal-form .checkbox-container input:checked ~ .checkmark:after {
+  display: block !important;
+}
+
+#modal-form .invalid-checkbox,
+#modal-form .checkbox-container input:required:invalid ~ .invalid-checkbox {
+  display: none;
+  margin: 0;
+  padding: 8px 12px;
+  border-radius: 8px;
+  background: #FEF2F2;
+  border: 1px solid #FECACA;
+  color: #B91C1C;
+  font-size: 13px;
+  font-weight: 600;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+#modal-form .sp-modal__form.is-consent-error .invalid-checkbox {
+  display: block;
+}
+
+#modal-form .sp-modal__submit.btn,
+#modal-form .main-form form input[type="submit"].sp-modal__submit,
+#modal-form .main-form form input[type="submit"].btn,
+#modal-form .main-form form input[type="submit"] {
+  display: block;
+  width: 100% !important;
+  max-width: 100% !important;
+  min-width: 0;
+  align-self: stretch;
+  height: 54px;
+  margin: 4px 0 0 !important;
+  padding: 0 20px !important;
+  border: 1.5px solid var(--sp-modal-yellow-2) !important;
+  border-radius: var(--sp-modal-radius-sm) !important;
+  background: var(--sp-modal-yellow-2) !important;
+  color: var(--sp-modal-navy) !important;
+  font-size: 16px;
+  font-weight: 800;
+  line-height: 1;
+  text-align: center;
+  cursor: pointer;
+  box-shadow: none !important;
+  float: none !important;
+  transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+#modal-form .sp-modal__submit.btn:hover,
+#modal-form .main-form form input[type="submit"].sp-modal__submit:hover,
+#modal-form .main-form form input[type="submit"].btn:hover,
+#modal-form .main-form form input[type="submit"]:hover {
+  background: var(--sp-modal-navy) !important;
+  border-color: var(--sp-modal-navy) !important;
+  color: #fff !important;
+  transform: translateY(-1px);
+  box-shadow: 0 10px 22px rgba(15, 23, 42, 0.2) !important;
+}
+
+#modal-form .sp-modal__form [role="alert"] {
+  margin: 0;
+  padding: 12px 14px;
+  border-radius: 10px;
+  background: #ECFDF5;
+  border: 1px solid #A7F3D0;
+  color: #065F46;
+  font-size: 14px;
+  font-weight: 600;
+  text-align: left;
+}
+
+@media screen and (max-width: 575px) {
+  .fancybox__container:has(#modal-form) .fancybox__content {
+    max-width: calc(100vw - 20px);
+  }
+
+  #modal-form.sp-modal,
+  .sp-modal#modal-form {
+    width: min(100%, calc(100vw - 20px));
+  }
+
+  #modal-form .sp-modal__card.main-form {
+    padding: 22px 16px 18px;
+    border-radius: 16px;
+  }
+
+  #modal-form .sp-modal__head {
+    margin-right: 40px;
+    gap: 8px;
+    margin-bottom: 16px;
+  }
+
+  #modal-form .sp-modal__product {
+    gap: 12px;
+    margin-bottom: 14px;
+    padding: 10px 12px;
+  }
+
+  #modal-form .sp-modal__product-media {
+    width: 72px;
+    height: 54px;
+  }
+
+  #modal-form .sp-modal__product-title {
+    font-size: 0.86rem;
+  }
+
+  #modal-form .sp-modal__product-price-value {
+    font-size: 0.88rem;
+  }
+
+  #modal-form .sp-modal__title {
+    font-size: 1.15rem;
+  }
+
+  #modal-form .sp-modal__subtitle {
+    font-size: 0.9rem;
+  }
+
+  #modal-form .sp-modal__phone input.telephone,
+  .banner__form-form .sp-modal__phone input.telephone,
+  #modal-form .sp-modal__submit.btn,
+  #modal-form .main-form form input[type="submit"] {
+    height: 52px;
+    font-size: 16px;
+  }
+
+  #modal-form .sp-modal__close {
+    top: 10px;
+    right: 10px;
+    width: 34px;
+    height: 34px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .fancybox__slide #modal-form.sp-modal {
+    animation: none;
+  }
+
+  #modal-form .sp-modal__close,
+  #modal-form .sp-modal__submit.btn {
+    transition: none;
+  }
+}

@@ -1,0 +1,269 @@
+/* ==========================================================================
+   SP-PARK-SHOWCASE — SEO & Conversion Optimized Product Slider
+   ========================================================================== */
+
+.sp-park-showcase {
+  padding: 40px 0 32px;
+}
+
+/* Full container width: kill legacy side-arrow inset (100% - 114px) */
+.sp-park-showcase .our__park {
+  padding-left: 0 !important;
+  padding-right: 0 !important;
+  margin-left: 0 !important;
+  margin-right: 0 !important;
+}
+
+.sp-park-showcase .parkSlider {
+  max-width: 100% !important;
+  width: 100% !important;
+  margin: 0 !important;
+  overflow: hidden;
+}
+
+.sp-park-showcase .parkSlider .swiper-wrapper {
+  margin-bottom: 0;
+}
+
+.sp-park-showcase .parkSlider .swiper-slide {
+  height: auto;
+  box-sizing: border-box;
+}
+
+.sp-park-showcase__head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 20px;
+  margin-bottom: 28px;
+}
+
+.sp-park-showcase__eyebrow {
+  display: inline-block;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: #15803d;
+  background: #dcfce7;
+  padding: 4px 10px;
+  border-radius: 6px;
+  margin-bottom: 8px;
+}
+
+.sp-park-showcase__title.title {
+  margin: 0 !important;
+  text-align: left !important;
+}
+
+.sp-park-showcase__controls {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.sp-park-tabs {
+  display: flex;
+  gap: 6px;
+  background: #f1f5f9;
+  padding: 5px;
+  border-radius: 12px;
+}
+
+.sp-park-tab {
+  border: none;
+  background: transparent;
+  color: #475569;
+  font-size: 13px;
+  font-weight: 600;
+  padding: 8px 14px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.sp-park-tab:hover {
+  color: #0f172a;
+}
+
+.sp-park-tab.is-active {
+  background: #0f172a;
+  color: #ffffff;
+}
+
+.sp-park-nav {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.sp-park-nav__btn {
+  position: static !important;
+  margin: 0 !important;
+  width: 42px !important;
+  height: 42px !important;
+  border-radius: 50% !important;
+  border: 1px solid #cbd5e1 !important;
+  background: #ffffff !important;
+  color: #0f172a !important;
+  transition: all 0.2s ease !important;
+}
+
+.sp-park-nav__btn:hover {
+  background: #fbbf24 !important;
+  border-color: #fbbf24 !important;
+}
+
+/* Внутреннее устройство карточки (убираем белую дыру) */
+.sp-park-card {
+  display: flex !important;
+  flex-direction: column !important;
+  justify-content: space-between !important;
+  height: 100% !important;
+  border-radius: 20px !important;
+  border: 1px solid #e2e8f0 !important;
+  transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease !important;
+}
+
+.sp-park-card:hover {
+  transform: translateY(-4px);
+  border-color: #fbbf24 !important;
+  box-shadow: 0 18px 36px -12px rgba(15, 23, 42, 0.12) !important;
+}
+
+.sp-park-card__media {
+  position: relative !important;
+  display: block !important;
+  width: 100% !important;
+  aspect-ratio: 4 / 3 !important;
+  overflow: hidden !important;
+  background: #f8fafc !important;
+  flex: 0 0 auto !important;
+}
+
+.sp-park-card__media img,
+.sp-park-card__img {
+  position: absolute !important;
+  inset: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+  max-height: none !important;
+  object-fit: cover !important;
+  object-position: center !important;
+  display: block !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+}
+
+.sp-park-card__status-badge {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  z-index: 2;
+  background: rgba(15, 23, 42, 0.82);
+  backdrop-filter: blur(4px);
+  color: #4ade80;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 6px 12px;
+  border-radius: 99px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  line-height: 1.2;
+}
+
+.sp-park-card__status-badge::before {
+  content: "";
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #22c55e;
+}
+
+.sp-park-card__body,
+.sp-park-card .product-card-wrapper-info {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 auto;
+  min-height: 0;
+  gap: 12px;
+  padding: 16px 16px 18px;
+  box-sizing: border-box;
+}
+
+.sp-park-card__h3 {
+  font-size: 16px;
+  font-weight: 700;
+  line-height: 1.3;
+  color: #0f172a;
+  margin: 0;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  min-height: calc(1.3em * 2);
+}
+
+/* Список ТТХ характеристик вместо пустого места */
+.sp-park-specs {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  font-size: 12px;
+  color: #64748b;
+  min-height: 96px;
+  flex: 0 0 auto;
+  box-sizing: border-box;
+}
+
+.sp-park-card .d_block {
+  margin-top: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  width: 100%;
+  flex: 0 0 auto;
+}
+
+.sp-park-specs__item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 4px 8px;
+  background: #f8fafc;
+  border-radius: 6px;
+}
+
+.sp-park-specs__item strong {
+  color: #0f172a;
+  font-weight: 700;
+}
+
+.sp-park-specs__item--included {
+  color: #15803d;
+  font-weight: 600;
+  background: #f0fdf4;
+  justify-content: flex-start;
+}
+
+@media (max-width: 768px) {
+  .sp-park-tabs {
+    width: 100%;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+  .sp-park-tabs::-webkit-scrollbar {
+    display: none;
+  }
+  .sp-park-nav {
+    display: none;
+  }
+}

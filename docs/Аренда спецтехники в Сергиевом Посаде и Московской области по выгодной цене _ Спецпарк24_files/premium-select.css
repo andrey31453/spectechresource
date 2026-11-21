@@ -1,0 +1,239 @@
+/**
+ * Specpark premium select (custom listbox → native <select> for FetchIt).
+ * Classes: .sp-premium-select (site-wide) + .sp-hero-select (hero aliases).
+ */
+.sp-premium-select,
+.sp-hero-select {
+  --sp-select-h: 48px;
+  --sp-select-ink: #0f172a;
+  --sp-select-muted: #64748b;
+  --sp-select-border: rgba(15, 23, 42, 0.14);
+  --sp-select-accent: #fdca00;
+  --sp-select-radius: 8px;
+  --sp-select-radius-list: 10px;
+  --sp-select-z: 80;
+
+  position: relative;
+  width: 100%;
+  min-width: 0;
+  z-index: 1;
+}
+
+.sp-premium-select.is-open,
+.sp-hero-select.is-open {
+  z-index: var(--sp-select-z);
+}
+
+.sp-premium-select__native,
+.sp-hero-select__native {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.sp-premium-select__trigger,
+.sp-hero-select__trigger {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  width: 100%;
+  height: var(--sp-select-h);
+  min-height: var(--sp-select-h);
+  box-sizing: border-box;
+  padding: 0 14px;
+  background: #fff;
+  border: 1px solid var(--sp-select-border);
+  border-radius: var(--sp-select-radius);
+  font-family: inherit;
+  font-size: 14.5px;
+  font-weight: 600;
+  color: var(--sp-select-ink);
+  line-height: 1.3;
+  text-align: left;
+  cursor: pointer;
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
+  transition: border-color 0.15s, box-shadow 0.15s;
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+.sp-premium-select__trigger:hover,
+.sp-hero-select__trigger:hover,
+.sp-premium-select.is-open .sp-premium-select__trigger,
+.sp-hero-select.is-open .sp-hero-select__trigger {
+  border-color: var(--sp-select-accent);
+  box-shadow: 0 0 0 3px rgba(253, 202, 0, 0.22);
+}
+
+.sp-premium-select__trigger:focus,
+.sp-hero-select__trigger:focus {
+  outline: none;
+  border-color: var(--sp-select-accent);
+  box-shadow: 0 0 0 3px rgba(253, 202, 0, 0.28);
+}
+
+.sp-premium-select__value,
+.sp-hero-select__value {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.sp-premium-select__value.is-placeholder,
+.sp-hero-select__value.is-placeholder {
+  color: var(--sp-select-muted);
+  font-weight: 500;
+}
+
+.sp-premium-select__chevron,
+.sp-hero-select__chevron {
+  flex: 0 0 auto;
+  width: 10px;
+  height: 10px;
+  border-right: 2px solid var(--sp-select-ink);
+  border-bottom: 2px solid var(--sp-select-ink);
+  transform: rotate(45deg) translateY(-2px);
+  transition: transform 0.15s;
+}
+
+.sp-premium-select.is-open .sp-premium-select__chevron,
+.sp-hero-select.is-open .sp-hero-select__chevron {
+  transform: rotate(225deg) translateY(-1px);
+}
+
+.sp-premium-select__list,
+.sp-hero-select__list {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: calc(100% + 6px);
+  width: auto;
+  z-index: calc(var(--sp-select-z) + 1);
+  margin: 0;
+  padding: 6px;
+  list-style: none;
+  max-height: min(320px, 50vh);
+  overflow-y: auto;
+  overflow-x: hidden;
+  background: #fff;
+  border: 1px solid rgba(15, 23, 42, 0.12);
+  border-radius: var(--sp-select-radius-list);
+  box-shadow: 0 14px 32px rgba(15, 23, 42, 0.14);
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: thin;
+  scrollbar-color: #0f172a transparent;
+}
+
+.sp-premium-select__list[hidden],
+.sp-hero-select__list[hidden] {
+  display: none !important;
+}
+
+.sp-premium-select__list::-webkit-scrollbar,
+.sp-hero-select__list::-webkit-scrollbar {
+  width: 8px;
+}
+
+.sp-premium-select__list::-webkit-scrollbar-thumb,
+.sp-hero-select__list::-webkit-scrollbar-thumb {
+  background: #0f172a;
+  border-radius: 8px;
+  border: 2px solid #fff;
+}
+
+.sp-premium-select__option,
+.sp-hero-select__option {
+  display: block;
+  width: 100%;
+  box-sizing: border-box;
+  padding: 11px 12px;
+  border: none;
+  border-radius: 7px;
+  background: transparent;
+  color: var(--sp-select-ink);
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 500;
+  text-align: left;
+  line-height: 1.35;
+  cursor: pointer;
+  white-space: normal;
+  word-break: break-word;
+}
+
+.sp-premium-select__option:hover,
+.sp-hero-select__option:hover,
+.sp-premium-select__option:focus,
+.sp-hero-select__option:focus {
+  outline: none;
+  background: #fff8d6;
+}
+
+.sp-premium-select__option.is-selected,
+.sp-hero-select__option.is-selected {
+  background: #fff1b8;
+  font-weight: 700;
+  box-shadow: inset 3px 0 0 var(--sp-select-accent);
+}
+
+/* Home yellow calc form — match 52px fields, allow list to escape card */
+.form__rent.home-lead {
+  overflow: visible;
+}
+
+.form__rent.home-lead::before,
+.form__rent.home-lead::after {
+  border-radius: inherit;
+}
+
+.form__rent.home-lead .sp-premium-select {
+  --sp-select-h: 52px;
+  --sp-select-radius: 12px;
+  --sp-select-z: 120;
+}
+
+.form__rent.home-lead .sp-premium-select__trigger {
+  font-size: 16px;
+  font-weight: 500;
+  padding: 0 16px;
+}
+
+/* Contacts CTA row — panel overflow must not clip the list */
+.contacts-cta-section .req-cta__panel {
+  overflow: visible;
+}
+
+.contacts-lead-form .sp-premium-select {
+  --sp-select-h: var(--cta-field-h, 48px);
+  --sp-select-radius: var(--cta-radius, 8px);
+  --sp-select-z: 120;
+  width: 100%;
+}
+
+.contacts-form-group .sp-premium-select {
+  flex: 1;
+  min-width: 0;
+}
+
+/* Kill legacy absolute offset if old markup still present */
+.form__input-dropdown-items {
+  top: calc(100% + 6px) !important;
+  left: 0 !important;
+  right: 0 !important;
+  width: auto !important;
+  height: auto !important;
+  max-height: min(320px, 50vh);
+  z-index: 80 !important;
+  box-sizing: border-box;
+}

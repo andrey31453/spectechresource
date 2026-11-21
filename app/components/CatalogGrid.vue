@@ -17,8 +17,25 @@ const number = (index: number) => String(index + 1).padStart(2, "0");
     <article
       v-for="(category, index) in categories"
       :key="category.slug"
-      class="flex h-full flex-col rounded-card border border-line bg-surface p-5 transition hover:-translate-y-0.5 hover:border-brand/40 hover:shadow-card"
+      class="flex h-full flex-col overflow-hidden rounded-card border border-line bg-surface p-5 transition hover:-translate-y-0.5 hover:border-brand/40 hover:shadow-card"
     >
+      <NuxtLink
+        v-if="category.image"
+        :to="categoryPath(category.slug)"
+        class="-mx-5 -mt-5 mb-4 block overflow-hidden bg-line"
+        tabindex="-1"
+        aria-hidden="true"
+      >
+        <img
+          :src="category.image"
+          :alt="category.title"
+          loading="lazy"
+          width="640"
+          height="360"
+          class="aspect-[16/9] w-full object-cover transition-transform duration-500 hover:scale-[1.03]"
+        >
+      </NuxtLink>
+
       <span aria-hidden="true" class="font-mono text-xs font-semibold tracking-[0.18em] text-brand">
         {{ number(index) }}
       </span>

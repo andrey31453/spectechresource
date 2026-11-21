@@ -1,0 +1,480 @@
+/* ==========================================================================
+   Cross-cutting CTA lead + contract guarantees (catalog categories)
+   Isolated from hero / first-screen work — classes: .cta-lead, .cta-benefits
+   ========================================================================== */
+
+:root {
+  /* Match logo yellow (#fdca00) + soft highlight */
+  --cta-accent: #fdca00;
+  --cta-accent-2: #f3c43a;
+  --cta-ink: #0F172A;
+  --cta-bg: #F4F6F9;
+  --cta-max: 1280px;
+  --cta-radius: 6px;
+}
+
+/* --------------------------------------------------------------------------
+   BLOCK 1 — Premium lead magnet
+   -------------------------------------------------------------------------- */
+.cta-lead {
+  background: var(--cta-bg);
+  padding: 40px 16px;
+  margin: 0;
+}
+
+.cta-lead__banner {
+  max-width: var(--cta-max);
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 1.1fr 0.9fr;
+  gap: 32px;
+  align-items: center;
+  padding: 36px 40px;
+  border-radius: var(--cta-radius);
+  background:
+    radial-gradient(ellipse 80% 60% at 10% 20%, rgba(255, 255, 255, 0.35), transparent 55%),
+    radial-gradient(ellipse 50% 40% at 90% 80%, rgba(15, 23, 42, 0.12), transparent 50%),
+    repeating-linear-gradient(
+      -12deg,
+      transparent,
+      transparent 14px,
+      rgba(255, 255, 255, 0.06) 14px,
+      rgba(255, 255, 255, 0.06) 15px
+    ),
+    linear-gradient(135deg, var(--cta-accent) 0%, var(--cta-accent-2) 100%);
+  box-shadow:
+    0 18px 40px rgba(15, 23, 42, 0.14),
+    0 2px 0 rgba(255, 255, 255, 0.25) inset;
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+}
+
+/* Thematic engineering / crane SVG (same motif as product-page rent form) */
+.cta-lead__banner::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  opacity: 0.15;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 800 280' fill='none'%3E%3Cpath stroke='%230F172A' stroke-width='1.2' d='M40 240H760M80 40V240M80 40H420M420 40L520 140M420 40L200 240M520 140H640M640 140V240M200 240V180H280V240'/%3E%3Cpath stroke='%230F172A' stroke-width='1' stroke-dasharray='4 6' d='M100 70H380M100 100H360M100 130H300'/%3E%3Ccircle cx='520' cy='140' r='6' fill='%23FDCA00' stroke='%230F172A' stroke-width='1.2'/%3E%3Cpath stroke='%230F172A' stroke-width='2' d='M80 40L95 55M80 40L65 55'/%3E%3Cpath stroke='%230F172A' stroke-width='0.8' opacity='0.5' d='M560 60h180M560 80h160M560 100h140'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: left -40px center;
+  background-size: min(640px, 75%) auto;
+}
+
+/* Subtle blueprint grid — fades under white form card */
+.cta-lead__banner::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background-image:
+    linear-gradient(to right, rgba(15, 23, 42, 0.07) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(15, 23, 42, 0.07) 1px, transparent 1px);
+  background-size: 28px 28px;
+  -webkit-mask-image: radial-gradient(ellipse 70% 85% at 22% 50%, #000 12%, transparent 72%);
+  mask-image: radial-gradient(ellipse 70% 85% at 22% 50%, #000 12%, transparent 72%);
+  opacity: 0.6;
+}
+
+.cta-lead__left,
+.cta-lead__right {
+  position: relative;
+  z-index: 1;
+}
+
+.cta-lead__badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 6px 12px;
+  margin-bottom: 14px;
+  border-radius: var(--cta-radius);
+  background: rgba(15, 23, 42, 0.12);
+  color: var(--cta-ink);
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+
+.cta-lead__title {
+  margin: 0 0 12px;
+  color: var(--cta-ink);
+  font-size: clamp(1.45rem, 2.2vw, 1.9rem);
+  font-weight: 700;
+  line-height: 1.25;
+}
+
+.cta-lead__subtitle {
+  margin: 0 0 22px;
+  color: rgba(15, 23, 42, 0.82);
+  font-size: 1rem;
+  line-height: 1.5;
+  max-width: 36em;
+}
+
+.cta-lead__contacts {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 14px 20px;
+}
+
+.cta-lead__phone {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  color: var(--cta-ink);
+  text-decoration: none;
+}
+
+.cta-lead__phone:visited {
+  color: var(--cta-ink);
+}
+
+.cta-lead__phone:hover .cta-lead__phone-num {
+  text-decoration: underline;
+}
+
+.cta-lead__phone-label {
+  font-size: 12px;
+  opacity: 0.75;
+}
+
+.cta-lead__phone-num {
+  font-size: 1.15rem;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+}
+
+.cta-lead__messengers {
+  display: flex;
+  gap: 10px;
+}
+
+.cta-lead__msg {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 42px;
+  height: 42px;
+  border-radius: var(--cta-radius);
+  color: #fff;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.cta-lead__msg:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 16px rgba(15, 23, 42, 0.18);
+  color: #fff;
+}
+
+.cta-lead__msg--tg {
+  background: #229ED9;
+}
+
+.cta-lead__msg--max {
+  background: transparent;
+  padding: 0;
+  overflow: hidden;
+}
+.cta-lead__msg--max img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: inherit;
+}
+
+.cta-lead__form-card {
+  background: #fff;
+  border-radius: var(--cta-radius);
+  padding: 22px 22px 18px;
+  box-shadow: 0 12px 28px rgba(15, 23, 42, 0.12);
+}
+
+/* Form internals (scoped; keeps FetchIt / .telephone / .invalid-checkbox) */
+.cta-lead .cta-lead-form__row {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  align-items: stretch;
+  width: 100%;
+}
+
+.cta-lead .cta-lead-form__phone {
+  position: relative;
+  max-width: none;
+  width: 100%;
+}
+
+.cta-lead .cta-lead-form__phone-icon {
+  position: absolute;
+  left: 16px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #6b7280;
+  pointer-events: none;
+  display: flex;
+  z-index: 1;
+}
+
+.cta-lead .cta-lead-form__phone input.telephone {
+  height: 54px;
+  width: 100%;
+  padding: 0 16px 0 48px;
+  border: 1px solid #E5E7EB;
+  border-radius: var(--cta-radius);
+  outline: none;
+  font-size: 16px; /* iOS zoom guard */
+  line-height: 1.2;
+  color: #111827;
+  background: #F9FAFB;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+}
+
+.cta-lead .cta-lead-form__phone input.telephone:focus {
+  border-color: var(--cta-accent);
+  background: #fff;
+  box-shadow: 0 0 0 3px rgba(253, 202, 0, 0.4);
+  outline: none;
+}
+
+.cta-lead .cta-lead-form__submit.btn {
+  width: 100%;
+  max-width: none;
+  height: 54px;
+  padding: 0 20px;
+  border: none;
+  border-radius: var(--cta-radius);
+  background: var(--cta-ink);
+  color: #fff;
+  font-size: 16px;
+  font-weight: 600;
+  transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+}
+
+.cta-lead .cta-lead-form__submit.btn:hover {
+  background: #0f1a30;
+  color: #fff;
+  transform: translateY(-2px);
+  box-shadow: 0 10px 20px rgba(15, 23, 42, 0.22);
+}
+
+.cta-lead .cta-lead-form__consents {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 12px;
+  margin-top: 16px;
+  width: 100%;
+}
+
+.cta-lead .cta-lead-form__consents .checkbox-container {
+  max-width: none;
+  width: 100%;
+  margin-top: 0;
+  font-size: 12px;
+  line-height: 1.45;
+  color: #4B5563;
+}
+
+.cta-lead .invalid-checkbox {
+  color: #DC2626;
+  font-size: 0.85rem;
+}
+
+@keyframes cta-shake {
+  0%, 100% { transform: translateX(0); }
+  20%, 60% { transform: translateX(-4px); }
+  40%, 80% { transform: translateX(4px); }
+}
+
+.cta-lead .checkbox-container input:required:invalid ~ .invalid-checkbox {
+  display: block;
+  animation: cta-shake 0.45s ease;
+}
+
+@media screen and (max-width: 991px) {
+  .cta-lead__banner {
+    grid-template-columns: 1fr;
+    padding: 28px 22px;
+    gap: 22px;
+  }
+
+  .cta-lead__title {
+    font-size: 1.4rem;
+  }
+}
+
+@media screen and (max-width: 575px) {
+  .cta-lead {
+    padding: 28px 12px;
+  }
+
+  .cta-lead__banner {
+    padding: 22px 16px;
+    border-radius: var(--cta-radius);
+  }
+
+  .cta-lead__form-card {
+    padding: 16px;
+  }
+
+  .cta-lead__phone-num {
+    font-size: 16px;
+  }
+
+  .cta-lead .cta-lead-form__phone input.telephone,
+  .cta-lead-form__phone input.telephone {
+    font-size: 16px;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   BLOCK 2 — Contract guarantees / AEO benefits
+   -------------------------------------------------------------------------- */
+.cta-benefits {
+  background: transparent;
+  padding: 48px 16px 56px;
+  margin: 0;
+}
+
+.cta-benefits__inner {
+  max-width: var(--cta-max);
+  margin: 0 auto;
+}
+
+.cta-benefits__title {
+  margin: 0 0 10px;
+  text-align: center;
+  font-size: clamp(1.5rem, 2.4vw, 1.85rem);
+  font-weight: 700;
+  color: #1F2937;
+}
+
+.cta-benefits__subtitle {
+  margin: 0 auto 32px;
+  text-align: center;
+  max-width: 40em;
+  color: #6B7280;
+  font-size: 1rem;
+  line-height: 1.5;
+}
+
+.cta-benefits__items {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 20px;
+}
+
+.cta-benefits__card {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 22px 20px;
+  background: #fff;
+  border: 1px solid #EEF0F3;
+  border-radius: var(--cta-radius);
+  box-shadow: 0 4px 14px rgba(15, 23, 42, 0.04);
+  transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
+}
+
+.cta-benefits__item:hover .cta-benefits__card {
+  transform: translateY(-4px);
+  box-shadow: 0 14px 28px rgba(15, 23, 42, 0.1);
+  border-color: #E5E7EB;
+}
+
+.cta-benefits__icon {
+  width: 56px;
+  height: 56px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--cta-radius);
+  background: linear-gradient(145deg, rgba(253, 202, 0, 0.18), rgba(243, 196, 58, 0.1));
+  flex-shrink: 0;
+}
+
+.cta-benefits__icon img {
+  width: 40px;
+  height: 40px;
+  object-fit: contain;
+}
+
+.cta-benefits__body {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.cta-benefits__name {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #111827;
+  line-height: 1.35;
+}
+
+.cta-benefits__desc {
+  margin: 0;
+  font-size: 0.9rem;
+  line-height: 1.5;
+  color: #6B7280;
+}
+
+@media screen and (max-width: 991px) {
+  .cta-benefits__items {
+    grid-template-columns: 1fr;
+    gap: 14px;
+  }
+}
+
+@media screen and (max-width: 575px) {
+  .cta-benefits {
+    padding: 32px 12px 40px;
+  }
+
+  .cta-benefits__subtitle {
+    margin-bottom: 22px;
+  }
+
+  .cta-benefits__card {
+    flex-direction: row;
+    align-items: flex-start;
+    gap: 14px;
+    padding: 16px;
+  }
+
+  .cta-benefits__icon {
+    width: 48px;
+    height: 48px;
+    border-radius: var(--cta-radius);
+  }
+
+  .cta-benefits__icon img {
+    width: 32px;
+    height: 32px;
+  }
+
+  .cta-benefits__name {
+    font-size: 0.95rem;
+  }
+
+  .cta-benefits__desc {
+    font-size: 0.85rem;
+  }
+}
+
+/* Neutralize legacy grey matryoshka if old class still present nearby */
+.cta-benefits.catalog__benefits,
+section.cta-benefits {
+  background: transparent !important;
+  border-radius: 0 !important;
+}

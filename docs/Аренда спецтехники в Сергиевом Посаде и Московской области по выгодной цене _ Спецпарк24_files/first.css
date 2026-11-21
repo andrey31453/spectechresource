@@ -1,0 +1,128 @@
+.header__top-logo span {
+    max-width: 165px;
+}
+.searchTerm {
+    padding-left: 1rem;
+}
+@media screen and (min-width:1391px){
+    .banner__text {
+      margin: 130px 0px 0px 10px;
+    }
+}
+@media screen and (max-width:1390px){
+    .banner__text {
+      margin: 40px 0px 0px 10px;
+    }
+}
+@media screen and (max-width:700px){
+    .header__top-worktime span {
+        max-width: 120px;
+    }
+}
+@media screen and (min-width: 591px) {
+    .banner__form .banner__form-form.main-form{
+        margin-top: -50px;
+    }
+}
+@media screen and (max-width: 590px) {
+    .banner__form .banner__form-form.main-form{
+        margin-top: 3rem;
+        margin-bottom: 2.75rem;
+    }
+    .banner__text {
+        margin-bottom: 20px;
+    }
+    
+    .main-form form {
+        width: 100%;
+    }
+    .main-form form .btn {
+        width: 100%;
+        max-width: 100%;
+    }
+}
+h2.title {
+  margin-top: 5rem;
+  margin-bottom: 1rem;
+  font-family: var(--font-family);
+  font-weight: 500;
+  text-align: center;
+  font-size: clamp(1.125rem, 2vw + 1rem, 2.125rem);
+}
+
+h3.title,
+.partners-section .title,
+.our_partners .title {
+  font-size: 20px;
+  font-family: var(--font-family);
+  font-weight: 500;
+  text-align: center;
+  margin-bottom: 40px;
+  font-size: clamp(1.125rem, 2vw + 1rem, 2.125rem);
+}
+h3.title.no_marginb,
+.partners-section .title.no_marginb,
+.our_partners .title.no_marginb {
+  margin-bottom: 0;
+}
+.form__rent .checkbox-container {
+    max-width: unset;
+}
+button.btn span {
+    white-space: nowrap;
+}
+
+.reviewsSwiper .title{
+    margin-top: 3rem;
+}
+.parkSlider-header {
+    margin-top: 3rem;
+}
+.btn.in-catalog {
+    margin:2rem auto 2rem;
+}
+.btn.in-catalog span{
+    color:#fff;
+}
+.btn.in-catalog:hover span{
+    color: var(--primary-color);
+}
+@media screen and (max-width:1451px){
+   .read-more-label {
+        left: 0px;
+    } 
+}
+@media screen and (max-width:1450px){
+    .read-more-label {
+        left: 10px;
+    }
+
+}
+@media screen and (max-width:1450px) and (min-width:641px){
+    .header__top{
+        padding-bottom: 10px;
+    }
+}
+.cityname.visible {
+    z-index: 1000;
+    position: fixed;
+    top: 0;
+}
+
+@media screen and (max-width:480px){
+    .banner__text h1{
+        text-align: center;
+        max-width: 400px;
+        margin-left: auto;
+        margin-right: auto;
+    }
+    
+    .banner__form .banner__form-form.main-form .checkbox-container {
+        max-width: unset;
+    }
+}
+
+.article-seo p img,
+.article-seo img{
+    max-width: 100%;
+}

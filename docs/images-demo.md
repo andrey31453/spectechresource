@@ -22,6 +22,20 @@
 | `usluga-planirovka.webp` | Планировка участка катком и автогрейдером | `grading-2.jpg` | Krzysztof Popławski | CC BY 4.0 | https://commons.wikimedia.org/wiki/File:Budowa_Velostrady_nr_6_-_odcinek_Katowice_Bryn%C3%B3w_-_Katowice_Bryn%C3%B3w,_wyr%C3%B3wnywarka_oraz_walec_podczas_pracy.jpg |
 | `usluga-perevozka.webp` | Перевозка гусеничной техники на трале | `transport-2.jpg` | Cjp24 | CC BY-SA 4.0 | https://commons.wikimedia.org/wiki/File:Liebherr_tracked_vehicle_on_Goldhofer_trailer_-_right_view2.jpg |
 
+## Где используются (сид `prisma/seed.ts`)
+
+Демо-снимки забирает сид: константы `PHOTO.*` — те же файлы `public/landing/images/tech/*.webp`.
+
+| Куда попадает | Сколько | Откуда берётся файл |
+|---|---|---|
+| `Category.image` — обложка раздела в `/katalog` и шапке `/katalog/[category]` | 8 разделов | `PHOTO` по смыслу раздела |
+| `EquipmentType.gallery` — обложка вида в каталоге и галерея «Фото техники» на `/arenda-[slug]` | 39 видов, по 2–3 фото | `typeDetails[slug].photos` |
+| `EquipmentModel.photos` — снимок модели в таблице «Модели в парке» | 23 модели | первое фото вида |
+| `Service.image` — карточка услуги | 5 услуг | `PHOTO` по смыслу услуги |
+
+Правило сида: демо-значения записываются только в пустые поля (`??` и проверка `length === 0`),
+поэтому фото, загруженное через админку, повторный `npm run db:seed` не перетирает.
+
 ## Перед публикацией
 
 - Снимки под CC BY-SA / CC BY требуют указания автора и лицензии рядом с изображением

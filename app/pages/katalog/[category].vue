@@ -37,11 +37,37 @@ usePageSeo({
     <h1>{{ h1 }}</h1>
     <p v-if="category.shortDesc" class="lead">{{ category.shortDesc }}</p>
 
+    <figure v-if="category.image" class="mt-6 overflow-hidden rounded-card border border-line bg-line">
+      <img
+        :src="category.image"
+        :alt="category.title"
+        width="1280"
+        height="640"
+        class="aspect-[16/9] w-full object-cover sm:aspect-[21/9]"
+      >
+    </figure>
+
     <ul class="grid" style="margin-top: 20px">
       <li v-for="type in category.types" :key="type.slug">
-        <NuxtLink :to="typePath(type.slug, city.slug)" class="card">
-          <span class="card__title">{{ type.name }}</span>
-          <span class="card__meta">{{ formatPriceFrom(type.priceFrom, type.priceUnit) }}</span>
+        <NuxtLink
+          :to="typePath(type.slug, city.slug)"
+          class="flex h-full flex-col overflow-hidden rounded-card border border-line bg-surface transition hover:-translate-y-0.5 hover:border-brand/40 hover:shadow-card"
+        >
+          <img
+            v-if="type.image"
+            :src="type.image"
+            :alt="`Аренда ${type.nameGenitive}`"
+            loading="lazy"
+            width="640"
+            height="400"
+            class="aspect-[16/10] w-full object-cover bg-line"
+          >
+          <span class="flex flex-1 flex-col gap-1 p-4">
+            <span class="font-semibold text-ink">{{ type.name }}</span>
+            <span class="mt-auto text-sm font-medium text-brand">
+              {{ formatPriceFrom(type.priceFrom, type.priceUnit) }}
+            </span>
+          </span>
         </NuxtLink>
       </li>
     </ul>

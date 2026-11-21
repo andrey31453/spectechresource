@@ -14,12 +14,15 @@ export interface TypeCardDto {
   nameGenitive: string;
   priceFrom: string | null;
   priceUnit: PriceUnit;
+  /** Обложка вида: первое фото галереи; null — фото ещё не загружено. */
+  image: string | null;
 }
 
 export interface CategoryCardDto {
   slug: string;
   title: string;
   shortDesc: string | null;
+  image?: string | null;
   types: TypeCardDto[];
 }
 
@@ -55,8 +58,29 @@ export interface SiteDto {
   city: CityDto;
 }
 
+/**
+ * Модель техники на главной: конкретная машина с ценой за смену.
+ * `categorySlug`/`typeSlug` связывают карточку с разделом и посадочной вида —
+ * отдельных страниц моделей в каталоге нет.
+ */
+export interface HomeModelDto {
+  id: string;
+  categorySlug: string;
+  typeSlug: string;
+  typeName: string;
+  brand: string;
+  model: string;
+  pricePerShift: string | null;
+  /** Цена за час, если заполнена в админке: вторая строка под ценой смены. */
+  pricePerHour: string | null;
+  /** Первое фото из галереи модели; null — фото ещё не загружено. */
+  photo: string | null;
+  specs: Array<{ name: string; value: string }>;
+}
+
 export interface HomeDto {
   categories: CategoryCardDto[];
+  models: HomeModelDto[];
   services: ServiceCardDto[];
   advantages: Array<{ title: string; text: string | null; icon: string | null }>;
   steps: Array<{ title: string; text: string | null }>;

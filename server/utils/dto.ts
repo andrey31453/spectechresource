@@ -21,6 +21,7 @@ export function toTypeCard(type: {
   nameGenitive: string;
   priceFrom: Decimalish | null;
   priceUnit: PriceUnit;
+  gallery?: string[];
 }) {
   return {
     slug: type.slug,
@@ -28,6 +29,31 @@ export function toTypeCard(type: {
     nameGenitive: type.nameGenitive,
     priceFrom: money(type.priceFrom),
     priceUnit: type.priceUnit,
+    image: type.gallery?.[0] ?? null,
+  };
+}
+
+export function toHomeModel(model: {
+  id: string;
+  brand: string;
+  model: string;
+  pricePerShift: Decimalish | null;
+  pricePerHour: Decimalish | null;
+  photos: string[];
+  specs: Array<{ name: string; value: string }>;
+  type: { slug: string; name: string; category: { slug: string } };
+}) {
+  return {
+    id: model.id,
+    categorySlug: model.type.category.slug,
+    typeSlug: model.type.slug,
+    typeName: model.type.name,
+    brand: model.brand,
+    model: model.model,
+    pricePerShift: money(model.pricePerShift),
+    pricePerHour: money(model.pricePerHour),
+    photo: model.photos[0] ?? null,
+    specs: model.specs.map((spec) => ({ name: spec.name, value: spec.value })),
   };
 }
 

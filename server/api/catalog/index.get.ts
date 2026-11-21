@@ -17,6 +17,7 @@ export default defineEventHandler(async () => {
     slug: category.slug,
     title: category.title,
     shortDesc: category.shortDesc,
+    image: category.image,
     types: category.types.map(toTypeCard),
   }));
 });

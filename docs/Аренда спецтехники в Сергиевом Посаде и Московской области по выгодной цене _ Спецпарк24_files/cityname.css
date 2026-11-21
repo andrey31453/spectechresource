@@ -1,0 +1,117 @@
+.cityname {
+    width: 100%;
+    margin: auto;
+    position: absolute;
+    top: -100%;
+    background-color: #f8f8f8;
+    box-shadow: 0 0 16px rgba(0, 0, 0, 0.1);
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    max-height: 0;
+    height: 100%;
+    left: 0;
+    transition: top .3s ease 0s,  max-height .4s ease .3s;
+}
+.cityname.visible{
+    top: 0;
+    max-height: 84px;
+}
+
+.cityname #searchInput {
+    max-width: 400px;
+    width: 100%;
+    display: block;
+    padding: 10px;
+    text-align: center;
+    outline:none;
+    border: 1px solid;
+    border-color: var(--primary-color-hover);
+    font-size: 1.2rem;
+}
+
+.cityname ul#results {
+    position: absolute;
+    top: -100%;
+    max-width: 400px;
+    width: 100%;
+    padding: 0px;
+    background: #f8f8f8;
+    max-height: 0px;
+    transition: padding .3s ease .2s, top .3s ease 0s, max-height .3s ease .5s;
+    display: flex;
+    flex-direction: column;
+
+    
+}
+
+.cityname ul#results::-webkit-scrollbar-track
+{
+	-webkit-box-shadow: inset 0 0 6px rgba(0,0,0,0.3);
+	background-color: #f8f8f8;
+}
+
+.cityname ul#results::-webkit-scrollbar
+{
+	width: 5px;
+	background-color: var(--primary-color-hover);
+}
+
+.cityname ul#results::-webkit-scrollbar-thumb
+{
+	background-color: var(--primary-color-hover);
+	border: 2px solid var(--primary-color-hover);
+}
+.cityname ul#results li{
+    opacity:0;
+    max-height: 0;
+    transition: padding .3s ease .2s, top .3s ease 0s, max-height .3s ease .7s;
+    padding: 0;
+    height: 100%;
+    list-style: none;
+}
+.cityname ul#results:has(li) li{
+    opacity:1;
+    max-height: 40px;
+    padding: 25px 0;
+    box-shadow: rgba(27, 31, 35, 0.04) 0px 1px 0px, rgba(255, 255, 255, 0.25) 0px 1px 0px inset;
+}
+.cityname ul#results:has(li) {
+    max-height: 400px;
+    overflow-y: scroll;
+    top:84px;
+    list-style: none;
+    text-align: center;
+    box-shadow: rgba(99, 99, 99, 0.2) 0px 2px 8px 0px;
+}
+ul#results li a {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    height: 100%;
+    font-size: 1.2rem;
+    transition: color .3s ease;
+}
+ul#results li:hover a{
+    color:var(--primary-color);
+    
+}
+ul#results li {
+    transition: background-color 0.3s ease-in-out;
+    display: flex;
+    height: 100%;
+    width: 100%;
+    align-items: center;
+    text-align: center;
+    font-size: 1.2rem;
+    justify-content: center;
+    
+
+}
+ul#results li:hover {
+    background-color: rgba(51, 51, 51, 0.1);
+}
+
+
+

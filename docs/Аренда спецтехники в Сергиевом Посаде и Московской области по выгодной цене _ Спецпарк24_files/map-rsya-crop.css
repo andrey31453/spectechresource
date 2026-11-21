@@ -1,0 +1,59 @@
+/**
+ * Hide Yandex Maps РСЯ banners in map-widget iframe embeds.
+ * Ads live inside cross-origin iframe — crop via overflow + taller iframe.
+ *
+ * IMPORTANT: do NOT position the iframe absolute. Absolute + overflow:hidden
+ * blanks WebGL/vector tiles in Chromium (gray box, Yandex logo only).
+ * Fixed-height .map-frame + overflow:hidden clips the taller relative iframe.
+ */
+.map-frame,
+.contacts-map-section .map-frame,
+.map-section .map-frame,
+.map-wrapper .map-frame {
+  --ymap-rsya-crop: 130px;
+  position: relative !important;
+  overflow: hidden !important;
+}
+
+.map-wrapper {
+  overflow: hidden !important;
+}
+
+.map-frame > div,
+.contacts-map-section .map-frame > div,
+.map-section .map-frame > div,
+.map-wrapper .map-frame > div {
+  position: relative !important;
+  width: 100% !important;
+  height: 100% !important;
+  max-height: 100% !important;
+  overflow: hidden !important;
+  margin: 0 !important;
+}
+
+.map-frame iframe,
+.contacts-map-section .map-frame iframe,
+.map-section .map-frame iframe,
+.map-wrapper .map-frame iframe {
+  position: relative !important;
+  top: auto !important;
+  left: auto !important;
+  right: auto !important;
+  bottom: auto !important;
+  width: 100% !important;
+  height: calc(100% + var(--ymap-rsya-crop, 130px)) !important;
+  min-height: calc(100% + var(--ymap-rsya-crop, 130px)) !important;
+  max-height: none !important;
+  display: block !important;
+  border: 0 !important;
+  margin: 0 !important;
+}
+
+@media (max-width: 768px) {
+  .map-frame,
+  .contacts-map-section .map-frame,
+  .map-section .map-frame,
+  .map-wrapper .map-frame {
+    --ymap-rsya-crop: 148px;
+  }
+}

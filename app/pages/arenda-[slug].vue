@@ -21,6 +21,9 @@ const { data, error } = await useFetch<LandingDto>("/api/landing", {
 throwIfError(error.value);
 
 const landing = computed(() => data.value);
+/** Первое фото показываем крупно, остальные — плиткой ниже. */
+const gallery = computed(() => landing.value?.type.gallery ?? []);
+const coverPhoto = computed(() => gallery.value[0] ?? null);
 const city = computed(() => landing.value?.city ?? { slug: "moskva", name: "Москва", nameIn: "Москве" });
 const companyName = computed(() => site.value?.companyName ?? "ООО «СПЕЦТЕХРЕСУРС»");
 const h1 = computed(() => `Аренда ${landing.value?.type.nameGenitive ?? ""} в ${city.value.nameIn}`);
@@ -114,6 +117,31 @@ function specLine(specs: Array<{ name: string; value: string }>): string {
           <template v-if="landing.type.withoutCrewAvailable && landing.type.crewAvailable"> или без экипажа</template>
         </li>
       </ul>
+    </section>
+
+    <section v-if="gallery.length" class="section">
+      <h2>Фото техники</h2>
+      <figure v-if="coverPhoto" class="mt-4 overflow-hidden rounded-card border border-line bg-line">
+        <img
+          :src="coverPhoto"
+          :alt="`${landing.type.name} — фото 1`"
+          width="1280"
+          height="720"
+          class="aspect-[16/9] w-full object-cover"
+        >
+      </figure>
+      <div v-if="gallery.length > 1" class="mt-3 flex flex-wrap gap-3">
+        <img
+          v-for="(photo, index) in gallery.slice(1)"
+          :key="`${photo}-${index}`"
+          :src="photo"
+          :alt="`${landing.type.name} — фото ${index + 2}`"
+          loading="lazy"
+          width="640"
+          height="480"
+          class="aspect-[4/3] w-full rounded-card border border-line bg-line object-cover sm:w-[calc(50%-0.375rem)]"
+        >
+      </div>
     </section>
 
     <section v-if="landing.models.length" class="section">

@@ -1,0 +1,1485 @@
+/* Shared catalog first-screen — :is(.catalog-avtk, .catalog-hero)  v=avtk-hero-33
+   Brand triad only: bg #F4F6F9 · ink #0F172A · accent #fdca00
+   CAD grid/glow on .catalog-hero MUST stay
+   Mobile: overflow containment + filter drawer fit */
+:is(.catalog-avtk, .catalog-hero) {
+  --avtk-accent: #fdca00;
+  --avtk-accent-hover: #e5b800;
+  --avtk-ink: #0F172A;
+  --avtk-dark: #0F172A;
+  --avtk-dark-2: #1E293B;
+  --avtk-bg: #F4F6F9;
+  --avtk-success: #16A34A;
+  --avtk-surface: #F4F6F9;
+  --avtk-card: #FFFFFF;
+  --avtk-border: #E2E8F0;
+  --avtk-muted: #64748B;
+  --avtk-radius: 6px;
+  --avtk-shadow: none;
+}
+
+/* ——— Hero ——— */
+.avtk-hero {
+  margin: 8px 0 16px;
+}
+.avtk-hero__title-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px 20px;
+  justify-content: space-between;
+}
+.avtk-hero__h1 {
+  margin: 0;
+  font-size: clamp(1.85rem, 3.6vw, 2.75rem);
+  line-height: 1.08;
+  letter-spacing: -0.025em;
+  color: var(--avtk-ink);
+  font-weight: 800;
+  /* Width grow only — NEVER flex-basis:240px (column = 240px HEIGHT void) */
+  flex: 1 1 auto;
+  min-width: 0;
+  max-width: 100%;
+  min-height: 0;
+}
+.avtk-hero__live {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0;
+  background: transparent;
+  color: var(--avtk-ink);
+  border-radius: 0;
+  font-size: 14px;
+  font-weight: 500;
+  white-space: nowrap;
+  border: none;
+}
+.avtk-hero__live strong { color: var(--avtk-ink); font-weight: 700; }
+.avtk-hero__pulse {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--avtk-success);
+  box-shadow: none;
+  animation: none;
+  flex-shrink: 0;
+}
+@keyframes avtk-pulse {
+  0%, 100% { box-shadow: none; }
+}
+.avtk-hero__usps {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 18px;
+  list-style: none;
+  margin: 10px 0 0;
+  padding: 0;
+  font-size: 14px;
+  color: var(--avtk-muted);
+}
+.avtk-hero__usps li {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.avtk-hero__usps li::before {
+  content: "";
+  width: 6px;
+  height: 6px;
+  border-radius: var(--avtk-radius);
+  background: var(--avtk-accent);
+}
+
+/* ——— Promo panel ——— */
+:is(.catalog-avtk, .catalog-hero) .promo-line-block.avtk-promo {
+  background: var(--avtk-card);
+  border-radius: var(--avtk-radius);
+  border: none;
+  border-left: 4px solid var(--avtk-accent);
+  box-shadow: none;
+  padding: 14px 18px;
+  margin: 0 0 16px;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 14px 20px;
+  justify-content: space-between;
+}
+.avtk-promo__badge,
+:is(.catalog-avtk, .catalog-hero) .promo-badge {
+  background: #FFF6D6;
+  color: var(--avtk-ink);
+  font-size: 13px;
+  font-weight: 600;
+  text-transform: none;
+  letter-spacing: 0;
+  padding: 6px 12px;
+  border-radius: var(--avtk-radius);
+  white-space: nowrap;
+}
+.avtk-promo__prices {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px 18px;
+  flex: 1 1 auto;
+}
+.avtk-promo__price {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 4px;
+  color: var(--avtk-dark);
+}
+.avtk-promo__price-label { font-size: 13px; color: var(--avtk-muted); }
+.avtk-promo__price strong { font-size: 1.25rem; font-weight: 800; }
+.avtk-promo__price-unit { font-size: 14px; color: var(--avtk-muted); }
+.avtk-promo__actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px 16px;
+}
+:is(.catalog-avtk, .catalog-hero) .btn-calc.avtk-promo__calc {
+  background: var(--avtk-accent);
+  color: var(--avtk-ink);
+  border: none;
+  border-radius: var(--avtk-radius);
+  padding: 11px 18px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+:is(.catalog-avtk, .catalog-hero) .btn-calc.avtk-promo__calc:hover {
+  background: var(--avtk-accent-hover);
+}
+.avtk-promo__contacts {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+.avtk-promo__tel {
+  display: flex;
+  flex-direction: column;
+  text-decoration: none;
+  color: inherit;
+  min-width: 0;
+  max-width: none;
+  overflow: visible;
+}
+.avtk-promo__tel .wa-label {
+  font-size: 13px;
+  text-transform: none;
+  letter-spacing: 0;
+  color: var(--avtk-muted);
+  font-weight: 500;
+}
+/* FIX: phone truncation — no mask, no overflow clip */
+:is(.catalog-avtk, .catalog-hero) .wa-phone,
+:is(.catalog-avtk, .catalog-hero) .avtk-promo__phone {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--avtk-dark);
+  white-space: nowrap;
+  overflow: visible !important;
+  text-overflow: clip !important;
+  mask-image: none !important;
+  -webkit-mask-image: none !important;
+  max-width: none !important;
+  width: auto !important;
+  display: inline-block;
+  letter-spacing: 0;
+}
+.avtk-promo__messengers {
+  display: flex;
+  gap: 8px;
+  flex-shrink: 0;
+}
+.avtk-msg {
+  width: 40px;
+  height: 40px;
+  border-radius: var(--avtk-radius);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  text-decoration: none;
+  transition: transform 0.15s, opacity 0.15s;
+}
+.avtk-msg:hover { transform: translateY(-1px); opacity: 0.92; }
+.avtk-msg--tg { background: #229ED9; }
+.avtk-msg--max {
+  background: transparent;
+  padding: 0;
+  overflow: hidden;
+}
+.avtk-msg--max img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: inherit;
+}
+
+@media (max-width: 576px) {
+  :is(.catalog-avtk, .catalog-hero) .promo-line-block.avtk-promo {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .avtk-promo__actions { flex-direction: column; align-items: stretch; }
+  :is(.catalog-avtk, .catalog-hero) .btn-calc.avtk-promo__calc { width: 100%; justify-content: center; }
+  .avtk-promo__contacts {
+    justify-content: space-between;
+    width: 100%;
+  }
+  :is(.catalog-avtk, .catalog-hero) .wa-phone,
+  :is(.catalog-avtk, .catalog-hero) .avtk-promo__phone {
+    font-size: 14px;
+  }
+}
+
+/* ——— AEO (compact premium strip) ——— */
+:is(.catalog-avtk, .catalog-hero) .avtk-aeo {
+  background: var(--avtk-card);
+  border: none;
+  border-radius: var(--avtk-radius);
+  padding: 12px 14px;
+  margin: 0 0 12px;
+  box-shadow: none;
+}
+:is(.catalog-avtk, .catalog-hero) .avtk-aeo__inner {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  align-items: stretch;
+}
+:is(.catalog-avtk, .catalog-hero) .avtk-aeo__text {
+  font-size: 14px;
+  line-height: 1.45;
+  color: var(--avtk-dark-2);
+  max-width: 72rem;
+}
+:is(.catalog-avtk, .catalog-hero) .avtk-aeo__text p { margin: 0; }
+/* Plain proof line — not icon-cards */
+:is(.catalog-avtk, .catalog-hero) .avtk-aeo__facts {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 4px 18px;
+}
+:is(.catalog-avtk, .catalog-hero) .avtk-aeo__facts li,
+:is(.catalog-avtk, .catalog-hero) .avtk-aeo__fact {
+  position: relative;
+  background: transparent;
+  border: none;
+  border-radius: 0;
+  padding: 2px 0;
+  display: inline-flex;
+  flex-direction: row;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 6px;
+  box-shadow: none;
+  min-width: 0;
+  overflow: visible;
+}
+:is(.catalog-avtk, .catalog-hero) .avtk-aeo__facts li::before,
+:is(.catalog-avtk, .catalog-hero) .avtk-aeo__fact::before {
+  display: none;
+}
+:is(.catalog-avtk, .catalog-hero) .avtk-aeo__icon {
+  display: none;
+}
+:is(.catalog-avtk, .catalog-hero) .avtk-aeo__body {
+  display: inline-flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 2px 6px;
+  min-width: 0;
+}
+:is(.catalog-avtk, .catalog-hero) .avtk-aeo__facts strong,
+:is(.catalog-avtk, .catalog-hero) .avtk-aeo__body > strong {
+  color: #0F172A;
+  font-size: 14px;
+  font-weight: 800;
+  letter-spacing: -0.01em;
+  white-space: nowrap;
+}
+:is(.catalog-avtk, .catalog-hero) .avtk-aeo__label,
+:is(.catalog-avtk, .catalog-hero) .avtk-aeo__body > span {
+  font-size: 13px;
+  color: var(--avtk-muted);
+  white-space: normal;
+}
+:is(.catalog-avtk, .catalog-hero) .avtk-aeo__more {
+  display: none;
+  margin-top: 6px;
+  background: none;
+  border: none;
+  color: var(--avtk-accent-hover);
+  font-weight: 600;
+  font-size: 13px;
+  cursor: pointer;
+  padding: 0;
+}
+@media (max-width: 767px) {
+  :is(.catalog-avtk, .catalog-hero) .avtk-hero {
+    margin: 4px 0 12px;
+  }
+  /* Block stack — no flex axis (avoids flex-basis→height void) */
+  :is(.catalog-avtk, .catalog-hero) .avtk-hero__title-row {
+    display: block;
+    min-height: 0;
+  }
+  :is(.catalog-avtk, .catalog-hero) .avtk-hero__h1 {
+    display: block;
+    font-size: clamp(1.55rem, 7.2vw, 1.95rem);
+    line-height: 1.12;
+    letter-spacing: -0.02em;
+    flex: none;
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+    min-height: 0;
+    height: auto;
+    margin: 0;
+  }
+  :is(.catalog-avtk, .catalog-hero) .avtk-hero__live {
+    display: inline-flex;
+    flex: none;
+    white-space: normal;
+    font-size: 13px;
+    margin: 6px 0 0;
+    padding: 0;
+  }
+  :is(.catalog-avtk, .catalog-hero) .avtk-hero__usps {
+    margin-top: 8px;
+  }
+  :is(.catalog-avtk, .catalog-hero) .avtk-aeo { padding: 10px 0; background: transparent; }
+  :is(.catalog-avtk, .catalog-hero) .avtk-aeo__text:not(.is-open) {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+  :is(.catalog-avtk, .catalog-hero) .avtk-aeo__more { display: inline-block; }
+  :is(.catalog-avtk, .catalog-hero) .avtk-aeo__facts {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+  }
+  :is(.catalog-avtk, .catalog-hero) .avtk-aeo__facts li,
+  :is(.catalog-avtk, .catalog-hero) .avtk-aeo__fact {
+    padding: 4px 0;
+  }
+  :is(.catalog-avtk, .catalog-hero) .avtk-aeo__facts strong,
+  :is(.catalog-avtk, .catalog-hero) .avtk-aeo__body > strong { font-size: 14px; }
+  :is(.catalog-avtk, .catalog-hero) .avtk-aeo__label,
+  :is(.catalog-avtk, .catalog-hero) .avtk-aeo__body > span {
+    font-size: 13px;
+  }
+}
+
+/* ——— SEO hub tags (quiet — not a second filter; sidebar = ajax) ———
+   Override legacy `.catalogs__params-top-tags a { width:100% }` which
+   stretched each tag into a full-width empty bar. */
+:is(.catalog-avtk, .catalog-hero) .avtk-tags {
+  margin: 4px 0 10px;
+  padding: 0;
+}
+:is(.catalog-avtk, .catalog-hero) .avtk-tags::before {
+  content: "Популярные подборки";
+  display: block;
+  margin: 0 0 8px;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  text-transform: none;
+  color: var(--avtk-muted);
+}
+:is(.catalog-avtk, .catalog-hero) .avtk-tags__tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px;
+  margin: 0 0 6px;
+  padding: 0;
+}
+/* No horizontal padding: title / «Все» / first tag share one left edge;
+   active underline (::after) = exact text width — never box-shadow on padded box */
+:is(.catalog-avtk, .catalog-hero) .avtk-tags__tab {
+  position: relative;
+  border: none;
+  background: transparent;
+  border-radius: 0;
+  padding: 4px 0;
+  margin: 0;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  color: var(--avtk-muted);
+  box-shadow: none;
+}
+:is(.catalog-avtk, .catalog-hero) .avtk-tags__tab.is-active {
+  background: transparent;
+  color: var(--avtk-ink);
+  box-shadow: none;
+  border-color: transparent;
+}
+:is(.catalog-avtk, .catalog-hero) .avtk-tags__tab.is-active::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 2px;
+  background: var(--avtk-accent);
+  border-radius: 1px;
+  pointer-events: none;
+}
+:is(.catalog-avtk, .catalog-hero) .avtk-tags__rail-wrap {
+  position: relative;
+}
+:is(.catalog-avtk, .catalog-hero) .avtk-tags__rail {
+  overflow: visible;
+}
+:is(.catalog-avtk, .catalog-hero) .avtk-tags__list.catalogs__params-top-tags,
+:is(.catalog-avtk, .catalog-hero) .avtk-tags__list {
+  display: flex !important;
+  flex-wrap: wrap !important;
+  flex-direction: row !important;
+  align-items: center;
+  gap: 8px !important;
+  width: 100% !important;
+  max-width: 100%;
+  padding: 0 !important;
+  margin: 0 !important;
+  white-space: normal !important;
+}
+:is(.catalog-avtk, .catalog-hero) .avtk-tags__list a,
+:is(.catalog-avtk, .catalog-hero) .avtk-tags__list a.avtk-tag,
+:is(.catalog-avtk, .catalog-hero) .catalogs__params-top-tags a.avtk-tag,
+:is(.catalog-avtk, .catalog-hero) .catalogs__params-top-tags a {
+  display: inline-flex !important;
+  align-items: center;
+  justify-content: center;
+  width: auto !important;
+  max-width: none !important;
+  flex: 0 0 auto !important;
+  order: 0 !important;
+  margin: 0 10px 0 0 !important;
+  padding: 4px 0 !important;
+  border-radius: 0 !important;
+  border: none;
+  background: transparent !important;
+  color: var(--avtk-dark-2) !important;
+  text-decoration: underline !important;
+  text-decoration-color: #CBD5E1 !important;
+  text-underline-offset: 3px;
+  font-size: 12px !important;
+  font-weight: 500;
+  line-height: 1.25;
+  white-space: nowrap !important;
+  box-sizing: border-box;
+  transition: color 0.15s, text-decoration-color 0.15s, background 0.15s;
+}
+:is(.catalog-avtk, .catalog-hero) .avtk-tags__list a:hover,
+:is(.catalog-avtk, .catalog-hero) .catalogs__params-top-tags a:hover {
+  border-color: transparent !important;
+  background: transparent !important;
+  color: var(--avtk-ink) !important;
+  text-decoration-color: var(--avtk-accent) !important;
+}
+:is(.catalog-avtk, .catalog-hero) .avtk-tags__list a.active__subcategory,
+:is(.catalog-avtk, .catalog-hero) .catalogs__params-top-tags a.active__subcategory {
+  background: transparent !important;
+  border-color: transparent !important;
+  color: var(--avtk-ink) !important;
+  font-weight: 700;
+  text-decoration-color: var(--avtk-accent) !important;
+  order: 0 !important;
+}
+:is(.catalog-avtk, .catalog-hero) .avtk-tags__list a:last-child,
+:is(.catalog-avtk, .catalog-hero) .catalogs__params-top-tags a:last-child {
+  margin-right: 0 !important;
+}
+/* Must beat `.avtk-tags__list a { display:inline-flex !important }` or tabs/clamp never hide */
+:is(.catalog-avtk, .catalog-hero) .avtk-tags__list a.is-hidden-tag,
+:is(.catalog-avtk, .catalog-hero) .avtk-tags__list a.avtk-tag.is-hidden-tag,
+:is(.catalog-avtk, .catalog-hero) .catalogs__params-top-tags a.is-hidden-tag,
+:is(.catalog-avtk, .catalog-hero) .avtk-tag.is-hidden-tag {
+  display: none !important;
+}
+:is(.catalog-avtk, .catalog-hero) .avtk-tags__rail.is-clamped {
+  max-height: 2.6em;
+  overflow: hidden;
+}
+:is(.catalog-avtk, .catalog-hero) .avtk-tags__rail.is-expanded {
+  max-height: none;
+  overflow: visible;
+}
+:is(.catalog-avtk, .catalog-hero) .avtk-tags__more {
+  margin-top: 6px;
+  background: none;
+  border: 1px dashed var(--avtk-border);
+  border-radius: var(--avtk-radius);
+  padding: 7px 12px;
+  font-size: 13px;
+  cursor: pointer;
+  color: var(--avtk-dark);
+}
+:is(.catalog-avtk, .catalog-hero) .avtk-tags__hint {
+  display: none;
+  position: absolute;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  width: 28px;
+  align-items: center;
+  justify-content: flex-end;
+  padding-right: 4px;
+  font-size: 22px;
+  color: var(--avtk-dark);
+  background: var(--avtk-card);
+  pointer-events: none;
+}
+@media (max-width: 767px) {
+  /* Scroll container must stay bounded — .is-expanded { overflow:visible } was killing swipe */
+  :is(.catalog-avtk, .catalog-hero) .avtk-tags__rail-wrap {
+    overflow: hidden;
+    max-width: 100%;
+  }
+  :is(.catalog-avtk, .catalog-hero) .avtk-tags__rail,
+  :is(.catalog-avtk, .catalog-hero) .avtk-tags__rail.is-expanded,
+  :is(.catalog-avtk, .catalog-hero) .avtk-tags__rail.is-clamped {
+    width: 100% !important;
+    max-width: 100% !important;
+    max-height: none !important;
+    overflow-x: auto !important;
+    overflow-y: hidden !important;
+    -webkit-overflow-scrolling: touch;
+    touch-action: pan-x;
+    overscroll-behavior-x: contain;
+    scrollbar-width: none;
+  }
+  :is(.catalog-avtk, .catalog-hero) .avtk-tags__rail::-webkit-scrollbar { display: none; }
+  :is(.catalog-avtk, .catalog-hero) .avtk-tags__list.catalogs__params-top-tags,
+  :is(.catalog-avtk, .catalog-hero) .avtk-tags__list {
+    flex-wrap: nowrap !important;
+    width: max-content !important;
+    max-width: none !important;
+    padding-right: 28px !important;
+  }
+  :is(.catalog-avtk, .catalog-hero) .avtk-tags__hint { display: flex; }
+  :is(.catalog-avtk, .catalog-hero) .avtk-tags__more { display: none !important; }
+}
+
+/* ——— Sort bar ——— */
+:is(.catalog-avtk, .catalog-hero) .avtk-sort.catalogs__params-top-control,
+:is(.catalog-avtk, .catalog-hero) .avtk-sort {
+  display: flex !important;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-start !important;
+  gap: 10px 14px;
+  padding: 8px 0 12px;
+  margin-bottom: 10px;
+  border-bottom: 1px solid var(--avtk-border);
+  width: 100%;
+  position: relative;
+}
+:is(.catalog-avtk, .catalog-hero) .avtk-sort > .ajax-form {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  margin: -1px;
+  padding: 0;
+  border: 0;
+}
+:is(.catalog-avtk, .catalog-hero) .avtk-sort__found {
+  font-size: 14px;
+  color: #4b5563;
+  white-space: nowrap;
+  flex: 0 0 auto;
+}
+:is(.catalog-avtk, .catalog-hero) .avtk-sort__found strong {
+  color: var(--avtk-dark);
+  font-weight: 800;
+}
+:is(.catalog-avtk, .catalog-hero) .avtk-sort__sort.catalogs__params-top-control-sort,
+:is(.catalog-avtk, .catalog-hero) .avtk-sort__sort {
+  display: inline-flex !important;
+  align-items: center;
+  justify-content: flex-start !important;
+  gap: 8px 10px;
+  flex: 1 1 auto;
+  min-width: 0;
+}
+:is(.catalog-avtk, .catalog-hero) .avtk-sort__label {
+  font-size: 13px;
+  color: #6b7280;
+  white-space: nowrap;
+}
+:is(.catalog-avtk, .catalog-hero) .avtk-sort__chips.catalogs__params-top-control-sort-btns,
+:is(.catalog-avtk, .catalog-hero) .avtk-sort__chips {
+  display: inline-flex !important;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px !important;
+}
+:is(.catalog-avtk, .catalog-hero) .avtk-sort__chip,
+:is(.catalog-avtk, .catalog-hero) .catalogs__params-top-control-sort-btns button.avtk-sort__chip,
+:is(.catalog-avtk, .catalog-hero) .avtk-sort .catalogs__params-top-control-sort-btns button {
+  border: none !important;
+  background: var(--avtk-bg) !important;
+  border-radius: var(--avtk-radius) !important;
+  padding: 7px 12px !important;
+  font-size: 13px !important;
+  line-height: 1.2;
+  cursor: pointer;
+  text-decoration: none !important;
+  color: var(--avtk-dark-2) !important;
+  opacity: 1 !important;
+  scale: 1 !important;
+  white-space: nowrap;
+}
+:is(.catalog-avtk, .catalog-hero) .avtk-sort__chip.active,
+:is(.catalog-avtk, .catalog-hero) .avtk-sort .catalogs__params-top-control-sort-btns button.active {
+  background: var(--avtk-dark) !important;
+  color: #fff !important;
+  border-color: var(--avtk-dark) !important;
+  opacity: 1 !important;
+}
+:is(.catalog-avtk, .catalog-hero) .avtk-sort__view.catalogs__params-top-control-sort-view,
+:is(.catalog-avtk, .catalog-hero) .avtk-sort__view {
+  margin-left: auto;
+  display: inline-flex !important;
+  align-items: center;
+  gap: 6px !important;
+  flex: 0 0 auto;
+}
+:is(.catalog-avtk, .catalog-hero) .avtk-sort__view-btn,
+:is(.catalog-avtk, .catalog-hero) .avtk-sort .catalogs__params-top-control-sort-view button {
+  width: 36px;
+  height: 36px;
+  border-radius: var(--avtk-radius) !important;
+  border: none !important;
+  background: var(--avtk-bg) !important;
+  color: var(--avtk-dark);
+  display: inline-flex !important;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  scale: 1 !important;
+  opacity: 1 !important;
+  padding: 0 !important;
+}
+:is(.catalog-avtk, .catalog-hero) .avtk-sort__view-btn.active,
+:is(.catalog-avtk, .catalog-hero) .avtk-sort .catalogs__params-top-control-sort-view button.active {
+  background: var(--avtk-accent) !important;
+  border-color: var(--avtk-accent) !important;
+  opacity: 1 !important;
+  scale: 1 !important;
+}
+/* Hide grid/list switcher on mobile — not needed next to Filters/sort */
+@media (max-width: 768px) {
+  :is(.catalog-avtk, .catalog-hero) .avtk-sort__view,
+  :is(.catalog-avtk, .catalog-hero) .avtk-sort__view.catalogs__params-top-control-sort-view,
+  :is(.catalog-avtk, .catalog-hero) #gridView,
+  :is(.catalog-avtk, .catalog-hero) #listView {
+    display: none !important;
+  }
+}
+@media (max-width: 575px) {
+  :is(.catalog-avtk, .catalog-hero) .avtk-sort__label { display: none; }
+}
+
+/* Mobile toolbar: [Фильтры] …… [Найдено + sort] on one row */
+@media (max-width: 991px) {
+  :is(.catalog-avtk, .catalog-hero) .catalogs__params#catalog,
+  :is(.catalog-avtk, .catalog-hero) section.catalogs__params {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    align-items: center;
+    column-gap: 10px;
+    row-gap: 10px;
+  }
+  :is(.catalog-avtk, .catalog-hero) .avtk-filter-trigger {
+    grid-column: 1;
+    grid-row: 1;
+    margin: 0 !important;
+    width: auto !important;
+    flex-shrink: 0;
+  }
+  :is(.catalog-avtk, .catalog-hero) .catalogs__params-filters.avtk-filters-shell {
+    grid-column: 1 / -1;
+  }
+  :is(.catalog-avtk, .catalog-hero) .catalogs__params-wrapper {
+    display: contents;
+  }
+  :is(.catalog-avtk, .catalog-hero) .avtk-sort.catalogs__params-top-control,
+  :is(.catalog-avtk, .catalog-hero) .avtk-sort {
+    grid-column: 2;
+    grid-row: 1;
+    margin: 0 !important;
+    padding: 0 !important;
+    border: 0 !important;
+    width: auto !important;
+    min-width: 0;
+    justify-content: flex-end !important;
+    flex-wrap: nowrap;
+    gap: 6px 8px;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+  :is(.catalog-avtk, .catalog-hero) .avtk-sort::-webkit-scrollbar { display: none; }
+  :is(.catalog-avtk, .catalog-hero) .avtk-sort__found {
+    font-size: 12px;
+  }
+  :is(.catalog-avtk, .catalog-hero) .avtk-sort__sort {
+    flex: 0 0 auto !important;
+  }
+  :is(.catalog-avtk, .catalog-hero) .avtk-sort__chips {
+    flex-wrap: nowrap !important;
+  }
+  :is(.catalog-avtk, .catalog-hero) .avtk-sort__chip,
+  :is(.catalog-avtk, .catalog-hero) .avtk-sort .catalogs__params-top-control-sort-btns button {
+    padding: 6px 10px !important;
+    font-size: 12px !important;
+  }
+  :is(.catalog-avtk, .catalog-hero) .catalogs__params-products,
+  :is(.catalog-avtk, .catalog-hero) #pdopage {
+    grid-column: 1 / -1;
+  }
+}
+
+:is(.catalog-avtk, .catalog-hero) .premium-filter__header {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 8px;
+}
+:is(.catalog-avtk, .catalog-hero) .premium-filter__header .avtk-filter-count-badge {
+  margin-left: auto;
+}
+
+/* ——— Filter accordion / UX ——— */
+.avtk-acc__toggle {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  background: none;
+  border: none;
+  padding: 4px 0;
+  cursor: pointer;
+  text-align: left;
+}
+.avtk-acc__chevron {
+  width: 8px;
+  height: 8px;
+  border-right: 2px solid #9ca3af;
+  border-bottom: 2px solid #9ca3af;
+  transform: rotate(45deg);
+  transition: transform 0.2s;
+  flex-shrink: 0;
+}
+.avtk-acc.is-open .avtk-acc__chevron {
+  transform: rotate(-135deg);
+}
+.avtk-acc__panel[hidden] { display: none !important; }
+.avtk-segmented {
+  display: inline-flex !important;
+  background: var(--avtk-surface);
+  border-radius: var(--avtk-radius);
+  padding: 3px;
+  gap: 2px;
+  border: 1px solid var(--avtk-border);
+}
+.avtk-segmented span {
+  border-radius: var(--avtk-radius) !important;
+  padding: 7px 12px !important;
+  font-size: 13px;
+  cursor: pointer;
+}
+.avtk-segmented span.active {
+  background: var(--avtk-accent) !important;
+  color: var(--avtk-dark) !important;
+  font-weight: 700;
+}
+/* Price fields: value + ₽ identical (override #price__inputs span { font-size:2rem }) */
+:is(.catalog-avtk, .catalog-hero) #price__inputs {
+  display: block;
+  width: 100%;
+}
+:is(.catalog-avtk, .catalog-hero) .slider-area-wrapper > form.ajax-form,
+:is(.catalog-avtk, .catalog-hero) #price__inputs form.ajax-form {
+  display: flex !important;
+  flex-direction: row !important;
+  flex-wrap: nowrap !important;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  margin-top: 0.85rem;
+}
+:is(.catalog-avtk, .catalog-hero) #price__inputs form.ajax-form > span:not(.avtk-price-suffix),
+:is(.catalog-avtk, .catalog-hero) .slider-area-wrapper > form.ajax-form > span:not(.avtk-price-suffix) {
+  font-size: 14px !important;
+  font-weight: 600 !important;
+  color: #9ca3af !important;
+  flex: 0 0 auto;
+}
+:is(.catalog-avtk, .catalog-hero) .avtk-price-field {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 4px;
+  flex: 1 1 0;
+  min-width: 0;
+  max-width: none;
+  background: #fff;
+  border: 1px solid var(--avtk-border);
+  border-radius: var(--avtk-radius);
+  padding: 0 10px;
+  box-shadow: 0 1px 2px rgba(20, 33, 61, 0.04);
+}
+:is(.catalog-avtk, .catalog-hero) .avtk-price-field input,
+:is(.catalog-avtk, .catalog-hero) #price__inputs .avtk-price-field input {
+  display: block !important;
+  width: 100% !important;
+  max-width: none !important;
+  min-width: 0;
+  border: none !important;
+  box-shadow: none !important;
+  background: transparent !important;
+  text-align: right !important;
+  font-size: 14px !important;
+  font-weight: 600 !important;
+  font-family: inherit !important;
+  padding: 8px 0 !important;
+  outline: none;
+  color: var(--avtk-dark) !important;
+  line-height: 1.2 !important;
+}
+:is(.catalog-avtk, .catalog-hero) #price__inputs span.avtk-price-suffix,
+:is(.catalog-avtk, .catalog-hero) .avtk-price-suffix {
+  position: static !important;
+  right: auto;
+  flex: 0 0 auto;
+  font-size: 14px !important;
+  font-weight: 600 !important;
+  font-family: inherit !important;
+  color: var(--avtk-dark) !important;
+  pointer-events: none;
+  line-height: 1.2 !important;
+  opacity: 1 !important;
+}
+/* Slider track inset so handles stay inside toggle/input edges */
+:is(.catalog-avtk, .catalog-hero) .slider-area-wrapper {
+  padding-left: 17px;
+  padding-right: 17px;
+  box-sizing: border-box;
+}
+:is(.catalog-avtk, .catalog-hero) .price-filter .noUi-target,
+:is(.catalog-avtk, .catalog-hero) .slider-area-wrapper .noUi-target {
+  margin-left: 0 !important;
+  margin-right: 0 !important;
+}
+.avtk-capacity-more {
+  margin-top: 8px;
+  width: 100%;
+  background: none;
+  border: 1px dashed var(--avtk-border);
+  border-radius: var(--avtk-radius);
+  padding: 8px;
+  font-size: 12px;
+  cursor: pointer;
+  color: var(--avtk-dark);
+}
+:is(.catalog-avtk, .catalog-hero) .avtk-filter-count-badge,
+:is(.catalog-avtk, .catalog-hero) .avtk-filter-trigger__badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 20px;
+  height: 20px;
+  padding: 0 6px;
+  border-radius: var(--avtk-radius);
+  background: var(--avtk-accent);
+  color: var(--avtk-dark);
+  font-size: 11px;
+  font-weight: 700;
+}
+/* Author `display` was overriding HTML [hidden] — zero pill stayed visible */
+:is(.catalog-avtk, .catalog-hero) .avtk-filter-count-badge[hidden],
+:is(.catalog-avtk, .catalog-hero) .avtk-filter-trigger__badge[hidden],
+:is(.catalog-avtk, .catalog-hero) .avtk-filter-count-badge.is-empty,
+:is(.catalog-avtk, .catalog-hero) .avtk-filter-trigger__badge.is-empty {
+  display: none !important;
+}
+:is(.catalog-avtk, .catalog-hero) .reset-block[data-avtk-reset-wrap]:not(.is-visible) {
+  display: none;
+}
+:is(.catalog-avtk, .catalog-hero) [data-avtk-capacity-grid] .premium-filter__tile[data-avtk-heavy="1"] {
+  display: none;
+}
+:is(.catalog-avtk, .catalog-hero) [data-avtk-capacity-grid].is-heavy-open .premium-filter__tile[data-avtk-heavy="1"],
+:is(.catalog-avtk, .catalog-hero) [data-avtk-capacity-grid] .premium-filter__tile[data-avtk-heavy="1"].is-heavy-shown {
+  display: flex;
+}
+
+/* Mobile filter trigger + sheet */
+.avtk-filter-trigger {
+  display: none;
+}
+.avtk-filter-sheet__header,
+.avtk-filter-sheet__footer {
+  display: none;
+}
+.avtk-filter-backdrop {
+  display: none;
+}
+
+@media (max-width: 991px) {
+  :is(.catalog-avtk, .catalog-hero) .avtk-filter-trigger {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    margin: 0 0 12px;
+    padding: 10px 14px;
+    border-radius: var(--avtk-radius);
+    border: 1px solid var(--avtk-border);
+    background: #fff;
+    box-shadow: var(--avtk-shadow);
+    font-weight: 600;
+    cursor: pointer;
+    color: var(--avtk-dark);
+    position: relative;
+    z-index: 2;
+    -webkit-tap-highlight-color: transparent;
+  }
+  /* Bottom sheet — override legacy sidebar max/min-width */
+  :is(.catalog-avtk, .catalog-hero) .catalogs__params-filters.avtk-filters-shell {
+    position: fixed !important;
+    left: 0 !important;
+    right: 0 !important;
+    bottom: 0 !important;
+    top: auto !important;
+    z-index: 1200;
+    max-height: 88vh !important;
+    height: 88vh !important;
+    min-width: 0 !important;
+    max-width: none !important;
+    width: 100% !important;
+    margin: 0 !important;
+    background: #fff;
+    border-radius: 6px 6px 0 0;
+    box-shadow: 0 -8px 30px rgba(0,0,0,0.18);
+    transform: translate3d(0, 110%, 0);
+    transition: transform 0.28s ease;
+    display: flex !important;
+    flex-direction: column;
+    padding: 0 !important;
+    visibility: visible;
+    pointer-events: none;
+    overflow: hidden !important; /* clip to sheet; body scrolls inside */
+  }
+  :is(.catalog-avtk, .catalog-hero) .catalogs__params-filters.avtk-filters-shell.is-open {
+    transform: translate3d(0, 0, 0);
+    pointer-events: auto;
+  }
+  :is(.catalog-avtk, .catalog-hero) .avtk-filter-sheet__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 16px;
+    border-bottom: 1px solid var(--avtk-border);
+    background: #fff;
+    z-index: 2;
+    flex: 0 0 auto;
+  }
+  :is(.catalog-avtk, .catalog-hero) .avtk-filter-sheet__close {
+    border: none;
+    background: var(--avtk-surface);
+    width: 36px;
+    height: 36px;
+    border-radius: var(--avtk-radius);
+    font-size: 22px;
+    cursor: pointer;
+    line-height: 1;
+  }
+  :is(.catalog-avtk, .catalog-hero) .avtk-filter-sheet__footer {
+    display: flex;
+    gap: 8px;
+    padding: 12px 16px;
+    border-top: 1px solid var(--avtk-border);
+    background: #fff;
+    flex: 0 0 auto;
+    z-index: 2;
+  }
+  :is(.catalog-avtk, .catalog-hero) .avtk-filter-sheet__reset,
+  :is(.catalog-avtk, .catalog-hero) .avtk-filter-sheet__apply {
+    flex: 1;
+    border-radius: var(--avtk-radius);
+    padding: 12px;
+    font-weight: 700;
+    cursor: pointer;
+    border: 1px solid var(--avtk-border);
+  }
+  :is(.catalog-avtk, .catalog-hero) .avtk-filter-sheet__apply {
+    background: var(--avtk-accent);
+    border-color: var(--avtk-accent);
+    color: var(--avtk-dark);
+  }
+  :is(.catalog-avtk, .catalog-hero) .avtk-filter-sheet__reset { background: #fff; }
+
+  /*
+   * ROOT CAUSE (scroll): shell flex children are header | .premium-filter | footer.
+   * .filter-mobile is nested — flex:1 on it never constrained the sheet.
+   * .premium-filter { overflow:hidden } then clipped the tall body with no scroll.
+   * Defeat filter__params.css max-height:0 accordion AND make the wrapper the scroll host.
+   */
+  :is(.catalog-avtk, .catalog-hero) .avtk-filters-shell .premium-filter,
+  :is(.catalog-avtk, .catalog-hero) .avtk-filters-shell .price-filter-wrapper,
+  :is(.catalog-avtk, .catalog-hero) .avtk-filters-shell .frp-filter {
+    flex: 1 1 0 !important;
+    min-height: 0 !important;
+    max-height: none !important;
+    display: flex !important;
+    flex-direction: column !important;
+    box-shadow: none !important;
+    border: none !important;
+    border-radius: 0 !important;
+    overflow: hidden !important; /* contain; scroll lives on .filter-mobile */
+  }
+  :is(.catalog-avtk, .catalog-hero) .avtk-filters-shell .filter-mobile,
+  :is(.catalog-avtk, .catalog-hero) .avtk-filters-shell .filter-mobile.active,
+  :is(.catalog-avtk, .catalog-hero) .avtk-filters-shell.is-open .filter-mobile {
+    display: block !important;
+    max-height: none !important; /* defeat filter__params accordion max-height:0 */
+    /* flex-basis:0 + min-height:0 → definite height so overflow-y scrolls */
+    flex: 1 1 0 !important;
+    min-height: 0 !important;
+    min-width: 0 !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    height: auto; /* no !important — must not fight flex shrink */
+    overflow-x: hidden !important;
+    overflow-y: auto !important;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior: contain;
+    touch-action: pan-y;
+    padding: 12px 16px 8px !important;
+    margin: 0 !important;
+    box-sizing: border-box !important;
+  }
+  /* Drawer internals: no right-clip (mode toggle / slider / inputs / footer) */
+  :is(.catalog-avtk, .catalog-hero) .avtk-filters-shell .price-filter,
+  :is(.catalog-avtk, .catalog-hero) .avtk-filters-shell .premium-filter__section,
+  :is(.catalog-avtk, .catalog-hero) .avtk-filters-shell .price-filter-variants,
+  :is(.catalog-avtk, .catalog-hero) .avtk-filters-shell .premium-filter__mode,
+  :is(.catalog-avtk, .catalog-hero) .avtk-filters-shell .avtk-segmented,
+  :is(.catalog-avtk, .catalog-hero) .avtk-filters-shell .slider-area-wrapper,
+  :is(.catalog-avtk, .catalog-hero) .avtk-filters-shell #price__inputs,
+  :is(.catalog-avtk, .catalog-hero) .avtk-filters-shell #price__inputs form.ajax-form {
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    box-sizing: border-box !important;
+  }
+  :is(.catalog-avtk, .catalog-hero) .avtk-filters-shell .price-filter,
+  :is(.catalog-avtk, .catalog-hero) .avtk-filters-shell .premium-filter__section {
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+  }
+  :is(.catalog-avtk, .catalog-hero) .avtk-filters-shell .premium-filter__mode,
+  :is(.catalog-avtk, .catalog-hero) .avtk-filters-shell .avtk-segmented {
+    display: flex !important;
+  }
+  :is(.catalog-avtk, .catalog-hero) .avtk-filters-shell .premium-filter__mode span,
+  :is(.catalog-avtk, .catalog-hero) .avtk-filters-shell .avtk-segmented span {
+    flex: 1 1 0 !important;
+    min-width: 0 !important;
+    box-sizing: border-box;
+  }
+  :is(.catalog-avtk, .catalog-hero) .avtk-filters-shell .slider-area-wrapper {
+    padding-left: 12px !important;
+    padding-right: 12px !important;
+  }
+  :is(.catalog-avtk, .catalog-hero) .avtk-filters-shell .noUi-target {
+    width: 100% !important;
+    max-width: 100% !important;
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+  }
+  :is(.catalog-avtk, .catalog-hero) .avtk-filters-shell .avtk-price-field {
+    flex: 1 1 0 !important;
+    min-width: 0 !important;
+  }
+  :is(.catalog-avtk, .catalog-hero) .avtk-filter-sheet__footer {
+    display: grid !important;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+    padding: 12px 16px;
+  }
+  :is(.catalog-avtk, .catalog-hero) .avtk-filter-sheet__reset,
+  :is(.catalog-avtk, .catalog-hero) .avtk-filter-sheet__apply {
+    width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
+  }
+  :is(.catalog-avtk, .catalog-hero) .avtk-filters-shell .premium-filter__header,
+  :is(.catalog-avtk, .catalog-hero) .avtk-filters-shell .price-filter-wrapper-header,
+  :is(.catalog-avtk, .catalog-hero) .avtk-filters-shell .reset-block {
+    display: none !important;
+  }
+  :is(.catalog-avtk, .catalog-hero) .avtk-filter-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(20, 33, 61, 0.45);
+    z-index: 1190;
+  }
+  :is(.catalog-avtk, .catalog-hero) .avtk-filter-backdrop:not([hidden]) {
+    display: block !important;
+  }
+  body.avtk-filter-open { overflow: hidden; }
+}
+
+/* Category mobile: kill horizontal page scroll from SEO min-widths / wide children */
+@media (max-width: 768px) {
+  :is(.catalog-avtk, .catalog-hero),
+  :is(.catalog-avtk, .catalog-hero) .catalogs__params,
+  :is(.catalog-avtk, .catalog-hero) .catalogs__params-wrapper,
+  :is(.catalog-avtk, .catalog-hero) .catalogs__params-products,
+  :is(.catalog-avtk, .catalog-hero) #pdopage {
+    max-width: 100% !important;
+    min-width: 0 !important;
+    box-sizing: border-box;
+    overflow-x: clip;
+  }
+}
+
+/* Toast */
+:is(.catalog-avtk, .catalog-hero) ~ .slide-out-window,
+.slide-out-window#slideOutWindow {
+  position: fixed;
+  right: 16px;
+  bottom: 16px;
+  z-index: 1300;
+  background: var(--avtk-dark);
+  color: #fff;
+  padding: 12px 14px;
+  border-radius: var(--avtk-radius);
+  box-shadow: var(--avtk-shadow);
+  display: none;
+  align-items: center;
+  gap: 12px;
+  font-size: 13px;
+}
+.slide-out-window.active {
+  display: flex !important;
+}
+.slide-out-window #scrollToCatalog {
+  background: var(--avtk-accent);
+  color: var(--avtk-dark);
+  border: none;
+  border-radius: var(--avtk-radius);
+  padding: 8px 10px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+
+/* Halved gap: catalogs__params was margin: 50px auto → 25px (scoped to AVTK) */
+:is(.catalog-avtk, .catalog-hero) > .avtk-tags,
+:is(.catalog-avtk, .catalog-hero) .avtk-tags {
+  margin-bottom: 6px !important;
+}
+:is(.catalog-avtk, .catalog-hero) > section.catalogs__params,
+:is(.catalog-avtk, .catalog-hero) section.catalogs__params#catalog {
+  margin: 25px auto !important; /* was 50px auto in catalogs__params.css */
+  padding-top: 0 !important;
+}
+:is(.catalog-avtk, .catalog-hero) .avtk-tags__more {
+  margin-bottom: 0;
+  margin-top: 6px;
+}
+
+
+/* ========== Industrial Tech Minimalism v=avtk-hero-27 ========== */
+/* Full-bleed steel strip: CAD/grid/glow on .catalog-hero (viewport width).
+   CAD schematic artwork lives in the RIGHT half of the SVG + pinned right —
+   keeps H1/crumbs clear. Grid stays full-bleed via ::before. */
+.catalog-hero {
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+  background-color: #F4F6F9;
+  background-image: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%201200%20420%22%20fill%3D%22none%22%3E%3Cg%20stroke%3D%22%230F172A%22%20stroke-width%3D%221%22%20opacity%3D%220.2%22%3E%3Cpath%20d%3D%22M620%20372H1152M700%2036V372M700%2036H980M980%2036L1080%20160M1080%20160H1150M1150%20160V372%22%2F%3E%3Cpath%20stroke-dasharray%3D%225%207%22%20d%3D%22M730%2088H960M730%20128H940M730%20168H900%22%2F%3E%3Ccircle%20cx%3D%221080%22%20cy%3D%22160%22%20r%3D%225%22%20fill%3D%22%23FDCA00%22%20fill-opacity%3D%220.5%22%20stroke%3D%22%230F172A%22%2F%3E%3Cpath%20d%3D%22M700%2036l14%2014M700%2036l-14%2014%22%20stroke-width%3D%221.5%22%2F%3E%3Cpath%20opacity%3D%220.65%22%20d%3D%22M1020%20210h120M1020%20240h100M1020%20270h80%22%2F%3E%3C%2Fg%3E%3Cg%20stroke%3D%22%230F172A%22%20stroke-width%3D%221.1%22%20opacity%3D%220.15%22%20fill%3D%22none%22%3E%3Cpath%20d%3D%22M760%20308h96l20-30h74v30h58l-24%2056H738z%22%2F%3E%3Cpath%20d%3D%22M842%20278c0-30%2020-56%2052-66l9%2019c-20%206-33%2024-33%2047%22%2F%3E%3Ccircle%20cx%3D%22788%22%20cy%3D%22338%22%20r%3D%2223%22%2F%3E%3Ccircle%20cx%3D%22788%22%20cy%3D%22338%22%20r%3D%2210%22%2F%3E%3Ccircle%20cx%3D%22968%22%20cy%3D%22338%22%20r%3D%2223%22%2F%3E%3Ccircle%20cx%3D%22968%22%20cy%3D%22338%22%20r%3D%2210%22%2F%3E%3Cpath%20d%3D%22M894%20278l46-76%2030%209-34%2067%22%2F%3E%3Cpath%20d%3D%22M940%20202h40l14%2024%22%2F%3E%3C%2Fg%3E%3Cg%20stroke%3D%22%230F172A%22%20stroke-width%3D%220.7%22%20opacity%3D%220.11%22%20stroke-dasharray%3D%223%206%22%3E%3Cpath%20d%3D%22M890%2048v300%22%2F%3E%3Ccircle%20cx%3D%221080%22%20cy%3D%22160%22%20r%3D%2228%22%2F%3E%3C%2Fg%3E%3C%2Fsvg%3E");
+  background-repeat: no-repeat;
+  background-position: right -2% 38%;
+  background-size: min(920px, 62%) auto;
+  border-bottom: 1px solid #E2E8F0;
+  padding-top: 20px;
+  padding-bottom: 36px;
+  margin-top: 0;
+  margin-bottom: 32px;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+.catalog-hero__inner,
+.catalog-hero > .container {
+  position: relative;
+  z-index: 2;
+  background: none;
+  overflow: visible;
+}
+/* Clear v19 décor that boxed the strip to container width */
+.catalog-hero__inner::before,
+.catalog-hero__inner::after,
+.catalog-hero > .container::before,
+.catalog-hero > .container::after {
+  content: none;
+  display: none;
+}
+/* Full-bleed CAD grid — clipped by .catalog-hero overflow */
+.catalog-hero::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background-image:
+    linear-gradient(to right, rgba(15, 23, 42, 0.04) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(15, 23, 42, 0.04) 1px, transparent 1px),
+    linear-gradient(to right, rgba(15, 23, 42, 0.028) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(15, 23, 42, 0.028) 1px, transparent 1px);
+  background-size: 96px 96px, 96px 96px, 32px 32px, 32px 32px;
+  -webkit-mask-image: radial-gradient(ellipse 85% 72% at 55% 8%, #000 18%, transparent 78%);
+  mask-image: radial-gradient(ellipse 85% 72% at 55% 8%, #000 18%, transparent 78%);
+}
+/* Yellow ambient glow — stays inside hero (no top < 0 outside strip) */
+.catalog-hero::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  right: 6%;
+  width: 420px;
+  height: 320px;
+  z-index: 0;
+  pointer-events: none;
+  background: radial-gradient(ellipse at 70% 0%, rgba(253, 202, 0, 0.14) 0%, transparent 68%);
+  filter: blur(8px);
+}
+/* Nested UI on steel — flat white / tone, no resting shadow */
+.catalog-hero .promo-line-block.avtk-promo,
+.catalog-hero .avtk-aeo {
+  background-color: #FFFFFF;
+  border: none;
+  box-shadow: none;
+}
+/* Ultra-faint CAD watermark in promo empty mid-gap */
+.catalog-hero .promo-line-block.avtk-promo {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+}
+.catalog-hero .promo-line-block.avtk-promo::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  opacity: 0.075;
+  background-image: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20480%20120%22%20fill%3D%22none%22%3E%3Cg%20stroke%3D%22%230F172A%22%20stroke-width%3D%221%22%20opacity%3D%220.9%22%3E%3Cpath%20d%3D%22M24%2096H456M72%2020V96M72%2020H220M220%2020L290%2070M290%2070H360M360%2070V96%22%2F%3E%3Cpath%20stroke-dasharray%3D%224%205%22%20d%3D%22M90%2040H200M90%2055H185%22%2F%3E%3Ccircle%20cx%3D%22290%22%20cy%3D%2270%22%20r%3D%224%22%20fill%3D%22%23FDCA00%22%20fill-opacity%3D%220.7%22%20stroke%3D%22%230F172A%22%2F%3E%3Cpath%20opacity%3D%220.65%22%20d%3D%22M380%2028h70M380%2042h55%22%2F%3E%3C%2Fg%3E%3C%2Fsvg%3E");
+  background-repeat: no-repeat;
+  background-position: center center;
+  background-size: min(440px, 58%) auto;
+}
+.catalog-hero .promo-line-block.avtk-promo > * {
+  position: relative;
+  z-index: 1;
+}
+.catalog-hero .avtk-aeo {
+  border-radius: var(--avtk-radius, 6px);
+  padding: 12px 16px;
+}
+.catalog-hero .avtk-tags__tab {
+  background: transparent;
+  border: none;
+  box-shadow: none;
+}
+.catalog-hero .avtk-tags__tab:hover {
+  border-color: transparent;
+  background: transparent;
+  color: var(--avtk-ink, #0F172A);
+}
+.catalog-hero .avtk-tags__tab.is-active {
+  background: transparent;
+  color: var(--avtk-ink, #0F172A);
+  box-shadow: none;
+  border-color: transparent;
+}
+.catalog-hero .avtk-tags__list a.avtk-tag,
+.catalog-hero .avtk-tags__list a {
+  background: transparent !important;
+  border: none;
+}
+.catalog-hero .avtk-tags__list a:hover,
+.catalog-hero .avtk-tags__list a.avtk-tag:hover {
+  border-color: transparent !important;
+  background: transparent !important;
+}
+.catalog-hero .avtk-hero__live {
+  background: transparent;
+  border: none;
+  box-shadow: none;
+  font-size: 14px;
+  padding: 0;
+}
+.catalog-hero .breadcrumb {
+  margin: 0 0 12px;
+  padding: 0;
+  background: transparent;
+  position: relative;
+  z-index: 2;
+  max-width: 100%;
+  overflow-x: auto;
+  overflow-y: hidden;
+  -webkit-overflow-scrolling: touch;
+  touch-action: pan-x;
+  scrollbar-width: none;
+}
+.catalog-hero .breadcrumb::-webkit-scrollbar { display: none; }
+.catalog-hero .breadcrumb ul {
+  display: flex;
+  flex-wrap: nowrap;
+  align-items: center;
+  gap: 4px 8px;
+  list-style: none;
+  margin: 0;
+  padding: 0 24px 0 0;
+  font-size: 13px;
+  width: max-content;
+  max-width: none;
+  white-space: nowrap;
+}
+.catalog-hero .breadcrumb li {
+  flex: 0 0 auto;
+  white-space: nowrap;
+}
+@media (max-width: 767px) {
+  .catalog-hero .breadcrumb::after {
+    content: "";
+    position: absolute;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    width: 24px;
+    pointer-events: none;
+    background: #F4F6F9;
+  }
+}
+@media (max-width: 768px) {
+  .catalog-hero {
+    padding-bottom: 24px;
+    margin-bottom: 20px;
+    background-size: min(640px, 78%) auto;
+    background-position: right -8% 45%;
+  }
+  .catalog-hero::before {
+    background-size: 72px 72px, 72px 72px, 24px 24px, 24px 24px;
+  }
+  .catalog-hero::after {
+    opacity: 0.35;
+    width: 260px;
+    height: 220px;
+    right: -30px;
+  }
+  .catalog-hero .promo-line-block.avtk-promo::before {
+    opacity: 0.05;
+    background-size: min(320px, 70%) auto;
+  }
+}
+
+/* Flush hero to header — no white strip, no overlap into sticky nav v=avtk-hero-20 */
+.catalog-avtk {
+  margin-top: 0;
+  padding-top: 0;
+}
+.catalog-hero {
+  margin-top: 0 !important;
+  /* bg starts at hero box top; overflow:hidden keeps décor out of header */
+}
+/* When breadcrumbs sit inside hero they must not recreate a white band */
+.catalog-hero .breadcrumb,
+.catalog-hero .breadcrumb.container {
+  background: transparent !important;
+  margin: 0 0 12px !important;
+  padding: 8px 0 0 !important;
+  border: 0 !important;
+  box-shadow: none !important;
+  /* keep overflow scroll from rules above — do not set max-width:none */
+  width: 100%;
+  max-width: 100%;
+}
+.catalog-hero .breadcrumb ul {
+  margin: 0;
+  /* keep right padding for fade edge (set above) */
+}
+
+/* Title → USPs → lead: breathing room (v=avtk-hero-33) */
+.catalog-hero .catalog-hero__main > h1,
+.catalog-hero .single__title.catalog__title > h1 {
+  margin-bottom: 0;
+}
+.catalog-hero .header-usps {
+  margin-top: 24px;
+  margin-bottom: 0;
+}
+.catalog-hero .catalog-hero__lead,
+.catalog-hero .catalog-hero__main .catalogs__params-top-text {
+  margin-top: 30px;
+}
+.catalog-hero .catalog-hero__lead > p:first-child,
+.catalog-hero .catalog-hero__main .catalogs__params-top-text > p:first-child {
+  margin-top: 0;
+}
+@media (max-width: 768px) {
+  .catalog-hero .header-usps {
+    margin-top: 20px;
+    margin-bottom: 0; /* lead owns the gap below USPs */
+  }
+}
+
+/* force all popular landing chips visible */
+.avtk-tags__list.is-expanded,
+.avtk-tags__list{
+  flex-wrap: wrap !important;
+  max-height: none !important;
+  overflow: visible !important;
+}
+.avtk-tags__rail{
+  overflow: visible !important;
+}
+.avtk-tags__more[hidden]{display:none !important}
+.avtk-tags__title{
+  font-size: 18px;
+  font-weight: 700;
+  color: #0b1f3a;
+  margin: 0 0 10px;
+}
+/* hide availability badges on cards */
+.product-card-badge{display:none!important;visibility:hidden!important}
