@@ -44,7 +44,7 @@ export function groupModelsByCategory(
       category: { slug: category.slug, title: category.title },
       number: String(groups.length + 1).padStart(2, "0"),
       models: items,
-      modelsLabel: `${items.length} ${pluralRu(items.length, ["модель", "модели", "моделей"])}`,
+      modelsLabel: modelsCountLabel(items.length),
       priceRange: priceRangeLabel(items),
     });
   }
@@ -52,11 +52,16 @@ export function groupModelsByCategory(
   return groups;
 }
 
+/** «1 модель», «2 модели», «5 моделей» — счётчик в мете полки и секции. */
+export function modelsCountLabel(count: number): string {
+  return `${count} ${pluralRu(count, ["модель", "модели", "моделей"])}`;
+}
+
 /**
- * Цены смены в полке: «13 500–28 000 ₽/смена», при одной цене — «13 500 ₽/смена»,
+ * Цены смены в подборке: «13 500–28 000 ₽/смена», при одной цене — «13 500 ₽/смена»,
  * без заполненных цен — «цена по запросу».
  */
-function priceRangeLabel(models: HomeModelDto[]): string {
+export function priceRangeLabel(models: HomeModelDto[]): string {
   const amounts = models
     .filter((model) => model.pricePerShift !== null)
     .map((model) => Number(model.pricePerShift))

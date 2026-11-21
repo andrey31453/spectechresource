@@ -4,6 +4,7 @@ import { computed, nextTick, onBeforeUnmount, onMounted, ref } from "vue";
 import type { HomeDto } from "~/types/catalog";
 import { buildLeadPayload, createRequestId } from "~/utils/lead-form";
 import { initLanding, type LandingLeadInput } from "~/utils/landing";
+import { groupModelsBySupergroup, sectionStyleVars, toneStyle } from "~/utils/model-groups";
 import { groupModelsByCategory } from "~/utils/models";
 import { telHref } from "~/utils/phone";
 import { pluralRu } from "~/utils/plural";
@@ -203,18 +204,13 @@ const parkSectionsLabel = computed(
 );
 
 /**
- * Полки `#modeli`: техника каждого раздела каталога — в своём ряду со стрелками.
- * Порядок разделов и моделей задаёт `GET /api/home`, группировка — `groupModelsByCategory`.
+ * Секции `#modeli`: техника разложена по надгруппам (земляные работы, погрузка и подъём,
+ * дороги и стройка, перевозки и коммуналка), внутри каждой — полки разделов каталога.
+ * Порядок разделов и моделей задаёт `GET /api/home`, группировка — `groupModelsByCategory`,
+ * надгруппы — `groupModelsBySupergroup` (`app/utils/model-groups.ts`).
  */
 const modelGroups = computed(() => groupModelsByCategory(categories.value, models.value));
-const modelCountLabel = computed(
-  () =>
-    `${models.value.length} ${pluralRu(models.value.length, ["модель", "модели", "моделей"])}`,
-);
-const modelSectionCountLabel = computed(
-  () =>
-    `${modelGroups.value.length} ${pluralRu(modelGroups.value.length, ["раздел", "раздела", "разделов"])}`,
-);
+const modelSections = computed(() => groupModelsBySupergroup(modelGroups.value));
 
 /** Классы, которые заказывают чаще всего: по ним в карточках разделов ставим «Хит спроса». */
 const HIT_TYPE_SLUGS = new Set([
@@ -1045,95 +1041,127 @@ onBeforeUnmount(() => {
       </section>
 
       <!--
-        Каталог моделей: техника разложена по разделам — у каждого своя полка
-        с рядом карточек и стрелками. Сама лента не едет: шаг делает посетитель.
-        Карточка — вертикальная плитка (`HomeModelCard`): фото, название, три
-        характеристики и цена; при наведении раскрывает полный список характеристик.
-        Стоит сразу под «Быстрый подбор», до «О компании»: видно, какая именно
-        машина поедет на объект и сколько стоит смена. Виды и цены «от» — в `#tehnika`.
+        Каталог моделей: четыре надгруппы по видам работ, у каждой — своя крупная
+        секция. Внутри секции техника разложена по полкам разделов каталога:
+        заголовок раздела, мета и ряд карточек со стрелками. Сама лента не едет:
+        шаг делает посетитель. Карточка — вертикальная плитка (`HomeModelCard`):
+        фото, название, три характеристики и цена; при наведении раскрывает полный
+        список характеристик. Стоит сразу под «Быстрый подбор», до «О компании»:
+        видно, какая именно машина поедет на объект и сколько стоит смена.
+        Виды и цены «от» — в `#tehnika`. Состав надгрупп — `app/utils/model-groups.ts`.
       -->
-      <section
-        v-if="models.length"
-        id="modeli"
-        class="band on-light pt-12! lg:pt-14!"
-      >
-        <div class="shell">
-          <div class="flex flex-wrap items-center justify-between gap-x-6 gap-y-3">
-            <div class="flex flex-wrap items-baseline gap-x-4 gap-y-1">
-              <span class="kicker">Каталог моделей</span>
-              <h2 class="h2">Конкретные машины с ценой за смену</h2>
-            </div>
-            <div class="flex flex-wrap items-center gap-4">
-              <p class="panel__meta text-sm">
-                {{ modelCountLabel }} · {{ modelSectionCountLabel }}
-              </p>
-              <a class="btn btn--ghost" href="/katalog"
-                >Весь каталог<svg
-                  class="h-4 w-4"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  stroke-width="1.6"
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
+      <div v-if="models.length" id="modeli">
+        <section
+          v-for="(section, sectionIndex) in modelSections"
+          :id="`modeli-${section.slug}`"
+          :key="section.slug"
+          class="band relative overflow-x-clip pt-12! pb-12! lg:pt-14! lg:pb-14!"
+          :class="toneStyle(section.tone).className"
+          :style="sectionStyleVars(section.tone)"
+        >
+          <!-- Водяной номер секции: декоративная «цифра-призрак» в свободном правом
+               верхнем углу (лид ограничен max-w-4xl). Рисуется до контента, поэтому
+               текст и карточки всегда поверх.
+               `max-lg:hidden`, а не `hidden lg:block`: в `/landing/style.css` есть
+               собственное `.hidden{display:none}`, и оно перебивает `lg:block`. -->
+          <span
+            aria-hidden="true"
+            class="pointer-events-none absolute top-28 right-6 max-lg:hidden text-[9.5rem] leading-none font-bold tabular-nums text-[var(--section-accent)] select-none opacity-[0.09]"
+            >{{ section.number }}</span
+          >
+          <div class="shell relative">
+            <div class="flex flex-wrap items-start justify-between gap-x-6 gap-y-4">
+              <div class="flex min-w-0 items-start gap-4">
+                <span
                   aria-hidden="true"
-                  focusable="false"
+                  class="mt-0.5 inline-flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-[var(--section-accent)] text-[var(--section-on-accent)] shadow-[0_14px_26px_-14px_rgb(13_18_20/0.6)] lg:h-14 lg:w-14"
                 >
-                  <path d="M4 12h15M13.5 6.5 19 12l-5.5 5.5" /></svg
-              ></a>
-            </div>
-          </div>
-          <div class="mt-7 space-y-7">
-            <div
-              v-for="group in modelGroups"
-              :key="group.category.slug"
-              class="border-t border-[#dcd8cb] pt-6 first:border-t-0 first:pt-0"
-            >
-              <div class="flex flex-wrap items-end justify-between gap-x-4 gap-y-3">
+                  <SiteIcon :name="section.icon" :stroke-width="1.5" class="h-6 w-6 lg:h-7 lg:w-7" />
+                </span>
                 <div class="min-w-0">
-                  <h3 class="h3">
-                    <a
-                      class="transition-colors hover:text-[#b83c12]"
-                      :href="categoryPath(group.category.slug)"
-                      >{{ group.category.title }}</a
-                    >
-                  </h3>
-                  <p class="panel__meta mt-1 text-sm">
-                    {{ group.number }} / {{ String(modelGroups.length).padStart(2, "0") }} ·
-                    {{ group.modelsLabel }} · {{ group.priceRange }}
-                  </p>
+                  <span class="kicker models-kicker">
+                    <span aria-hidden="true" class="inline-block h-0.5 w-6 bg-[var(--section-kicker)]" />
+                    Каталог моделей · {{ section.numberLabel }}
+                  </span>
+                  <h2 class="h2 mt-3 text-[var(--section-ink)]">{{ section.title }}</h2>
                 </div>
+              </div>
+              <div class="flex flex-wrap items-center gap-4">
+                <p class="models-meta text-sm">
+                  {{ section.modelsLabel }} · {{ section.shelvesLabel }}
+                </p>
+                <a v-if="sectionIndex === 0" class="btn btn--ghost" href="/katalog"
+                  >Весь каталог<svg
+                    class="h-4 w-4"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="1.6"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    aria-hidden="true"
+                    focusable="false"
+                  >
+                    <path d="M4 12h15M13.5 6.5 19 12l-5.5 5.5" /></svg
+                ></a>
+              </div>
+            </div>
+            <p class="lead models-lead mt-3 max-w-4xl">{{ section.lead }}</p>
+            <ul class="mt-4 flex flex-wrap gap-2">
+              <li
+                v-for="tag in section.tags"
+                :key="tag"
+                class="inline-flex items-center rounded-full border border-[var(--section-chip-border)] bg-[var(--section-chip-bg)] px-3 py-1 text-xs font-semibold text-[var(--section-chip-ink)]"
+              >
+                {{ tag }}
+              </li>
+            </ul>
+            <div class="mt-8 space-y-8">
+              <div
+                v-for="shelf in section.shelves"
+                :key="shelf.category.slug"
+                class="models-shelf border-t pt-6 first:border-t-0 first:pt-0"
+              >
+                <div class="flex flex-wrap items-end justify-between gap-x-4 gap-y-3">
+                  <div class="models-shelf-head min-w-0 pl-3">
+                    <h3 class="h3 text-[var(--section-ink)]">
+                      <a
+                        class="transition-colors hover:text-[var(--section-accent)]"
+                        :href="categoryPath(shelf.category.slug)"
+                        >{{ shelf.category.title }}</a
+                      >
+                    </h3>
+                    <p class="models-meta mt-1 text-sm">
+                      {{ shelf.numberLabel }} · {{ shelf.modelsLabel }} · {{ shelf.priceRange }}
+                    </p>
+                  </div>
                 <div class="flex shrink-0 items-center gap-2">
                   <div
-                    v-if="railPages(group.category.slug) > 1"
+                    v-if="railPages(shelf.category.slug) > 1"
                     class="mr-1 flex items-center gap-1"
-                    :aria-label="`Страницы моделей раздела «${group.category.title}»`"
+                    :aria-label="`Страницы моделей раздела «${shelf.category.title}»`"
                   >
                     <button
-                      v-for="page in railPages(group.category.slug)"
+                      v-for="page in railPages(shelf.category.slug)"
                       :key="page"
                       type="button"
                       class="inline-flex h-6 w-6 items-center justify-center rounded-full"
-                      :aria-label="`Страница ${page} из ${railPages(group.category.slug)}`"
-                      :aria-current="page - 1 === railPage(group.category.slug) ? 'true' : undefined"
-                      @click="goToPage(group.category.slug, page - 1)"
+                      :aria-label="`Страница ${page} из ${railPages(shelf.category.slug)}`"
+                      :aria-current="page - 1 === railPage(shelf.category.slug) ? 'true' : undefined"
+                      @click="goToPage(shelf.category.slug, page - 1)"
                     >
                       <span
-                        class="h-2 w-2 rounded-full transition-colors"
-                        :class="
-                          page - 1 === railPage(group.category.slug)
-                            ? 'bg-[#b83c12]'
-                            : 'bg-[#d9d5c8]'
-                        "
+                        class="shelf-dot h-2 w-2 rounded-full transition-colors"
+                        :class="{ 'shelf-dot--active': page - 1 === railPage(shelf.category.slug) }"
                       />
                     </button>
                   </div>
                   <button
                     type="button"
-                    class="inline-flex h-9 w-9 items-center justify-center rounded-full border border-[#d9d5c8] text-[#b83c12] transition hover:border-[#b83c12] hover:bg-[#f6f1ea] disabled:cursor-default disabled:opacity-30 disabled:hover:border-[#d9d5c8] disabled:hover:bg-transparent"
-                    :disabled="railPage(group.category.slug) === 0"
-                    :aria-label="`Предыдущие модели раздела «${group.category.title}»`"
-                    @click="scrollRail(group.category.slug, -1)"
+                    class="shelf-btn inline-flex h-9 w-9 items-center justify-center rounded-full border transition"
+                    :disabled="railPage(shelf.category.slug) === 0"
+                    :aria-label="`Предыдущие модели раздела «${shelf.category.title}»`"
+                    @click="scrollRail(shelf.category.slug, -1)"
                   >
                     <svg
                       class="h-4 w-4"
@@ -1151,10 +1179,10 @@ onBeforeUnmount(() => {
                   </button>
                   <button
                     type="button"
-                    class="inline-flex h-9 w-9 items-center justify-center rounded-full border border-[#d9d5c8] text-[#b83c12] transition hover:border-[#b83c12] hover:bg-[#f6f1ea] disabled:cursor-default disabled:opacity-30 disabled:hover:border-[#d9d5c8] disabled:hover:bg-transparent"
-                    :disabled="railPage(group.category.slug) >= railPages(group.category.slug) - 1"
-                    :aria-label="`Следующие модели раздела «${group.category.title}»`"
-                    @click="scrollRail(group.category.slug, 1)"
+                    class="shelf-btn inline-flex h-9 w-9 items-center justify-center rounded-full border transition"
+                    :disabled="railPage(shelf.category.slug) >= railPages(shelf.category.slug) - 1"
+                    :aria-label="`Следующие модели раздела «${shelf.category.title}»`"
+                    @click="scrollRail(shelf.category.slug, 1)"
                   >
                     <svg
                       class="h-4 w-4"
@@ -1173,28 +1201,31 @@ onBeforeUnmount(() => {
                 </div>
               </div>
               <ul
-                :ref="(el) => setRail(group.category.slug, el)"
+                :ref="(el) => setRail(shelf.category.slug, el)"
                 class="models-rail mt-4 flex gap-4 overflow-x-auto pb-1"
-                :aria-label="`Модели раздела «${group.category.title}»`"
-                @scroll.passive="updateRail(group.category.slug)"
+                :aria-label="`Модели раздела «${shelf.category.title}»`"
+                @scroll.passive="updateRail(shelf.category.slug)"
               >
                 <li
-                  v-for="item in group.models"
+                  v-for="item in shelf.models"
                   :key="item.id"
                   class="w-[86vw] shrink-0 p-2 sm:w-[320px] xl:w-[380px]"
                 >
                   <HomeModelCard :model="item" :city-slug="city.slug" />
                 </li>
-
               </ul>
+              </div>
             </div>
-          </div>
 
-          <p class="note mt-6 border-l-2 px-4 py-3 text-sm border-flame/70 bg-flame/5">
-            {{ priceDisclaimer }}
-          </p>
-        </div>
-      </section>
+            <p
+              v-if="sectionIndex === modelSections.length - 1"
+              class="note models-note mt-6 border-l-2 px-4 py-3 text-sm"
+            >
+              {{ priceDisclaimer }}
+            </p>
+          </div>
+        </section>
+      </div>
 
       <section id="o-kompanii" class="band on-light">
         <div class="shell">
@@ -3631,13 +3662,69 @@ onBeforeUnmount(() => {
 }
 
 /*
- * Фон полосы чуть темнее общего песочного (`--color-sand`): белые карточки
- * моделей получают контур и читаются как товарные плитки, а не растворяются в фоне.
- * Внутренний отступ `li` (p-2) — запас под `scale` карточки при наведении:
- * увеличенная карточка остаётся внутри своей ячейки и не создаёт прокрутку ряда.
+ * Цвет секций «Каталог моделей». Фон — готовые полосы лендинга
+ * (`.on-light` / `.flame-band` / `.process-band`), а роли приходят из
+ * `HOME_MODEL_TONE_STYLES` переменными `--section-*`: их ставит секция инлайном,
+ * наследуют шапка, полки и карточки. Порядок тонов — светлая, оранжевая, чёрная.
+ * Свои scoped-классы нужны там, где правила лендинга (`.kicker`, `.lead`,
+ * `.panel__meta`, `.note`) задают цвет: scoped-селектор с атрибутом специфичнее
+ * и перебивает `/landing/style.css`, который грузится позже бандла.
  */
-#modeli {
-  background-color: #ece7da;
+.models-kicker {
+  color: var(--section-kicker, #b83c12);
+}
+
+/* У `.kicker` в лендинге своя черта-псевдоэлемент; здесь черта своя,
+   её цвет зависит от тона, поэтому базовую гасим. */
+.models-kicker::before {
+  display: none;
+}
+
+.models-lead {
+  color: var(--section-muted, #3d474b);
+}
+
+.models-meta {
+  color: var(--section-muted, #3d474b);
+}
+
+.models-shelf {
+  border-top-color: color-mix(in srgb, var(--section-ink, #0d1214) 16%, transparent);
+}
+
+.models-shelf-head {
+  border-left: 3px solid var(--section-accent, #b83c12);
+}
+
+.models-note {
+  border-left-color: var(--section-accent, #b83c12);
+  background-color: color-mix(in srgb, var(--section-ink, #0d1214) 7%, transparent);
+  color: var(--section-muted, #3d474b);
+}
+
+.shelf-btn {
+  border-color: color-mix(in srgb, var(--section-accent, #b83c12) 40%, #ffffff);
+  color: var(--section-accent, #b83c12);
+  background-color: var(--section-rail-bg, rgb(255 255 255 / 0.55));
+}
+
+.shelf-btn:hover:not(:disabled) {
+  border-color: var(--section-accent, #b83c12);
+  background-color: var(--section-accent, #b83c12);
+  color: var(--section-on-accent, #ffffff);
+}
+
+.shelf-btn:disabled {
+  cursor: default;
+  opacity: 0.3;
+}
+
+.shelf-dot {
+  background-color: color-mix(in srgb, var(--section-accent, #b83c12) 30%, transparent);
+}
+
+.shelf-dot--active {
+  background-color: var(--section-accent, #b83c12);
 }
 
 .models-rail::-webkit-scrollbar {

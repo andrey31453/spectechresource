@@ -47,6 +47,30 @@ withDefaults(
       <circle cx="17" cy="18" r="2" />
       <path d="M8 18h7" />
     </template>
+    <template v-else-if="name === 'excavator'">
+      <rect x="3.5" y="14.5" width="10" height="4" rx="2" />
+      <path d="M6.5 14.5V12h5v2.5" />
+      <path d="M8 12V9.5h3V12" />
+      <path d="M11.5 10.5 16 7.5" />
+      <path d="M16 7.5 18.5 11" />
+      <path d="M18 11h3v2.5h-3z" />
+    </template>
+    <template v-else-if="name === 'crane'">
+      <path d="M3.5 17.5h16" />
+      <circle cx="6.5" cy="18.6" r="1.5" />
+      <circle cx="16.5" cy="18.6" r="1.5" />
+      <path d="M5.5 17.5v-4h6v4" />
+      <path d="M11.5 13.5 19.6 5" />
+      <path d="M19.6 5v2" />
+      <path d="M18.4 7h2.4" />
+      <path d="M19.6 7v1.4a1.3 1.3 0 0 1-2.6 0" />
+    </template>
+    <template v-else-if="name === 'roller'">
+      <circle cx="7" cy="16.5" r="3" />
+      <path d="M10 16.5v-6h5.5l3 3v3" />
+      <path d="M12 10.5V8h3v2.5" />
+      <path d="M2.5 21h19" />
+    </template>
     <template v-else-if="name === 'clock'">
       <circle cx="12" cy="12" r="8.5" />
       <path d="M12 7.5V12l3.2 2" />
