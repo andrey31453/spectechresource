@@ -1,10 +1,11 @@
 <script setup lang="ts">
 import type { FetchError } from "ofetch";
-import { computed, nextTick, onBeforeUnmount, onMounted, ref } from "vue";
+import { computed, nextTick, onBeforeUnmount, onMounted } from "vue";
 import type { HomeDto } from "~/types/catalog";
 import { buildLeadPayload, createRequestId } from "~/utils/lead-form";
 import { initLanding, type LandingLeadInput } from "~/utils/landing";
-import { groupModelsBySupergroup, sectionStyleVars, toneStyle } from "~/utils/model-groups";
+import { groupModelsBySupergroup } from "~/utils/model-groups";
+import { HOME_MODEL_VARIANTS } from "~/utils/model-variants";
 import { groupModelsByCategory } from "~/utils/models";
 import { telHref } from "~/utils/phone";
 import { pluralRu } from "~/utils/plural";
@@ -646,105 +647,13 @@ async function submitLead(input: LandingLeadInput) {
   }
 }
 
-/**
- * Полки `#modeli`: у каждого раздела свой горизонтальный ряд карточек.
- * Ряд листается страницами — целыми карточками: на десктопе три, на телефоне одна.
- * Сами карточки не едут, полосы прокрутки не видно: двигают стрелки, точки под рядом,
- * тач и трекпад (ряд остаётся `overflow-x: auto`).
- */
-const railRefs = ref<Record<string, HTMLElement | null>>({});
-/** `page` — текущая страница (с нуля), `pages` — сколько их всего; при одной точки не рисуются. */
-const railStates = ref<Record<string, { page: number; pages: number }>>({});
-
-function setRail(slug: string, el: unknown) {
-  const node = el instanceof HTMLElement ? el : null;
-
-  if (railRefs.value[slug] !== node) railRefs.value[slug] = node;
-  if (node) updateRail(slug);
-}
-
-/**
- * Геометрия полки: ширина карточки с зазором, сколько их влезает в кадр целиком
- * и сколько выходит страниц. Считаем по DOM, а не по брейкпоинтам: ширина карточек
- * задана утилитами Tailwind, и логика страниц должна идти за вёрсткой, а не дублировать её.
- */
-function railMetrics(rail: HTMLElement) {
-  const cards = rail.querySelectorAll<HTMLElement>("li");
-  const gap = Number.parseFloat(getComputedStyle(rail).columnGap) || 0;
-  const step = (cards[0]?.offsetWidth ?? 0) + gap;
-  const inView = step > 0 ? Math.max(1, Math.round((rail.clientWidth + gap) / step)) : 1;
-
-  return {
-    pageWidth: step > 0 ? step * inView : rail.clientWidth,
-    pages: Math.max(1, Math.ceil(cards.length / inView)),
-    max: Math.max(0, rail.scrollWidth - rail.clientWidth),
-  };
-}
-
-/**
- * Текущая страница и их число. Последняя страница прижимается к правому краю,
- * поэтому определяется по `max`, а не по номеру шага.
- * Состояние меняем только при реальном изменении: ref-функция полки вызывается
- * на каждом патче, и лишняя запись запустила бы бесконечный перерендер.
- */
-function updateRail(slug: string) {
-  const rail = railRefs.value[slug];
-  if (!rail) return;
-
-  const { pageWidth, pages, max } = railMetrics(rail);
-  const page =
-    max > 0 && rail.scrollLeft >= max - 2
-      ? pages - 1
-      : Math.min(pages - 1, Math.round(rail.scrollLeft / pageWidth));
-  const current = railStates.value[slug];
-
-  if (current && current.page === page && current.pages === pages) return;
-
-  railStates.value[slug] = { page, pages };
-}
-
-function updateAllRails() {
-  for (const slug of Object.keys(railRefs.value)) updateRail(slug);
-}
-
-function railPages(slug: string): number {
-  return railStates.value[slug]?.pages ?? 1;
-}
-
-function railPage(slug: string): number {
-  return railStates.value[slug]?.page ?? 0;
-}
-
-/** Переход на страницу: последнюю прижимаем к правому краю, чтобы кадр остался полным. */
-function goToPage(slug: string, target: number) {
-  const rail = railRefs.value[slug];
-  if (!rail) return;
-
-  const { pageWidth, pages, max } = railMetrics(rail);
-  const page = Math.min(pages - 1, Math.max(0, target));
-  const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-
-  rail.scrollTo({
-    left: Math.min(page * pageWidth, max),
-    behavior: reduced ? "auto" : "smooth",
-  });
-}
-
-/** Стрелка листает ровно одну страницу — столько карточек, сколько видно целиком. */
-function scrollRail(slug: string, direction: -1 | 1) {
-  goToPage(slug, railPage(slug) + direction);
-}
-
 /** Модули макета: появление блоков, меню, табы, маска, заявка, шкала разделов. */
 let disposeLanding: (() => void) | undefined;
 onMounted(() => {
   void nextTick(moveStyleLast);
   disposeLanding = initLanding({ submitLead });
-  void nextTick(updateAllRails);
-  window.addEventListener("resize", updateAllRails, { passive: true });
 });
 onBeforeUnmount(() => {
-  window.removeEventListener("resize", updateAllRails);
   disposeLanding?.();
   disposeLanding = undefined;
 });
@@ -1041,189 +950,81 @@ onBeforeUnmount(() => {
       </section>
 
       <!--
-        Каталог моделей: четыре надгруппы по видам работ, у каждой — своя крупная
-        секция. Внутри секции техника разложена по полкам разделов каталога:
-        заголовок раздела, мета и ряд карточек со стрелками. Сама лента не едет:
-        шаг делает посетитель. Карточка — вертикальная плитка (`HomeModelCard`):
-        фото, название, три характеристики и цена; при наведении раскрывает полный
-        список характеристик. Стоит сразу под «Быстрый подбор», до «О компании»:
-        видно, какая именно машина поедет на объект и сколько стоит смена.
-        Виды и цены «от» — в `#tehnika`. Состав надгрупп — `app/utils/model-groups.ts`.
+        Каталог моделей — четыре версии одного блока подряд, A → B → C → D.
+        Заказчик сравнивает вёрстку глазами, поэтому версии стоят на странице
+        одновременно, а данные у них общие: `modelSections`, `city.slug` и
+        дисклеймер о цене. Подпись над версией — `HomeModelsCaption` (данные из
+        `HOME_MODEL_VARIANTS`), якоря `#modeli-variant-*` совпадают с навигацией
+        сравнения выше. В продакшн останется одна версия: тогда лишние компоненты,
+        подписи и навигация удаляются (план — `docs/specs/home.md`).
       -->
       <div v-if="models.length" id="modeli">
-        <section
-          v-for="(section, sectionIndex) in modelSections"
-          :id="`modeli-${section.slug}`"
-          :key="section.slug"
-          class="band relative overflow-x-clip pt-12! pb-12! lg:pt-14! lg:pb-14!"
-          :class="toneStyle(section.tone).className"
-          :style="sectionStyleVars(section.tone)"
-        >
-          <!-- Водяной номер секции: декоративная «цифра-призрак» в свободном правом
-               верхнем углу (лид ограничен max-w-4xl). Рисуется до контента, поэтому
-               текст и карточки всегда поверх.
-               `max-lg:hidden`, а не `hidden lg:block`: в `/landing/style.css` есть
-               собственное `.hidden{display:none}`, и оно перебивает `lg:block`. -->
-          <span
-            aria-hidden="true"
-            class="pointer-events-none absolute top-28 right-6 max-lg:hidden text-[9.5rem] leading-none font-bold tabular-nums text-[var(--section-accent)] select-none opacity-[0.09]"
-            >{{ section.number }}</span
-          >
-          <div class="shell relative">
-            <div class="flex flex-wrap items-start justify-between gap-x-6 gap-y-4">
-              <div class="flex min-w-0 items-start gap-4">
-                <span
-                  aria-hidden="true"
-                  class="mt-0.5 inline-flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-[var(--section-accent)] text-[var(--section-on-accent)] shadow-[0_14px_26px_-14px_rgb(13_18_20/0.6)] lg:h-14 lg:w-14"
-                >
-                  <SiteIcon :name="section.icon" :stroke-width="1.5" class="h-6 w-6 lg:h-7 lg:w-7" />
-                </span>
-                <div class="min-w-0">
-                  <span class="kicker models-kicker">
-                    <span aria-hidden="true" class="inline-block h-0.5 w-6 bg-[var(--section-kicker)]" />
-                    Каталог моделей · {{ section.numberLabel }}
-                  </span>
-                  <h2 class="h2 mt-3 text-[var(--section-ink)]">{{ section.title }}</h2>
-                </div>
-              </div>
-              <div class="flex flex-wrap items-center gap-4">
-                <p class="models-meta text-sm">
-                  {{ section.modelsLabel }} · {{ section.shelvesLabel }}
-                </p>
-                <a v-if="sectionIndex === 0" class="btn btn--ghost" href="/katalog"
-                  >Весь каталог<svg
-                    class="h-4 w-4"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    stroke-width="1.6"
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    aria-hidden="true"
-                    focusable="false"
-                  >
-                    <path d="M4 12h15M13.5 6.5 19 12l-5.5 5.5" /></svg
-                ></a>
-              </div>
-            </div>
-            <p class="lead models-lead mt-3 max-w-4xl">{{ section.lead }}</p>
-            <ul class="mt-4 flex flex-wrap gap-2">
-              <li
-                v-for="tag in section.tags"
-                :key="tag"
-                class="inline-flex items-center rounded-full border border-[var(--section-chip-border)] bg-[var(--section-chip-bg)] px-3 py-1 text-xs font-semibold text-[var(--section-chip-ink)]"
-              >
-                {{ tag }}
-              </li>
-            </ul>
-            <div class="mt-8 space-y-8">
-              <div
-                v-for="shelf in section.shelves"
-                :key="shelf.category.slug"
-                class="models-shelf border-t pt-6 first:border-t-0 first:pt-0"
-              >
-                <div class="flex flex-wrap items-end justify-between gap-x-4 gap-y-3">
-                  <div class="models-shelf-head min-w-0 pl-3">
-                    <h3 class="h3 text-[var(--section-ink)]">
-                      <a
-                        class="transition-colors hover:text-[var(--section-accent)]"
-                        :href="categoryPath(shelf.category.slug)"
-                        >{{ shelf.category.title }}</a
-                      >
-                    </h3>
-                    <p class="models-meta mt-1 text-sm">
-                      {{ shelf.numberLabel }} · {{ shelf.modelsLabel }} · {{ shelf.priceRange }}
-                    </p>
-                  </div>
-                <div class="flex shrink-0 items-center gap-2">
-                  <div
-                    v-if="railPages(shelf.category.slug) > 1"
-                    class="mr-1 flex items-center gap-1"
-                    :aria-label="`Страницы моделей раздела «${shelf.category.title}»`"
-                  >
-                    <button
-                      v-for="page in railPages(shelf.category.slug)"
-                      :key="page"
-                      type="button"
-                      class="inline-flex h-6 w-6 items-center justify-center rounded-full"
-                      :aria-label="`Страница ${page} из ${railPages(shelf.category.slug)}`"
-                      :aria-current="page - 1 === railPage(shelf.category.slug) ? 'true' : undefined"
-                      @click="goToPage(shelf.category.slug, page - 1)"
-                    >
-                      <span
-                        class="shelf-dot h-2 w-2 rounded-full transition-colors"
-                        :class="{ 'shelf-dot--active': page - 1 === railPage(shelf.category.slug) }"
-                      />
-                    </button>
-                  </div>
-                  <button
-                    type="button"
-                    class="shelf-btn inline-flex h-9 w-9 items-center justify-center rounded-full border transition"
-                    :disabled="railPage(shelf.category.slug) === 0"
-                    :aria-label="`Предыдущие модели раздела «${shelf.category.title}»`"
-                    @click="scrollRail(shelf.category.slug, -1)"
-                  >
-                    <svg
-                      class="h-4 w-4"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      stroke-width="1.8"
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                      aria-hidden="true"
-                      focusable="false"
-                    >
-                      <path d="M20 12H5M10.5 6.5 5 12l5.5 5.5" />
-                    </svg>
-                  </button>
-                  <button
-                    type="button"
-                    class="shelf-btn inline-flex h-9 w-9 items-center justify-center rounded-full border transition"
-                    :disabled="railPage(shelf.category.slug) >= railPages(shelf.category.slug) - 1"
-                    :aria-label="`Следующие модели раздела «${shelf.category.title}»`"
-                    @click="scrollRail(shelf.category.slug, 1)"
-                  >
-                    <svg
-                      class="h-4 w-4"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      stroke-width="1.8"
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                      aria-hidden="true"
-                      focusable="false"
-                    >
-                      <path d="M4 12h15M13.5 6.5 19 12l-5.5 5.5" />
-                    </svg>
-                  </button>
-                </div>
-              </div>
-              <ul
-                :ref="(el) => setRail(shelf.category.slug, el)"
-                class="models-rail mt-4 flex gap-4 overflow-x-auto pb-1"
-                :aria-label="`Модели раздела «${shelf.category.title}»`"
-                @scroll.passive="updateRail(shelf.category.slug)"
-              >
-                <li
-                  v-for="item in shelf.models"
-                  :key="item.id"
-                  class="w-[86vw] shrink-0 p-2 sm:w-[320px] xl:w-[380px]"
-                >
-                  <HomeModelCard :model="item" :city-slug="city.slug" />
-                </li>
-              </ul>
-              </div>
-            </div>
-
-            <p
-              v-if="sectionIndex === modelSections.length - 1"
-              class="note models-note mt-6 border-l-2 px-4 py-3 text-sm"
+        <div class="bg-[#0d1214] px-5 pt-12 pb-9 text-[#e8e2d2] md:px-8">
+          <div class="mx-auto max-w-site">
+            <span
+              class="font-mono text-[10px] font-semibold tracking-[0.24em] text-[#ff9c4a] uppercase"
+              >Сравнение · каталог моделей</span
             >
-              {{ priceDisclaimer }}
+            <h2
+              class="mt-3 text-[clamp(1.5rem,3.4vw,2.35rem)] leading-tight font-bold tracking-tight text-white"
+            >
+              Четыре версии блока — одна под другой
+            </h2>
+            <p class="mt-3 max-w-3xl text-[15px] leading-7 text-[#a9a49a]">
+              Данные во всех версиях одни и те же:
+              {{ models.length }} {{ pluralRu(models.length, ["модель", "модели", "моделей"]) }} в
+              {{ modelSections.length }}
+              {{ pluralRu(modelSections.length, ["группе", "группах", "группах"]) }}, одинаковые цены
+              и ссылки. Листайте вниз: A → B → C → D — и скажите, какую оставляем.
             </p>
+            <nav class="mt-6 flex flex-wrap gap-2" aria-label="Версии блока «Каталог моделей»">
+              <a
+                v-for="variant in HOME_MODEL_VARIANTS"
+                :key="variant.key"
+                :href="`#${variant.id}`"
+                class="inline-flex min-h-11 items-center gap-2 rounded-full border border-white/25 px-4 py-2 text-[13px] text-[#f4efe2] transition hover:border-[#ff9c4a] hover:text-[#ff9c4a]"
+              >
+                <b class="font-mono text-[11px] tracking-[0.18em]">{{ variant.key.toUpperCase() }}</b>
+                {{ variant.title }}
+              </a>
+            </nav>
           </div>
+        </div>
+
+        <section id="modeli-variant-a" aria-label="Вариант A — Инженерный чертёж">
+          <HomeModelsCaption variant="a" />
+          <HomeModelsBlueprint
+            :sections="modelSections"
+            :city-slug="city.slug"
+            :price-disclaimer="priceDisclaimer"
+          />
+        </section>
+
+        <section id="modeli-variant-b" aria-label="Вариант B — Шоурум">
+          <HomeModelsCaption variant="b" />
+          <HomeModelsShowroom
+            :sections="modelSections"
+            :city-slug="city.slug"
+            :price-disclaimer="priceDisclaimer"
+          />
+        </section>
+
+        <section id="modeli-variant-c" aria-label="Вариант C — Полка-паспорт">
+          <HomeModelsCaption variant="c" />
+          <HomeModelsPassport
+            :sections="modelSections"
+            :city-slug="city.slug"
+            :price-disclaimer="priceDisclaimer"
+          />
+        </section>
+
+        <section id="modeli-variant-d" aria-label="Вариант D — Витрина">
+          <HomeModelsCaption variant="d" />
+          <HomeModelsShowcase
+            :sections="modelSections"
+            :city-slug="city.slug"
+            :price-disclaimer="priceDisclaimer"
+          />
         </section>
       </div>
 
@@ -3646,93 +3447,3 @@ onBeforeUnmount(() => {
     </footer>
   </div>
 </template>
-
-<style scoped>
-/*
- * Полки «Каталог моделей»: у каждого раздела свой горизонтальный ряд карточек.
- * Автоматической прокрутки нет — листают стрелки, точки, тач и трекпад; страница
- * считается целыми карточками, состояние живёт в `railStates`.
- * Полоса прокрутки скрыта: она резала ряд под карточками и спорила с точками.
- * Классы локальные (scoped): правила макета из `/landing/style.css` их не перебивают.
- */
-.models-rail {
-  scroll-snap-type: x proximity;
-  scrollbar-width: none;
-  overscroll-behavior-x: contain;
-}
-
-/*
- * Цвет секций «Каталог моделей». Фон — готовые полосы лендинга
- * (`.on-light` / `.flame-band` / `.process-band`), а роли приходят из
- * `HOME_MODEL_TONE_STYLES` переменными `--section-*`: их ставит секция инлайном,
- * наследуют шапка, полки и карточки. Порядок тонов — светлая, оранжевая, чёрная.
- * Свои scoped-классы нужны там, где правила лендинга (`.kicker`, `.lead`,
- * `.panel__meta`, `.note`) задают цвет: scoped-селектор с атрибутом специфичнее
- * и перебивает `/landing/style.css`, который грузится позже бандла.
- */
-.models-kicker {
-  color: var(--section-kicker, #b83c12);
-}
-
-/* У `.kicker` в лендинге своя черта-псевдоэлемент; здесь черта своя,
-   её цвет зависит от тона, поэтому базовую гасим. */
-.models-kicker::before {
-  display: none;
-}
-
-.models-lead {
-  color: var(--section-muted, #3d474b);
-}
-
-.models-meta {
-  color: var(--section-muted, #3d474b);
-}
-
-.models-shelf {
-  border-top-color: color-mix(in srgb, var(--section-ink, #0d1214) 16%, transparent);
-}
-
-.models-shelf-head {
-  border-left: 3px solid var(--section-accent, #b83c12);
-}
-
-.models-note {
-  border-left-color: var(--section-accent, #b83c12);
-  background-color: color-mix(in srgb, var(--section-ink, #0d1214) 7%, transparent);
-  color: var(--section-muted, #3d474b);
-}
-
-.shelf-btn {
-  border-color: color-mix(in srgb, var(--section-accent, #b83c12) 40%, #ffffff);
-  color: var(--section-accent, #b83c12);
-  background-color: var(--section-rail-bg, rgb(255 255 255 / 0.55));
-}
-
-.shelf-btn:hover:not(:disabled) {
-  border-color: var(--section-accent, #b83c12);
-  background-color: var(--section-accent, #b83c12);
-  color: var(--section-on-accent, #ffffff);
-}
-
-.shelf-btn:disabled {
-  cursor: default;
-  opacity: 0.3;
-}
-
-.shelf-dot {
-  background-color: color-mix(in srgb, var(--section-accent, #b83c12) 30%, transparent);
-}
-
-.shelf-dot--active {
-  background-color: var(--section-accent, #b83c12);
-}
-
-.models-rail::-webkit-scrollbar {
-  display: none;
-}
-
-/* Карточка встаёт по левому краю ленты после шага стрелки. */
-.models-rail > li {
-  scroll-snap-align: start;
-}
-</style>
