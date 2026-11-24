@@ -6,8 +6,8 @@ import { HOME_MODEL_VARIANTS, modelVariant } from "~/utils/model-variants";
  * якоря и названия обязаны быть уникальными — иначе подпись уедет к чужой версии.
  */
 describe("HOME_MODEL_VARIANTS", () => {
-  it("четыре версии по порядку A, B, C, D", () => {
-    expect(HOME_MODEL_VARIANTS.map((variant) => variant.key)).toEqual(["a", "b", "c", "d"]);
+  it("десять версий по порядку H, J, I, F, G, E, A, B, C, D", () => {
+    expect(HOME_MODEL_VARIANTS.map((variant) => variant.key)).toEqual(["h", "j", "i", "f", "g", "e", "a", "b", "c", "d"]);
   });
 
   it("якоря уникальны и совпадают с шаблоном `modeli-variant-*`", () => {
@@ -34,6 +34,12 @@ describe("modelVariant", () => {
   it("находит версию по коду", () => {
     expect(modelVariant("c").title).toBe("Полка-паспорт");
     expect(modelVariant("a").id).toBe("modeli-variant-a");
+    expect(modelVariant("e").title).toBe("Коммерческая витрина");
+    expect(modelVariant("f").title).toBe("Парк крупным планом");
+    expect(modelVariant("g").title).toBe("Редакционные полки");
+    expect(modelVariant("h").id).toBe("modeli-variant-h");
+    expect(modelVariant("i").id).toBe("modeli-variant-i");
+    expect(modelVariant("j").id).toBe("modeli-variant-j");
   });
 
   it("неизвестный код — ошибка, а не пустая подпись", () => {

@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import type { FetchError } from "ofetch";
-import { computed, nextTick, onBeforeUnmount, onMounted } from "vue";
+import { computed, nextTick, onBeforeUnmount, onMounted, ref } from "vue";
 import type { HomeDto } from "~/types/catalog";
 import { buildLeadPayload, createRequestId } from "~/utils/lead-form";
 import { initLanding, type LandingLeadInput } from "~/utils/landing";
@@ -30,6 +30,7 @@ definePageMeta({ layout: false });
 
 /** Сколько видов показываем в карточке раздела: остальные сворачиваются в «ещё N». */
 const CATALOG_TYPES_LIMIT = 4;
+const heroActive = ref(false);
 
 const { data: site } = await useSite();
 const { data: home } = await useAsyncData<HomeDto>(
@@ -95,7 +96,6 @@ const faq = computed(() => home.value?.faq ?? []);
  * когда появятся собственные фото парка (вопрос Q-08 в `docs/specs/front.md`).
  */
 const PHOTOS = {
-  hero: "/landing/images/tech/hero.webp",
   park: "/landing/images/tech/park.webp",
   delivery: "/landing/images/tech/podacha.webp",
   crew: "/landing/images/tech/mashinist.webp",
@@ -247,30 +247,6 @@ const catalogCards = computed(() =>
     };
   }),
 );
-
-/** Первый экран: цена смены, размер парка и число разделов — из данных каталога. */
-const heroFacts = computed(() => {
-  const price = lowestPrice(allTypes.value);
-
-  return [
-    {
-      label: "Цена",
-      value: price
-        ? formatPriceShort(price.priceFrom, price.priceUnit)
-        : "по запросу",
-    },
-    { label: "Парк", value: `${parkTypeLabel.value} техники` },
-    { label: "Каталог", value: parkSectionsLabel.value },
-  ];
-});
-
-/**
- * Оффер первого экрана: что есть в парке и на каких условиях работаем.
- * Цена самой дешёвой смены выводится рядом — в бейджах `heroFacts`,
- * чтобы цифра не повторялась в лиде.
- */
-const heroLead =
-  "Гусеничные и колёсные экскаваторы, автокраны, самосвалы, катки, илососы и сваебойные установки — в наличии, с машинистами в штате. Смету с доставкой и ГСМ считаем до подачи машины, договор с юрлицами: НДС или без, закрывающие документы.";
 
 /** Слаги «быстрого подбора»: частые заказы в полосе `#podbor` под первым экраном. */
 const HERO_QUICK_SLUGS = [
@@ -512,38 +488,6 @@ const docTabs: DocTab[] = [
   },
 ];
 
-/**
- * Пункты шкалы разделов: порядок и `id` совпадают с блоками страницы.
- * Шкала и мобильное меню строятся из этого списка, поэтому новый блок
- * достаточно добавить здесь и в разметке.
- */
-const railItems: Array<{ id: string; label: string }> = [
-  { id: "main", label: "Аренда спецтехники" },
-  { id: "podbor", label: "Быстрый подбор" },
-  { id: "modeli", label: "Модели и цены" },
-  { id: "o-kompanii", label: "О компании" },
-  { id: "katalog", label: "Каталог техники" },
-  { id: "tehnika", label: "Техника в парке" },
-  { id: "usloviya", label: "Условия аренды" },
-  { id: "raschet", label: "Расчёт по объекту" },
-  { id: "uslugi", label: "Услуги" },
-  { id: "zadacha", label: "Задача" },
-  { id: "formaty", label: "Форматы работы" },
-  { id: "smena", label: "Смена и оплата" },
-  { id: "poryadok", label: "Порядок работы" },
-  { id: "populyarnoe", label: "Популярная техника" },
-  { id: "pokazateli", label: "Парк в цифрах" },
-  { id: "garantii", label: "Гарантии" },
-  { id: "dokumenty", label: "Документы" },
-  { id: "pochemu-my", label: "Почему напрямую" },
-  { id: "dopusk", label: "Допуск на объект" },
-  { id: "geografiya", label: "География" },
-  { id: "faq", label: "Вопросы" },
-  { id: "tendery", label: "Тендеры" },
-  { id: "ceny", label: "Стоимость" },
-  { id: "zayavka", label: "Заявка" },
-];
-
 const route = useRoute();
 
 usePageSeo({
@@ -660,9 +604,9 @@ onBeforeUnmount(() => {
 </script>
 <template>
   <div>
-    <header class="site-header">
-      <div class="shell flex items-center justify-between gap-6 py-3">
-        <a class="brand" href="/">
+    <header class="site-header fixed! left-0 w-screen transition-[opacity,transform,visibility] duration-500 motion-reduce:transition-none" :class="heroActive ? 'visible translate-y-0 opacity-100' : 'invisible -translate-y-full opacity-0'" :inert="!heroActive">
+      <div class="shell flex flex-nowrap items-center justify-between gap-2! py-3 sm:gap-4!">
+        <a class="brand shrink-0" href="/" aria-label="СПЕЦТЕХРЕСУРС — на главную">
           <svg
             class="brand__mark"
             viewBox="0 0 104 137"
@@ -680,7 +624,7 @@ onBeforeUnmount(() => {
               d="M76 7.5L104 15V101.5L76 119.5Z"
             />
           </svg>
-          <span>
+          <span class="hidden sm:block">
             <span class="brand__name"
               >СПЕЦ<span class="brand__accent">ТЕХ</span>РЕСУРС</span
             >
@@ -769,7 +713,7 @@ onBeforeUnmount(() => {
           </div>
         </nav>
 
-        <div class="header-contacts hidden lg:flex flex-col items-end gap-2">
+        <div class="header-contacts ml-auto hidden shrink-0 xl:flex items-center">
           <a class="header-phone" :href="phoneLink">
             <svg
               class="header-phone__icon"
@@ -787,9 +731,6 @@ onBeforeUnmount(() => {
               /></svg
             >{{ phone }}
           </a>
-          <a class="btn btn--ghost btn--sm header-cta" href="#zayavka"
-            >Заказать технику</a
-          >
         </div>
 
         <details class="mnav lg:hidden">
@@ -844,92 +785,11 @@ onBeforeUnmount(() => {
             </div>
           </div>
         </details>
+        <a class="inline-flex min-h-11 shrink-0 items-center justify-center whitespace-nowrap border border-[#ff8a2b] bg-[#ff8a2b] px-3 py-3 text-[11px] font-bold text-[#101416] transition-colors hover:bg-[#ffa24f] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#ff8a2b] sm:px-5 sm:text-sm" href="#zayavka">Заказать технику</a>
       </div>
     </header>
     <main id="main">
-      <nav class="rail" aria-label="Разделы страницы" data-rail>
-        <div class="rail__plate" aria-hidden="true" />
-        <ol class="rail__list">
-          <li
-            v-for="(item, index) in railItems"
-            :key="item.id"
-            class="rail__item"
-          >
-            <a
-              class="rail__link"
-              :class="{ 'is-active': index === 0 }"
-              :href="`#${item.id}`"
-              :data-rail-target="item.id"
-              :aria-current="index === 0 ? 'true' : undefined"
-            >
-              <span class="rail__dot" aria-hidden="true" />
-              <span class="rail__label">{{ item.label }}</span>
-            </a>
-          </li>
-        </ol>
-      </nav>
-
-      <section class="hero hero--photo hero--photo-strong hero--steps">
-        <div class="hero__bg" aria-hidden="true">
-          <img
-            class="hero__bg-img"
-            :src="PHOTOS.hero"
-            alt=""
-            width="1600"
-            height="1200"
-            fetchpriority="high"
-            decoding="async"
-          />
-        </div>
-        <div class="shell hero__inner">
-          <h1 class="h1 mt-5 max-w-5xl">
-            <span>Аренда спецтехники в {{ city.nameIn }}</span>
-            <span class="hero-steps">
-              <span class="hero-steps__item">экскаваторы</span
-              ><span class="hero-steps__item">автокраны</span
-              ><span class="hero-steps__item">самосвалы</span
-              ><span class="hero-steps__item">катки</span>
-            </span>
-            <span class="hero__accent">с машинистом</span>
-          </h1>
-          <p class="lead mt-5 max-w-3xl">{{ heroLead }}</p>
-          <div class="mt-8 flex flex-wrap gap-3">
-            <a class="btn btn--primary" href="#zayavka"
-              >Заказать технику<svg
-                class="h-4 w-4"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="1.6"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                aria-hidden="true"
-                focusable="false"
-              >
-                <path d="M4 12h15M13.5 6.5 19 12l-5.5 5.5" /></svg></a
-            ><a class="btn btn--ghost" href="#katalog"
-              >Каталог техники<svg
-                class="h-4 w-4"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="1.6"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                aria-hidden="true"
-                focusable="false"
-              >
-                <path d="M4 12h15M13.5 6.5 19 12l-5.5 5.5" /></svg
-            ></a>
-          </div>
-          <ul class="mt-6 flex flex-wrap gap-2">
-            <li v-for="fact in heroFacts" :key="fact.label" class="chip">
-              <span>{{ fact.label }}</span>
-              <b class="text-snow">{{ fact.value }}</b>
-            </li>
-          </ul>
-        </div>
-      </section>
+      <HomeExperimentalLanding variant="dark" embedded @activate="heroActive = true" />
 
       <section id="podbor" class="band feat-band">
         <div class="shell">
@@ -950,7 +810,7 @@ onBeforeUnmount(() => {
       </section>
 
       <!--
-        Каталог моделей — четыре версии одного блока подряд, A → B → C → D.
+        Каталог моделей — версии одного блока подряд, H → J → I → F → G → E → A → B → C → D.
         Заказчик сравнивает вёрстку глазами, поэтому версии стоят на странице
         одновременно, а данные у них общие: `modelSections`, `city.slug` и
         дисклеймер о цене. Подпись над версией — `HomeModelsCaption` (данные из
@@ -968,14 +828,14 @@ onBeforeUnmount(() => {
             <h2
               class="mt-3 text-[clamp(1.5rem,3.4vw,2.35rem)] leading-tight font-bold tracking-tight text-white"
             >
-              Четыре версии блока — одна под другой
+               {{ HOME_MODEL_VARIANTS.length }} вариантов каталога — один под другим
             </h2>
             <p class="mt-3 max-w-3xl text-[15px] leading-7 text-[#a9a49a]">
               Данные во всех версиях одни и те же:
               {{ models.length }} {{ pluralRu(models.length, ["модель", "модели", "моделей"]) }} в
               {{ modelSections.length }}
-              {{ pluralRu(modelSections.length, ["группе", "группах", "группах"]) }}, одинаковые цены
-              и ссылки. Листайте вниз: A → B → C → D — и скажите, какую оставляем.
+               {{ pluralRu(modelSections.length, ["группе", "группах", "группах"]) }}, одинаковые цены
+               и ссылки. Листайте вниз: {{ HOME_MODEL_VARIANTS.map(variant => variant.key.toUpperCase()).join(" → ") }} — и скажите, какую оставляем.
             </p>
             <nav class="mt-6 flex flex-wrap gap-2" aria-label="Версии блока «Каталог моделей»">
               <a
@@ -990,6 +850,40 @@ onBeforeUnmount(() => {
             </nav>
           </div>
         </div>
+
+        <section id="modeli-variant-h" aria-label="Вариант H — Парк по задачам с миниатюрами">
+          <HomeModelsCaption variant="h" />
+          <HomeModelsSignatureSections :sections="modelSections" variant="h" :thumbnails="true" :city-slug="city.slug" :price-disclaimer="priceDisclaimer" />
+        </section>
+
+        <section id="modeli-variant-j" aria-label="Вариант J — Парк по задачам с текстом на фото">
+          <HomeModelsCaption variant="j" />
+          <HomeModelsSignatureSections :sections="modelSections" variant="j" :thumbnails="true" :city-slug="city.slug" :price-disclaimer="priceDisclaimer" />
+        </section>
+
+        <section id="modeli-variant-i" aria-label="Вариант I — Парк по задачам без миниатюр">
+          <HomeModelsCaption variant="i" />
+          <HomeModelsSignatureSections :sections="modelSections" variant="i" :thumbnails="false" :city-slug="city.slug" :price-disclaimer="priceDisclaimer" />
+        </section>
+
+        <section id="modeli-variant-f" aria-label="Вариант F — Парк крупным планом">
+          <HomeModelsCaption variant="f" />
+          <HomeModelsSignature :groups="modelGroups" :city-slug="city.slug" :price-disclaimer="priceDisclaimer" />
+        </section>
+
+        <section id="modeli-variant-g" aria-label="Вариант G — Редакционные полки">
+          <HomeModelsCaption variant="g" />
+          <HomeModelsEditorial :groups="modelGroups" :city-slug="city.slug" :price-disclaimer="priceDisclaimer" />
+        </section>
+
+        <section id="modeli-variant-e" aria-label="Вариант E — Коммерческая витрина">
+          <HomeModelsCaption variant="e" />
+          <HomeModelsCommercial
+            :sections="modelSections"
+            :city-slug="city.slug"
+            :price-disclaimer="priceDisclaimer"
+          />
+        </section>
 
         <section id="modeli-variant-a" aria-label="Вариант A — Инженерный чертёж">
           <HomeModelsCaption variant="a" />
