@@ -34,6 +34,7 @@ export function toTypeCard(type: {
 }
 
 export function toHomeModel(model: {
+  slug: string;
   id: string;
   brand: string;
   model: string;
@@ -46,6 +47,7 @@ export function toHomeModel(model: {
 }) {
   return {
     id: model.id,
+    slug: model.slug,
     categorySlug: model.type.category.slug,
     typeSlug: model.type.slug,
     typeName: model.type.name,

@@ -45,7 +45,7 @@ function closeMenu(event: MouseEvent) {
             <NuxtLink to="/uslugi" :class="menuLink">Все услуги</NuxtLink>
           </div>
         </details>
-        <NuxtLink to="/#ceny" :class="menuLink">Стоимость</NuxtLink>
+        <NuxtLink to="/#tehnika" :class="menuLink">Стоимость</NuxtLink>
         <NuxtLink to="/kontakty" :class="menuLink">Контакты</NuxtLink>
       </nav>
       <a :href="telHref(site.phone)" class="ml-auto hidden min-h-11 shrink-0 items-center text-sm font-bold text-snow hover:text-flame2 xl:inline-flex">{{ site.phone }}</a>

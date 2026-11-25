@@ -76,7 +76,6 @@ const priceDisclaimer = computed(
 const categories = computed(() => home.value?.categories ?? []);
 const models = computed(() => home.value?.models ?? []);
 const services = computed(() => home.value?.services ?? []);
-const advantages = computed(() => home.value?.advantages ?? []);
 const steps = computed(() => home.value?.steps ?? []);
 const stats = computed(() => home.value?.stats ?? []);
 const faq = computed(() => home.value?.faq ?? []);
@@ -93,36 +92,6 @@ const PHOTOS = {
   service: "/landing/images/tech/remont.webp",
   site: "/landing/images/tech/na-obekte.webp",
 } as const;
-
-const advantagePhotos: string[] = [
-  PHOTOS.park,
-  PHOTOS.delivery,
-  PHOTOS.crew,
-  PHOTOS.documents,
-  PHOTOS.service,
-  PHOTOS.site,
-];
-
-/** Иконки карточек: щит, часы, машина, документ, ключ, геометка — по порядку карточек. */
-const advantageIcons: string[] = [
-  "M12 3 4.5 6v6c0 4.2 3.2 7.6 7.5 9 4.3-1.4 7.5-4.8 7.5-9V6z",
-  "M12 3.5a8.5 8.5 0 1 0 0 17 8.5 8.5 0 0 0 0-17zm0 4.3V12l3.4 2",
-  "M3.5 7.5h9.5v9H3.5zM13 11h3.9l3.1 3.2v2.3H13z",
-  "M14 3H7a1.5 1.5 0 0 0-1.5 1.5v15A1.5 1.5 0 0 0 7 21h10a1.5 1.5 0 0 0 1.5-1.5V7.5z",
-  "M15.4 3.6a4.6 4.6 0 0 0 5.1 6.9l-8.1 8.1a2.6 2.6 0 1 1-3.6-3.6l8-8.1a4.6 4.6 0 0 0-1.4-3.3z",
-  "M12 21s-6.5-5.4-6.5-10a6.5 6.5 0 1 1 13 0c0 4.6-6.5 10-6.5 10z",
-];
-
-/** Карточки «Почему нас выбирают»: преимущества из админки + номер, фото и иконка по порядку. */
-const advantageCards = computed(() =>
-  advantages.value.map((item, index) => ({
-    title: item.title,
-    text: item.text,
-    photo: advantagePhotos[index] ?? null,
-    icon: advantageIcons[index] ?? advantageIcons[0] ?? "",
-    number: String(index + 1).padStart(2, "0"),
-  })),
-);
 
 /** Иконки шагов заявки: поиск, расчёт, согласование, погрузка, доставка, сервис. */
 const stepIcons: string[] = [
@@ -240,70 +209,6 @@ const heroQuickPicks = computed(() => {
   });
 });
 
-interface PopularType {
-  slug: string;
-  title: string;
-  rank: string;
-  purpose: string;
-  conditions: string;
-}
-
-/** Популярные виды техники: цена берётся из каталога, тексты — из брифа главной (§3.5). */
-const POPULAR_TYPES: PopularType[] = [
-  {
-    slug: "gusenichnogo-ekskavatora",
-    title: "Гусеничный экскаватор",
-    rank: "чаще всего",
-    purpose:
-      "Котлованы, траншеи, разработка плотного грунта, погрузка в самосвал",
-    conditions: "С машинистом, смена 8 часов, подача тралом",
-  },
-  {
-    slug: "avtokrana",
-    title: "Автокран",
-    rank: "монтаж",
-    purpose: "Подъём и установка конструкций, разгрузка, монтаж оборудования",
-    conditions: "С машинистом, стропальщик по договорённости",
-  },
-  {
-    slug: "samosvala",
-    title: "Самосвал",
-    rank: "вывоз",
-    purpose:
-      "Вывоз грунта и строительного мусора, доставка инертных материалов",
-    conditions: "С водителем, объём кузова 10–30 т",
-  },
-  {
-    slug: "katka",
-    title: "Каток",
-    rank: "уплотнение",
-    purpose: "Уплотнение грунта, щебня и асфальта, подготовка основания",
-    conditions: "С машинистом, вибрационный или статический режим",
-  },
-];
-
-/** Виды техники с ценой из каталога — карточки блока «Популярная техника». */
-const popularTypes = computed(() =>
-  POPULAR_TYPES.map((item) => {
-    const type = categories.value
-      .flatMap((category) =>
-        category.types.map((entry) => ({
-          ...entry,
-          categorySlug: category.slug,
-        })),
-      )
-      .find((entry) => entry.slug === item.slug);
-
-    return {
-      ...item,
-      price: type
-        ? formatPriceFrom(type.priceFrom, type.priceUnit)
-        : "Цена по запросу",
-      href: type ? typePath(type.slug, city.value.slug) : "/katalog",
-    };
-  }),
-);
-
 interface LeaseTab {
   id: string;
   label: string;
@@ -313,7 +218,7 @@ interface LeaseTab {
   specs: Array<{ label: string; value: string }>;
 }
 
-/** Условия аренды — три вкладки брифа главной (§3.10). */
+/** Условия смены и ГСМ; доставка собрана в отдельном разделе. */
 const leaseTabs: LeaseTab[] = [
   {
     id: "smena",
@@ -341,26 +246,7 @@ const leaseTabs: LeaseTab[] = [
         value: "за счёт заказчика, если не согласовано иное",
       },
       { label: "Обслуживание и ремонт", value: "за счёт исполнителя" },
-      { label: "Простой по вине исполнителя", value: "не оплачивается" },
-      { label: "Замена при поломке", value: "резервная машина" },
       { label: "Ответственность перед третьими лицами", value: "по договору" },
-    ],
-  },
-  {
-    id: "dostavka",
-    label: "Доставка и допуск",
-    title: "Доставка на объект и допуск к работам",
-    text: "Способ доставки зависит от машины: гусеничную технику везём тралом, колёсную подаём своим ходом. Пропуска, освещение и подготовку площадки обеспечивает заказчик.",
-    photo: PHOTOS.delivery,
-    specs: [
-      { label: "Доставка", value: "тралом или своим ходом, по адресу" },
-      { label: "Въезд и пропуска", value: "оформляет заказчик" },
-      { label: "Документы машиниста", value: "удостоверение и путевой лист" },
-      { label: "Инструктаж по ТБ", value: "на объекте перед началом работ" },
-      {
-        label: "Работа на действующем объекте",
-        value: "по регламенту заказчика",
-      },
     ],
   },
 ];
@@ -373,7 +259,7 @@ interface DocTab {
   cards: Array<{ code: string; name: string; text: string }>;
 }
 
-/** Документы для юрлиц и тендеров — три вкладки брифа главной (§3.12, §3.15). */
+/** Договор и закрывающие; тендеры вынесены в компактную карточку. */
 const docTabs: DocTab[] = [
   {
     id: "dogovor",
@@ -423,29 +309,6 @@ const docTabs: DocTab[] = [
         code: "Счёт-фактура",
         name: "Счёт-фактура",
         text: "Выставляем при работе с НДС вместе с УПД — в сроки, установленные договором.",
-      },
-    ],
-  },
-  {
-    id: "tender",
-    label: "Для тендеров",
-    title: "Документы для закупок",
-    note: "Готовим пакет под 44-ФЗ и 223-ФЗ: от карточки предприятия до спецификации с графиком подачи машин.",
-    cards: [
-      {
-        code: "Карточка",
-        name: "Карточка предприятия и реквизиты",
-        text: "Комплект учредительных и регистрационных документов — по запросу.",
-      },
-      {
-        code: "КП",
-        name: "Коммерческое предложение по форме заказчика",
-        text: "Заполняем форму закупки: позиции, смены, стоимость и сроки подачи техники.",
-      },
-      {
-        code: "Опыт",
-        name: "Подтверждение опыта",
-        text: "Акты, отзывы и референс-лист по аналогичным объектам — в составе заявки.",
       },
     ],
   },
@@ -595,7 +458,7 @@ onBeforeUnmount(() => {
 
       <section id="o-kompanii" class="band on-light">
         <div class="shell">
-          <div class="about">
+          <div class="max-w-4xl">
             <div class="about__intro">
               <span class="kicker">О компании</span>
               <h2 class="h2 about__title mt-4">
@@ -607,10 +470,8 @@ onBeforeUnmount(() => {
               <p class="lead mt-4">
                 {{ parkTypeLabel }} техники в {{ parkSectionsLabel }}: экскаваторы,
                 автокраны, самосвалы, катки, погрузчики и сваебойные установки.
-                Парк собственный, машинисты в штате, техника обслуживается между
-                сменами, диспетчер на связи {{ workingHours }}. Один договор
-                закрывает машину, экипаж, доставку и документы — подрядчиков под
-                объект собирать не нужно.
+                Работаем в {{ city.nameIn }} и области. Диспетчер на связи
+                {{ workingHours }}.
               </p>
 
               <a class="btn btn--ink about__cta" href="#pokazateli"
@@ -627,40 +488,6 @@ onBeforeUnmount(() => {
                 >
                   <path d="M4 12h15M13.5 6.5 19 12l-5.5 5.5" /></svg
               ></a>
-            </div>
-            <div class="catcards">
-              <article
-                v-for="card in advantageCards"
-                :key="card.title"
-                class="catcard reveal"
-              >
-                <figure
-                  v-if="card.photo"
-                  class="catcard__media"
-                  role="img"
-                  :aria-label="card.title"
-                  :style="{ backgroundImage: `url('${card.photo}')` }"
-                >
-                  <span class="catcard__num">{{ card.number }}</span>
-                </figure>
-                <div class="catcard__head">
-                  <svg
-                    class="catcard__icon"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    stroke-width="1.6"
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    aria-hidden="true"
-                    focusable="false"
-                  >
-                    <path :d="card.icon" />
-                  </svg>
-                  <h3 class="catcard__title">{{ card.title }}</h3>
-                </div>
-                <p class="catcard__text">{{ card.text }}</p>
-              </article>
             </div>
           </div>
         </div>
@@ -902,376 +729,6 @@ onBeforeUnmount(() => {
         </div>
       </section>
 
-      <section id="usloviya" class="band feat-band">
-        <div class="shell">
-          <h2 class="sr-only">Условия аренды спецтехники</h2>
-          <ul class="featstrip__row">
-            <li class="featstrip-item">
-              <svg
-                class="featstrip-item__icon"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="1.6"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                aria-hidden="true"
-                focusable="false"
-              >
-                <path
-                  d="M12 3.5a8.5 8.5 0 1 0 0 17 8.5 8.5 0 0 0 0-17zm0 4.3V12l3.4 2"
-                />
-              </svg>
-              <span>
-                <span class="featstrip-item__title">Смена 8 часов</span>
-                <span class="featstrip-item__text"
-                  >минимум 4 часа оплачиваемого времени</span
-                >
-              </span>
-            </li>
-            <li class="featstrip-item">
-              <svg
-                class="featstrip-item__icon"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="1.6"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                aria-hidden="true"
-                focusable="false"
-              >
-                <path d="M12 3.5a8.5 8.5 0 1 0 0 17 8.5 8.5 0 0 0 0-17z" />
-                <path d="M2.5 12h4M17.5 12h4" />
-              </svg>
-              <span>
-                <span class="featstrip-item__title">Подача от 4 часов</span>
-                <span class="featstrip-item__text"
-                  >по {{ city.nameIn }} при свободной машине</span
-                >
-              </span>
-            </li>
-            <li class="featstrip-item">
-              <svg
-                class="featstrip-item__icon"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="1.6"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                aria-hidden="true"
-                focusable="false"
-              >
-                <path d="M3.5 7.5h9.5v9H3.5zM13 11h3.9l3.1 3.2v2.3H13z" />
-                <path
-                  d="M6.5 20a1.8 1.8 0 1 0 0-3.6 1.8 1.8 0 0 0 0 3.6zM17 20a1.8 1.8 0 1 0 0-3.6A1.8 1.8 0 0 0 17 20z"
-                />
-              </svg>
-              <span>
-                <span class="featstrip-item__title">Своя техника</span>
-                <span class="featstrip-item__text"
-                  >без субподряда и посредников</span
-                >
-              </span>
-            </li>
-            <li class="featstrip-item">
-              <svg
-                class="featstrip-item__icon"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="1.6"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                aria-hidden="true"
-                focusable="false"
-              >
-                <path d="M12 12a3.6 3.6 0 1 0 0-7.2 3.6 3.6 0 0 0 0 7.2z" />
-                <path d="M4.5 20.4a7.5 7.5 0 0 1 15 0" />
-              </svg>
-              <span>
-                <span class="featstrip-item__title">Экипаж в штате</span>
-                <span class="featstrip-item__text"
-                  >машинисты с допусками и стажем</span
-                >
-              </span>
-            </li>
-            <li class="featstrip-item">
-              <svg
-                class="featstrip-item__icon"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="1.6"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                aria-hidden="true"
-                focusable="false"
-              >
-                <path
-                  d="M14 3H7a1.5 1.5 0 0 0-1.5 1.5v15A1.5 1.5 0 0 0 7 21h10a1.5 1.5 0 0 0 1.5-1.5V7.5z"
-                />
-                <path d="M14 3v4.5h4.5" />
-                <path d="M9 12.5h6M9 16h4" />
-              </svg>
-              <span>
-                <span class="featstrip-item__title">Документы для юрлиц</span>
-                <span class="featstrip-item__text"
-                  >договор, счёт, УПД, путевые листы</span
-                >
-              </span>
-            </li>
-          </ul>
-        </div>
-      </section>
-
-      <section id="raschet" class="band on-light">
-        <div class="bg-survey" aria-hidden="true">
-          <svg
-            class="bg-survey__svg"
-            viewBox="0 0 240 240"
-            fill="none"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            aria-hidden="true"
-            focusable="false"
-          >
-            <path class="bg-survey__thin" d="M120 42V28" />
-            <circle class="bg-survey__thin" cx="120" cy="22" r="5" />
-            <rect
-              class="bg-survey__body"
-              x="92"
-              y="42"
-              width="56"
-              height="38"
-              rx="4"
-            />
-            <circle class="bg-survey__thin" cx="120" cy="61" r="5" />
-            <path class="bg-survey__body" d="M92 52H66a8 8 0 0 0 0 16h26" />
-            <path class="bg-survey__thin" d="M66 52v16" />
-            <path
-              class="bg-survey__leg"
-              d="M120 80 44 196M120 80l76 116M120 80v96"
-            />
-            <path
-              class="bg-survey__thin"
-              d="M30 196h28M182 196h28M106 176h28"
-            />
-            <path class="bg-survey__brace" d="M81 140h78" />
-          </svg>
-        </div>
-        <div class="shell">
-          <div class="context">
-            <div class="context__copy">
-              <span class="kicker">Условия объекта</span>
-              <h2 class="h2 mt-4">
-                Сначала смотрим на объект, потом подбираем машину
-              </h2>
-              <p class="lead mt-4 max-w-4xl">
-                Подбор техники начинается не с прайса, а с условий работы:
-                подъездные пути, грунты, стеснённость площадки, режим объекта и
-                сроки. От них зависит класс машины, сменное оборудование и
-                способ доставки.
-              </p>
-              <ol class="context__rows">
-                <li class="context__row reveal">
-                  <span class="context__num">01</span>
-                  <div>
-                    <h3 class="context__title">Подъезды и площадка</h3>
-                    <p class="context__text">
-                      Какая ширина проезда, есть ли ограничения по нагрузке на
-                      ось, где можно развернуть самосвал, автокран или
-                      низкорамный трал.
-                    </p>
-                  </div>
-                </li>
-                <li class="context__row reveal">
-                  <span class="context__num">02</span>
-                  <div>
-                    <h3 class="context__title">Грунты и рельеф</h3>
-                    <p class="context__text">
-                      Слабые и обводнённые грунты требуют другой машины либо
-                      временного покрытия; уклон и перепад высот влияют на
-                      работу крана и экскаватора.
-                    </p>
-                  </div>
-                </li>
-                <li class="context__row reveal">
-                  <span class="context__num">03</span>
-                  <div>
-                    <h3 class="context__title">Стеснённость и коммуникации</h3>
-                    <p class="context__text">
-                      Работа в охранных зонах ЛЭП и трубопроводов идёт по
-                      наряду-допуску; от этого зависит вылет стрелы, габарит
-                      машины и порядок допуска на площадку.
-                    </p>
-                  </div>
-                </li>
-                <li class="context__row reveal">
-                  <span class="context__num">04</span>
-                  <div>
-                    <h3 class="context__title">Режим и сроки</h3>
-                    <p class="context__text">
-                      Круглосуточные и вахтовые графики, работа в выходные,
-                      простои из-за погоды и очередь машин на выезде учитываются
-                      в смете до подписания договора.
-                    </p>
-                  </div>
-                </li>
-              </ol>
-            </div>
-            <figure class="context__visual reveal">
-              <figcaption class="context__caption">
-                <span>Схема площадки</span>
-                <span class="context__hint" aria-hidden="true"
-                  ><svg
-                    class="h-4 w-4"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    stroke-width="1.6"
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    aria-hidden="true"
-                    focusable="false"
-                  >
-                    <path d="m6 9.5 6 6 6-6" /></svg
-                ></span>
-              </figcaption>
-              <div class="context__scene">
-                <svg
-                  class="plan"
-                  viewBox="0 0 640 480"
-                  role="img"
-                  aria-label="Условная схема площадки: зона работ с объектом и оборудованием, проезды и направление подъезда техники"
-                  focusable="false"
-                >
-                  <defs>
-                    <pattern
-                      id="plan-hatch"
-                      width="12"
-                      height="12"
-                      patternUnits="userSpaceOnUse"
-                      patternTransform="rotate(38)"
-                    >
-                      <path class="plan__hatch" d="M0 0V12" />
-                    </pattern>
-                  </defs>
-                  <rect
-                    class="plan__ground"
-                    x="40"
-                    y="36"
-                    width="560"
-                    height="408"
-                    rx="6"
-                  />
-                  <rect
-                    class="plan__frame"
-                    x="40"
-                    y="36"
-                    width="560"
-                    height="408"
-                    rx="6"
-                  />
-                  <g class="plan__corners">
-                    <path d="M40 68V36h32" />
-                    <path d="M568 36h32v32" />
-                    <path d="M600 412v32h-32" />
-                    <path d="M72 444H40v-32" />
-                  </g>
-                  <path class="plan__road" d="M40 380H560V140" />
-                  <path class="plan__road-line" d="M40 380H560V140" />
-                  <rect
-                    class="plan__zone"
-                    x="104"
-                    y="96"
-                    width="300"
-                    height="232"
-                    rx="3"
-                  />
-                  <rect
-                    class="plan__zone-edge"
-                    x="104"
-                    y="96"
-                    width="300"
-                    height="232"
-                    rx="3"
-                  />
-                  <rect
-                    class="plan__building"
-                    x="140"
-                    y="132"
-                    width="228"
-                    height="164"
-                    rx="2"
-                  />
-                  <path
-                    class="plan__cell"
-                    d="M216 132V296M292 132V296M140 178H368M140 224H368M140 270H368"
-                  />
-                  <rect
-                    class="plan__unit"
-                    x="162"
-                    y="152"
-                    width="52"
-                    height="30"
-                    rx="1.5"
-                  />
-                  <rect
-                    class="plan__unit"
-                    x="162"
-                    y="240"
-                    width="52"
-                    height="32"
-                    rx="1.5"
-                  />
-                  <circle class="plan__ring" cx="116" cy="316" r="24" />
-                  <circle class="plan__ring" cx="116" cy="316" r="42" />
-                  <g class="plan__markers">
-                    <circle class="plan__marker" cx="116" cy="108" r="5" />
-                    <circle class="plan__marker" cx="392" cy="108" r="5" />
-                    <circle class="plan__marker" cx="116" cy="316" r="5" />
-                    <circle class="plan__marker" cx="392" cy="316" r="5" />
-                  </g>
-                  <path
-                    class="plan__route"
-                    d="M596 62C556 92 470 104 404 120"
-                  />
-                  <path class="plan__arrow" d="M420 114 404 120 410 136" />
-                </svg>
-              </div>
-              <div class="context__legend">
-                <span class="context__legend-item">
-                  <i
-                    class="context__swatch context__swatch--zone"
-                    aria-hidden="true"
-                  />
-                  Зона работ
-                </span>
-                <span class="context__legend-item">
-                  <i
-                    class="context__swatch context__swatch--building"
-                    aria-hidden="true"
-                  />
-                  Объект и оборудование
-                </span>
-                <span class="context__legend-item">
-                  <i
-                    class="context__swatch context__swatch--marker"
-                    aria-hidden="true"
-                  />
-                  Точки подъезда и работы
-                </span>
-                <span class="context__legend-item">
-                  Условная схема, без масштаба
-                </span>
-              </div>
-            </figure>
-          </div>
-        </div>
-      </section>
-
       <section id="uslugi" class="scroll-mt-24 bg-black py-12 text-white md:py-16" aria-labelledby="directions-title">
         <div class="shell">
           <div class="mb-8 grid! gap-5 md:grid-cols-2">
@@ -1279,7 +736,7 @@ onBeforeUnmount(() => {
               <p class="mb-3 text-xs font-bold tracking-[0.14em] text-[#ff9e49] uppercase">Направления работ</p>
               <h2 id="directions-title" class="m-0 text-[clamp(1.8rem,3.5vw,3rem)] leading-[1.12] font-extrabold tracking-[-0.035em] text-white">Сначала задача.<br>Затем нужная машина.</h2>
             </div>
-            <p class="m-0 max-w-lg self-end text-sm leading-relaxed text-[#c7c7c7]">Расскажите об объекте, объёме и сроках. Уточним подъездные пути, ограничения и необходимое оборудование — подберём технику под реальные условия работы.</p>
+            <p class="m-0 max-w-lg self-end text-sm leading-relaxed text-[#c7c7c7]">Выберите направление работ: от разработки грунта до перевозки техники. На странице услуги — задачи и подходящие машины.</p>
           </div>
           <div v-if="services.length" class="grid! gap-3 sm:grid-cols-2 lg:grid-cols-3">
             <a v-for="(service, index) in services" :key="service.slug" :href="servicePath(service.slug)" class="group flex min-w-0 flex-col rounded-lg border border-[#424242] bg-[#141414] p-6 text-white! no-underline! transition-colors hover:border-[#ff7a00] hover:bg-[#242424] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#ffae66] motion-reduce:transition-none!" data-direction-card>
@@ -1292,109 +749,13 @@ onBeforeUnmount(() => {
         </div>
       </section>
 
-      <section id="zadacha" class="band on-light">
-        <div class="shell">
-          <span class="kicker">Задача</span>
-          <h2 class="h2 mt-4">Аренда техники — это не только машина</h2>
-          <p class="lead mt-4 max-w-4xl">
-            Объект редко обходится одной единицей: сегодня нужен экскаватор,
-            завтра автокран, послезавтра самосвал. Считаем смету под весь фронт
-            работ сразу, чтобы техника не простаивала в ожидании.
-          </p>
-          <div class="mt-10 grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-            <article class="panel p-6 reveal">
-              <svg
-                class="h-7 w-7 text-flame"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="1.6"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                aria-hidden="true"
-                focusable="false"
-              >
-                <path d="M3 16.5V12h3.5V8.5h6V12H18l3 2.5v2h-2" />
-                <path d="M6.5 16.5h11" />
-                <path
-                  d="M6 19.5a1.8 1.8 0 1 0 0-3.6 1.8 1.8 0 0 0 0 3.6zM17 19.5a1.8 1.8 0 1 0 0-3.6 1.8 1.8 0 0 0 0 3.6z"
-                />
-              </svg>
-              <h3 class="h3 mt-5">Под объект нужен не один класс техники</h3>
-              <p class="panel__meta mt-3">
-                Экскаватор-погрузчик на благоустройстве, гусеничный экскаватор
-                на котловане, автокран на монтаже — это три разные машины в
-                разные дни. Держим весь набор в собственном парке, чтобы
-                заказчик не собирал технику по частям и не терял дни на
-                переговорах.
-              </p>
-            </article>
-            <article class="panel p-6 reveal">
-              <svg
-                class="h-7 w-7 text-flame"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="1.6"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                aria-hidden="true"
-                focusable="false"
-              >
-                <circle cx="12" cy="12" r="8.5" />
-                <path d="M12 7.5V12l3.2 2" />
-              </svg>
-              <h3 class="h3 mt-5">Простой машины дороже самой аренды</h3>
-              <p class="panel__meta mt-3">
-                Вставшая из-за поломки техника останавливает бригаду и сдвигает
-                весь график. Поэтому машины проходят ТО между сменами, на объект
-                выходит резервная единица, а сроки замены фиксируются в договоре
-                — не «как получится».
-              </p>
-            </article>
-            <article class="panel p-6 reveal">
-              <svg
-                class="h-7 w-7 text-flame"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="1.6"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                aria-hidden="true"
-                focusable="false"
-              >
-                <path
-                  d="M14 3H7a1.5 1.5 0 0 0-1.5 1.5v15A1.5 1.5 0 0 0 7 21h10a1.5 1.5 0 0 0 1.5-1.5V7.5z"
-                />
-                <path d="M14 3v4.5h4.5" />
-                <path d="M9 12.5h6M9 16h4" />
-              </svg>
-              <h3 class="h3 mt-5">
-                Документы важнее, чем «договоримся на месте»
-              </h3>
-              <p class="panel__meta mt-3">
-                Бухгалтерии и проверяющим нужны договор, счёт, акты и путевые
-                листы, а тендерной комиссии — справки и подтверждение опыта.
-                Работаем по договору с полным комплектом закрывающих документов.
-              </p>
-            </article>
-          </div>
-        </div>
-        <div class="deco deco--corner deco--br" aria-hidden="true">
-          <span class="deco__angle" /><span class="deco__dot" />
-        </div>
-      </section>
-
       <section id="formaty" class="band grid-bg">
         <div class="shell">
           <span class="kicker">Два формата работы</span>
           <h2 class="h2 mt-4">Одна машина на смену или парк на весь объект</h2>
           <p class="lead mt-4 max-w-4xl">
-            Форматы совмещаются: можно взять один экскаватор на два дня или
-            отдать весь фронт работ нам — от расчистки площадки до вывоза грунта
-            и забивки свай. Условия, стоимость и ответственность фиксируются
-            договором.
+            Выберите отдельную машину или согласуйте состав техники
+            под последовательные этапы работ.
           </p>
           <div class="mt-10 grid gap-4 md:grid-cols-2">
             <article class="linecard reveal">
@@ -1433,9 +794,9 @@ onBeforeUnmount(() => {
                   сваебойные установки с машинистом на смену, неделю или месяц.
                 </p>
                 <ul class="tick mt-7">
-                  <li>Машинист в штате, с допусками и опытом на объектах</li>
-                  <li>Заправка, ТО и текущий ремонт — наша зона</li>
-                  <li>Смена 8 или 10 часов, минимальный заказ — одна смена</li>
+                  <li>Одна машина под конкретный этап работ</li>
+                  <li>Сменное оборудование под вашу задачу</li>
+                  <li>Аренда на смену, неделю или месяц</li>
                 </ul>
                 <div class="mt-7">
                   <a class="btn btn--ghost" href="/katalog"
@@ -1496,7 +857,7 @@ onBeforeUnmount(() => {
                 <ul class="tick mt-7">
                   <li>Один договор и один диспетчер на весь парк</li>
                   <li>График выхода машин под этапы работ</li>
-                  <li>Замена при поломке из резерва без сдвига графика</li>
+                  <li>Координация подачи нескольких классов техники</li>
                 </ul>
                 <div class="mt-7">
                   <a class="btn btn--ghost" href="/uslugi"
@@ -1523,12 +884,11 @@ onBeforeUnmount(() => {
       <section id="smena" class="band on-light">
         <div class="shell">
           <span class="kicker">Условия аренды</span>
-          <h2 class="h2 mt-4">Смена, топливо и доставка — как это устроено</h2>
+          <h2 class="h2 mt-4">Смена и топливо — условия аренды</h2>
           <p class="lead mt-4 max-w-4xl">
             Смена — 8 часов, минимум 4 оплачиваемых часа, переработка — по
             часовому тарифу. ГСМ по умолчанию за счёт заказчика, обслуживание и
-            ремонт — наши. Как это считается, что нужно для допуска и как
-            доставляем машину — по вкладкам.
+            ремонт — наши. Подробности расчёта — по вкладкам.
           </p>
           <div class="tabs mt-10" data-tabs>
             <div
@@ -1620,71 +980,9 @@ onBeforeUnmount(() => {
                 {{ stepsLabel }}: от заявки до выхода машины на объект
               </h2>
               <p class="lead mt-4 max-w-4xl">
-                Заявку ведёт один диспетчер: подбирает машину, считает смету с
-                доставкой, готовит договор и следит за подачей. Сроки каждого
-                шага известны до начала работ — «уточним по ходу» не бывает.
+                Заявку ведёт один диспетчер. Даты и время каждого этапа
+                согласуем при оформлении заказа.
               </p>
-              <ul class="process__points">
-                <li class="process__point">
-                  <span class="process__mark"
-                    ><svg
-                      class="h-3 w-3"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      stroke-width="1.6"
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                      aria-hidden="true"
-                      focusable="false"
-                    >
-                      <path d="m4.5 12.5 5 5 10-11" /></svg
-                  ></span>
-                  <span
-                    >Один договор на технику, экипаж, доставку и документы</span
-                  >
-                </li>
-                <li class="process__point">
-                  <span class="process__mark"
-                    ><svg
-                      class="h-3 w-3"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      stroke-width="1.6"
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                      aria-hidden="true"
-                      focusable="false"
-                    >
-                      <path d="m4.5 12.5 5 5 10-11" /></svg
-                  ></span>
-                  <span
-                    >Цена фиксируется в смете до подачи машины, переработка — по
-                    часовому тарифу</span
-                  >
-                </li>
-                <li class="process__point">
-                  <span class="process__mark"
-                    ><svg
-                      class="h-3 w-3"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      stroke-width="1.6"
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                      aria-hidden="true"
-                      focusable="false"
-                    >
-                      <path d="m4.5 12.5 5 5 10-11" /></svg
-                  ></span>
-                  <span
-                    >Полный комплект закрывающих документов, включая справки для
-                    тендера</span
-                  >
-                </li>
-              </ul>
             </div>
             <ol class="process__grid">
               <li
@@ -1713,60 +1011,6 @@ onBeforeUnmount(() => {
               </li>
             </ol>
           </div>
-        </div>
-      </section>
-
-      <section id="populyarnoe" class="band flame-band">
-        <div class="shell">
-          <span class="kicker">Популярная техника</span>
-          <h2 class="h2 mt-4">Что заказывают чаще всего</h2>
-          <p class="lead mt-4 max-w-4xl">
-            Гусеничный экскаватор, автокран, самосвал и каток закрывают
-            большинство заявок: котлован и траншеи, монтаж конструкций, вывоз
-            грунта, уплотнение основания. Цена — за смену 8 часов с машинистом по
-            данным каталога; доставку и ГСМ считаем отдельно.
-          </p>
-          <ol class="levels mt-10">
-            <li
-              v-for="(card, index) in popularTypes"
-              :key="card.slug"
-              class="panel panel--practice levelcard reveal"
-              :class="{ 'panel--accent': index === 0 }"
-            >
-              <h3 class="levelcard__title">{{ card.title }}</h3>
-              <span class="levelcard__rank">{{ card.rank }}</span>
-              <dl class="levelcard__specs">
-                <div class="levelcard__spec">
-                  <dt class="levelcard__label">Цена</dt>
-                  <dd class="levelcard__value">{{ card.price }}</dd>
-                </div>
-                <div class="levelcard__spec">
-                  <dt class="levelcard__label">Для чего берут</dt>
-                  <dd class="levelcard__value">{{ card.purpose }}</dd>
-                </div>
-                <div class="levelcard__spec">
-                  <dt class="levelcard__label">Условия</dt>
-                  <dd class="levelcard__value">{{ card.conditions }}</dd>
-                </div>
-              </dl>
-              <div class="mt-6">
-                <a class="btn btn--ghost" :href="card.href"
-                  >Заказать<svg
-                    class="h-4 w-4"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    stroke-width="1.6"
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    aria-hidden="true"
-                    focusable="false"
-                  >
-                    <path d="M4 12h15M13.5 6.5 19 12l-5.5 5.5" /></svg
-                ></a>
-              </div>
-            </li>
-          </ol>
         </div>
       </section>
 
@@ -1862,29 +1106,6 @@ onBeforeUnmount(() => {
                 проходит до начала работ.
               </p>
             </article>
-            <article class="panel p-6 reveal">
-              <svg
-                class="h-7 w-7 text-flame"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="1.6"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                aria-hidden="true"
-                focusable="false"
-              >
-                <path d="M12 3 3 7.5 12 12l9-4.5z" />
-                <path d="M3 12.5 12 17l9-4.5" />
-                <path d="M3 17 12 21.5 21 17" />
-              </svg>
-              <h3 class="h3 mt-5">Закрывающие документы</h3>
-              <p class="panel__meta mt-3">
-                Договор, счёт, акты, путевые листы и счета-фактуры — в срок, без
-                напоминаний. Комплект подходит для бухгалтерии, тендеров и
-                проверок.
-              </p>
-            </article>
           </div>
         </div>
       </section>
@@ -1959,11 +1180,11 @@ onBeforeUnmount(() => {
         <div class="shell">
           <span class="kicker">Документы</span>
           <h2 class="h2 mt-4">
-            Что получает юрлицо: договор, закрывающие, тендер
+            Договор и закрывающие документы
           </h2>
           <p class="lead mt-4 max-w-4xl">
             Комплект документов зависит от формы оплаты и требований вашей
-            бухгалтерии или тендерного отдела. Ниже — что входит в каждый пакет;
+            бухгалтерии. Ниже — что входит в каждый пакет;
             состав и сроки согласуем до подачи техники.
           </p>
           <p class="note note--comment mt-6">
@@ -2017,353 +1238,32 @@ onBeforeUnmount(() => {
               </section>
             </div>
           </div>
-        </div>
-      </section>
-
-      <section id="pochemu-my" class="band flame-band">
-        <div class="shell">
-          <div class="practice-split">
-            <div class="practice-intro">
-              <span class="kicker">Почему напрямую</span>
-
-              <h2 class="h3 mt-4">
-                Работа с собственником парка — меньше посредников в смете
-              </h2>
-              <p class="lead mt-4">
-                Посредник добавляет в стоимость свою маржу и не отвечает за
-                фактическое состояние машины. Мы держим парк сами: диспетчер
-                видит, где каждая единица, и может перепланировать выход без
-                переторговки с третьей стороной.
-              </p>
-              <p class="note practice-intro__note">
-                Документы на технику, допуски машинистов и страховая
-                ответственность — направляем по запросу в составе предложения и
-                тендерной документации.
-              </p>
+          <aside id="tendery" aria-labelledby="tender-title" class="mt-10 grid gap-6 rounded-2xl bg-[#fff0df] p-6 text-[#20272d] sm:p-9 lg:grid-cols-[1.2fr_0.8fr] lg:items-center">
+            <div>
+              <SiteIcon name="docs" class="mb-4 h-9 w-9 text-[#9c4100]" />
+              <h3 id="tender-title" class="m-0 text-2xl font-extrabold leading-tight tracking-tight text-[#20272d]">Участвуем в тендерах и закупках</h3>
+              <p class="mt-4 mb-0 max-w-2xl text-sm leading-relaxed text-[#4e555b]">44-ФЗ, 223-ФЗ и коммерческие закупки. Подготовим предложение по форме заказчика, сведения о технике и подтверждение опыта под требования вашей закупки.</p>
             </div>
-            <ol class="panel panel--practice practice-sheet">
-              <li class="practice reveal">
-                <span class="practice__num">01</span>
-                <div class="practice__body">
-                  <div class="practice__head">
-                    <svg
-                      class="h-5 w-5 practice__icon"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      stroke-width="1.6"
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                      aria-hidden="true"
-                      focusable="false"
-                    >
-                      <path
-                        d="M12 3 4.5 6v6c0 4.2 3.2 7.6 7.5 9 4.3-1.4 7.5-4.8 7.5-9V6z"
-                      />
-                      <path d="m9 12.2 2.2 2.3 4.3-4.5" />
-                    </svg>
-                    <h3 class="practice__title">
-                      Машина, а не «найдём у партнёров»
-                    </h3>
-                  </div>
-                  <p class="practice__text">
-                    Каждая единица в каталоге — наша: известны год выпуска,
-                    состояние, наработка и комплект сменного оборудования. Мы не
-                    обещаем технику, которой у нас нет, и не подменяем класс
-                    машины в день подачи.
-                  </p>
-                </div>
-              </li>
-              <li class="practice reveal">
-                <span class="practice__num">02</span>
-                <div class="practice__body">
-                  <div class="practice__head">
-                    <svg
-                      class="h-5 w-5 practice__icon"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      stroke-width="1.6"
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                      aria-hidden="true"
-                      focusable="false"
-                    >
-                      <path
-                        d="M14 3H7a1.5 1.5 0 0 0-1.5 1.5v15A1.5 1.5 0 0 0 7 21h10a1.5 1.5 0 0 0 1.5-1.5V7.5z"
-                      />
-                      <path d="M14 3v4.5h4.5" />
-                      <path d="M9 12.5h6M9 16h4" />
-                    </svg>
-                    <h3 class="practice__title">
-                      Один диспетчер на все заявки
-                    </h3>
-                  </div>
-                  <p class="practice__text">
-                    Заявки, переносы и замены идут через одного диспетчера,
-                    который знает график парка на неделю вперёд. Не нужно
-                    обзванивать менеджеров, чтобы сдвинуть выход машины на день
-                    или добавить вторую единицу.
-                  </p>
-                </div>
-              </li>
-              <li class="practice reveal">
-                <span class="practice__num">03</span>
-                <div class="practice__body">
-                  <div class="practice__head">
-                    <svg
-                      class="h-5 w-5 practice__icon"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      stroke-width="1.6"
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                      aria-hidden="true"
-                      focusable="false"
-                    >
-                      <rect x="2.5" y="5.5" width="19" height="13" rx="1.5" />
-                      <path d="M2.5 10h19" />
-                      <path d="M6 14.5h4" />
-                    </svg>
-                    <h3 class="practice__title">Смета без скрытых позиций</h3>
-                  </div>
-                  <p class="practice__text">
-                    Мобилизация, работа на объекте, переработка и ГСМ расписаны
-                    отдельными строками. Итог совпадает с договором, а не
-                    пересчитывается «по факту» после закрытия смены.
-                  </p>
-                </div>
-              </li>
-              <li class="practice reveal">
-                <span class="practice__num">04</span>
-                <div class="practice__body">
-                  <div class="practice__head">
-                    <svg
-                      class="h-5 w-5 practice__icon"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      stroke-width="1.6"
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                      aria-hidden="true"
-                      focusable="false"
-                    >
-                      <path d="M8 21 12 3l4 18" />
-                      <path d="M6.4 15h11.2M9.2 9h5.6" />
-                      <path d="M6 21h12" />
-                    </svg>
-                    <h3 class="practice__title">
-                      Допуск на объект и требования площадки
-                    </h3>
-                  </div>
-                  <p class="practice__text">
-                    Учитываем внутренние регламенты заказчика: пропуска,
-                    наряд-допуск, работу в охранных зонах и режимные
-                    ограничения. Документы на технику и удостоверения машинистов
-                    готовим заранее, а не в день выезда.
-                  </p>
-                </div>
-              </li>
-            </ol>
-          </div>
-        </div>
-      </section>
-
-      <section id="dopusk" class="band grid-bg">
-        <div class="shell">
-          <span class="kicker">Допуск и подача</span>
-          <h2 class="h2 mt-4">Что нужно от заказчика до выхода машины</h2>
-          <p class="lead mt-4 max-w-4xl">
-            Список короткий, но без него машина не заедет на объект: пропуска,
-            наряд-допуск и место для стоянки оформляются заранее. Диспетчер
-            подскажет, что из этого нужно именно на вашей площадке.
-          </p>
-          <div class="mt-8">
-            <div class="docrow">
-              <svg
-                class="h-5 w-5"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="1.6"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                aria-hidden="true"
-                focusable="false"
-              >
-                <path
-                  d="M14 3H7a1.5 1.5 0 0 0-1.5 1.5v15A1.5 1.5 0 0 0 7 21h10a1.5 1.5 0 0 0 1.5-1.5V7.5z"
-                />
-                <path d="M14 3v4.5h4.5" />
-                <path d="M9 12.5h6M9 16h4" /></svg
-              ><span class="text-sm text-mist"
-                >Заявка с адресом объекта, характером работ и сроками — по ней
-                подбираем машину и считаем смену</span
-              >
+            <div class="rounded-xl border border-[#dfe4ea] bg-white p-6">
+              <p class="m-0 text-base font-bold text-[#20272d]">Обсудим вашу закупку</p>
+              <p class="mt-3 mb-5 text-sm leading-relaxed text-[#4e555b]">Укажите номер закупки и срок подачи в комментарии к заявке.</p>
+              <a href="#zayavka" data-tender-cta class="inline-flex min-h-12 w-full items-center justify-center rounded-lg bg-[#ff901e] px-5 py-3 text-sm font-bold text-[#171b1f]! no-underline! transition-colors hover:bg-[#ffa43e] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#9c4100] motion-reduce:transition-none">Обсудить тендер</a>
             </div>
-            <div class="docrow">
-              <svg
-                class="h-5 w-5"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="1.6"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                aria-hidden="true"
-                focusable="false"
-              >
-                <path
-                  d="M14 3H7a1.5 1.5 0 0 0-1.5 1.5v15A1.5 1.5 0 0 0 7 21h10a1.5 1.5 0 0 0 1.5-1.5V7.5z"
-                />
-                <path d="M14 3v4.5h4.5" />
-                <path d="M9 12.5h6M9 16h4" /></svg
-              ><span class="text-sm text-mist"
-                >Пропуска на технику и машинистов, режим въезда и время подачи
-                на территорию</span
-              >
-            </div>
-            <div class="docrow">
-              <svg
-                class="h-5 w-5"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="1.6"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                aria-hidden="true"
-                focusable="false"
-              >
-                <path
-                  d="M12 3 4.5 6v6c0 4.2 3.2 7.6 7.5 9 4.3-1.4 7.5-4.8 7.5-9V6z"
-                />
-                <path d="m9 12.2 2.2 2.3 4.3-4.5" /></svg
-              ><span class="text-sm text-mist"
-                >Наряд-допуск, если работы идут в охранных зонах ЛЭП,
-                трубопроводов или на действующем производстве</span
-              >
-            </div>
-            <div class="docrow">
-              <svg
-                class="h-5 w-5"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="1.6"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                aria-hidden="true"
-                focusable="false"
-              >
-                <path
-                  d="M12 21s6.5-5.6 6.5-10.5a6.5 6.5 0 1 0-13 0C5.5 15.4 12 21 12 21z"
-                />
-                <circle cx="12" cy="10.5" r="2.4" /></svg
-              ><span class="text-sm text-mist"
-                >Схема подъезда и место для стоянки: ширина проезда, покрытие и
-                ограничения по нагрузке на ось</span
-              >
-            </div>
-            <div class="docrow">
-              <svg
-                class="h-5 w-5"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="1.6"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                aria-hidden="true"
-                focusable="false"
-              >
-                <path
-                  d="M14 3H7a1.5 1.5 0 0 0-1.5 1.5v15A1.5 1.5 0 0 0 7 21h10a1.5 1.5 0 0 0 1.5-1.5V7.5z"
-                />
-                <path d="M14 3v4.5h4.5" />
-                <path d="M9 12.5h6M9 16h4" /></svg
-              ><span class="text-sm text-mist"
-                >Ответственный на площадке: принимает машину, подписывает
-                путевой лист и акт смены</span
-              >
-            </div>
-            <div class="docrow">
-              <svg
-                class="h-5 w-5"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="1.6"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                aria-hidden="true"
-                focusable="false"
-              >
-                <circle cx="12" cy="12" r="8.5" />
-                <path d="M12 7.5V12l3.2 2" /></svg
-              ><span class="text-sm text-mist"
-                >Бытовые условия для экипажа при вахтовом графике: помещение для
-                отдыха и место для пересменки</span
-              >
-            </div>
-            <div class="docrow">
-              <svg
-                class="h-5 w-5"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="1.6"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                aria-hidden="true"
-                focusable="false"
-              >
-                <path d="M4 16.5V12h3.5V8.5h6V12H18l3 2.5v2h-2" />
-                <path d="M6.5 16.5h11" />
-                <path
-                  d="M6 19.5a1.8 1.8 0 1 0 0-3.6 1.8 1.8 0 0 0 0 3.6zM17 19.5a1.8 1.8 0 1 0 0-3.6 1.8 1.8 0 0 0 0 3.6z"
-                /></svg
-              ><span class="text-sm text-mist"
-                >Точка заправки или порядок передачи ГСМ, если топливо не входит
-                в смену</span
-              >
-            </div>
-          </div>
+          </aside>
         </div>
       </section>
 
       <section id="geografiya" class="band on-light">
         <div class="shell">
-          <span class="kicker">География</span>
-          <h2 class="h2 mt-4">Москва и область: тралом и своим ходом</h2>
-          <p class="lead mt-4 max-w-4xl">
-            Везём технику на объект сами: тяжёлые машины — низкорамным тралом,
-            колёсную технику — своим ходом. Адрес, габариты машины и время
-            подачи диспетчер проверяет до подписания договора.
-          </p>
+          <span class="kicker">Доставка и допуск</span>
+          <h2 class="h2 mt-4">Доставка в Москву и область: что подготовить</h2>
+          <p class="lead mt-4 max-w-4xl">Гусеничную и тяжёлую технику доставляем тралом, колёсную — своим ходом. Стоимость считаем по адресу объекта; выезд за пределы области согласуем отдельно.</p>
           <ul class="tick mt-7">
-            <li>
-              Доставка тралом: гусеничные экскаваторы, катки, сваебойные
-              установки
-            </li>
-            <li>
-              Своим ходом по городу и области: экскаваторы-погрузчики,
-              самосвалы, автокраны
-            </li>
-            <li>
-              Мобилизацию считаем по адресу объекта — отдельной строкой в смете
-            </li>
-            <li>
-              Подача в выходные и круглосуточные смены — по согласованному
-              графику
-            </li>
+            <li>Сообщите адрес, дату и удобное время подачи.</li>
+            <li>Проверьте ширину въезда, покрытие и место для разгрузки или стоянки.</li>
+            <li>Подготовьте пропуска; для работ в охранных зонах — необходимый наряд-допуск.</li>
+            <li>Назначьте ответственного за приём машины и инструктаж на площадке.</li>
           </ul>
-          <p class="note mt-6">
-            Выезд за пределы области — по согласованию: время в пути и обратную
-            мобилизацию считаем заранее и фиксируем в договоре.
-          </p>
         </div>
       </section>
 
@@ -2406,29 +1306,6 @@ onBeforeUnmount(() => {
             </div>
           </div>
 
-          <p class="cta-key">
-            <svg
-              class="cta-key__icon"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="1.6"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              aria-hidden="true"
-              focusable="false"
-            >
-              <path
-                d="M12 3 4.5 6v6c0 4.2 3.2 7.6 7.5 9 4.3-1.4 7.5-4.8 7.5-9V6z"
-              />
-              <path d="m9 12.2 2.2 2.3 4.3-4.5" /></svg
-            ><span
-              >Работаем по договору: техника, экипаж, доставка и документы —
-              <strong class="cta-key__hi"
-                >один подрядчик на весь объём работ</strong
-              >.</span
-            >
-          </p>
         </div>
       </section>
 
@@ -2449,156 +1326,6 @@ onBeforeUnmount(() => {
               <summary class="h3">{{ item.question }}</summary>
               <p class="panel__meta mt-3">{{ item.answer }}</p>
             </details>
-          </div>
-        </div>
-      </section>
-
-      <section id="tendery" class="band on-light">
-        <div class="shell">
-          <span class="kicker">Тендеры и госпредприятия</span>
-          <h2 class="h2 mt-4">Готовим документацию для ЭТП, 44-ФЗ и 223-ФЗ</h2>
-          <p class="lead mt-4 max-w-4xl">
-            Работаем с закупками сетевых, генерирующих и промышленных компаний:
-            помогаем заказчику сформировать технические требования так, чтобы к
-            поставке не прошли машины без подтверждённого состояния и допусков.
-          </p>
-          <ul class="tick mt-7">
-            <li>
-              Техническое задание и обоснование требований к технике и сменному
-              оборудованию
-            </li>
-            <li>
-              Расчёт стоимости смены, мобилизации и ГСМ как приложение к
-              закупочной документации
-            </li>
-            <li>Справки и референс-лист по запросу</li>
-            <li>
-              Документы для подтверждения опыта: акты, отзывы, путевые листы
-            </li>
-          </ul>
-        </div>
-        <div class="deco deco--seal deco--br" aria-hidden="true">
-          <span class="deco__seal"
-            ><span class="deco__rings" aria-hidden="true"
-              ><i class="deco__ring deco__ring--near" /><i
-                class="deco__ring deco__ring--far" /><i
-                class="deco__ring-dot" /></span
-            ><svg
-              class="deco__seal-svg"
-              viewBox="0 0 132 168"
-              fill="none"
-              stroke="currentColor"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              aria-hidden="true"
-              focusable="false"
-            >
-              <path
-                class="deco__seal-line"
-                d="M24 8h66l26 26v108a16 16 0 0 1-16 16H24a16 16 0 0 1-16-16V24a16 16 0 0 1 16-16Z"
-              />
-              <path
-                class="deco__seal-line"
-                d="M90 8c0 12 1 18 6 22 5 4 12 4 20 4"
-              />
-              <path
-                class="deco__seal-line"
-                d="M28 58h70M28 78h64M28 98h58M28 118h20"
-              />
-              <circle class="deco__seal-ring" cx="85" cy="132" r="30" />
-              <circle class="deco__seal-ring" cx="85" cy="132" r="19" />
-              <path class="deco__seal-check" d="M72 132l7.5 7.5 20-14.8" /></svg
-          ></span>
-          <span class="deco__ticks"
-            ><i class="deco__tick" /><i class="deco__tick" /><i
-              class="deco__tick" /><i class="deco__tick" /><i
-              class="deco__tick" /><i class="deco__tick" /><i
-              class="deco__tick" /><i class="deco__tick" /><i
-              class="deco__tick" /><i class="deco__tick" /><i
-              class="deco__tick"
-          /></span>
-        </div>
-      </section>
-
-      <section id="ceny" class="band grid-bg">
-        <div class="shell">
-          <span class="kicker">Ориентиры</span>
-          <h2 class="h2 mt-4">Прайс: {{ parkTypeLabel }} — цена за смену</h2>
-          <p class="lead mt-4 max-w-4xl">
-            Цены выгружены из каталога: смена 8 часов с машинистом по каждому
-            виду. Итог зависит от объекта, сроков и доставки, но порядок цифр
-            виден до звонка. Смету с мобилизацией и ГСМ пришлём по заявке.
-          </p>
-          <div class="tabs mt-10" data-tabs>
-            <div class="tabs__list" role="tablist" aria-label="Разделы техники">
-              <button
-                v-for="category in categories"
-                :id="`ceny-tab-${category.slug}`"
-                :key="category.slug"
-                type="button"
-                class="tabs__tab"
-                role="tab"
-                :aria-controls="`ceny-panel-${category.slug}`"
-              >
-                {{ category.title
-                }}<span class="tabs__count">{{ category.types.length }}</span>
-              </button>
-            </div>
-            <div class="tabs__panels">
-              <section
-                v-for="category in categories"
-                :id="`ceny-panel-${category.slug}`"
-                :key="category.slug"
-                class="tabs__panel"
-                role="tabpanel"
-                :aria-labelledby="`ceny-tab-${category.slug}`"
-              >
-                <p class="lead">{{ category.shortDesc }}</p>
-                <div class="table-scroll mt-8">
-                  <table class="tbl">
-                    <thead>
-                      <tr>
-                        <th scope="col">Вид техники</th>
-                        <th scope="col">Ориентир</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      <tr v-for="type in category.types" :key="type.slug">
-                        <td>
-                          <a class="inline-flex min-h-6 items-center" :href="typePath(type.slug, city.slug)">{{
-                            type.name
-                          }}</a>
-                        </td>
-                        <td>
-                          {{ formatPriceShort(type.priceFrom, type.priceUnit) }}
-                        </td>
-                      </tr>
-                    </tbody>
-                  </table>
-                </div>
-                <p
-                  class="note mt-6 border-l-2 px-4 py-3 text-sm border-flame/70 bg-flame/5"
-                >
-                  {{ priceDisclaimer }}
-                </p>
-                <div class="mt-6">
-                  <a class="btn btn--ghost" :href="categoryPath(category.slug)"
-                    >Расчёт по этому разделу<svg
-                      class="h-4 w-4"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      stroke-width="1.6"
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                      aria-hidden="true"
-                      focusable="false"
-                    >
-                      <path d="M4 12h15M13.5 6.5 19 12l-5.5 5.5" /></svg
-                  ></a>
-                </div>
-              </section>
-            </div>
           </div>
         </div>
       </section>

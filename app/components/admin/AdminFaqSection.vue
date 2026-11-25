@@ -126,7 +126,7 @@ const SCOPE_BADGES: Record<FaqScopeName, string> = {
             v-if="form.scope === 'TYPE'"
             label="Вид техники"
             :error="fieldErrors.equipmentTypeId"
-            hint="Страница /arenda-{код}-v-{город}"
+            hint="Страница /arenda-{код}"
           >
             <select v-model="form.equipmentTypeId" class="field__input" name="equipmentTypeId">
               <option value="">— выберите вид —</option>

@@ -1,14 +1,17 @@
 import { describe, expect, it } from "vitest";
-import { categoryPath, servicePath, typePath } from "~/utils/routes";
+import { categoryPath, modelPath, servicePath, typePath } from "~/utils/routes";
 
 describe("typePath", () => {
   it("собирает ЧПУ посадочной без завершающего слеша (ADR-6)", () => {
-    expect(typePath("gusenichnogo-ekskavatora", "moskva")).toBe("/arenda-gusenichnogo-ekskavatora-v-moskva");
+    expect(typePath("gusenichnogo-ekskavatora", "moskva")).toBe("/arenda-gusenichnogo-ekskavatora");
     expect(typePath("gusenichnogo-ekskavatora", "moskva")).not.toMatch(/\/$/);
   });
 
-  it("подставляет город из City.slug", () => {
-    expect(typePath("mini-ekskavatora", "sankt-peterburg")).toBe("/arenda-mini-ekskavatora-v-sankt-peterburg");
+  it("не включает город в адрес", () => {
+    expect(typePath("mini-ekskavatora", "sankt-peterburg")).toBe("/arenda-mini-ekskavatora");
+  });
+  it("вкладывает модель в вид", () => {
+    expect(modelPath("gusenichnogo-ekskavatora", "cat-320")).toBe("/arenda-gusenichnogo-ekskavatora/cat-320");
   });
 });
 

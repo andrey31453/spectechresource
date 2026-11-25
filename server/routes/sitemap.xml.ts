@@ -6,20 +6,15 @@ export default defineEventHandler(async (event) => {
   } = useRuntimeConfig();
   const base = String(siteUrl).replace(/\/+$/, "");
 
-  const [city, categories, types, services, pages] = await Promise.all([
-    prisma.city.findFirst({
-      where: { isActive: true },
-      orderBy: [{ isDefault: "desc" }, { sortOrder: "asc" }],
-      select: { slug: true },
-    }),
+  const [categories, types, services, pages] = await Promise.all([
     prisma.category.findMany({
       where: { isPublished: true },
       select: { slug: true, updatedAt: true },
     }),
     prisma.equipmentType.findMany({
-      where: { isPublished: true },
+      where: { isPublished: true, category: { isPublished: true } },
       orderBy: { sortOrder: "asc" },
-      select: { slug: true, updatedAt: true },
+      select: { slug: true, updatedAt: true, models: { where: { isAvailable: true }, select: { slug: true, updatedAt: true } } },
     }),
     prisma.service.findMany({
       where: { isPublished: true },
@@ -43,13 +38,16 @@ export default defineEventHandler(async (event) => {
       lastmod: day(item.updatedAt),
       priority: "0.8",
     })),
-    ...(city
-      ? types.map((item) => ({
-          path: `/arenda-${item.slug}-v-${city.slug}`,
+    ...types.map((item) => ({
+          path: `/arenda-${item.slug}`,
           lastmod: day(item.updatedAt),
           priority: "0.9",
-        }))
-      : []),
+        })),
+    ...types.flatMap(type => type.models.map(model => ({
+      path: `/arenda-${type.slug}/${model.slug}`,
+      lastmod: day(model.updatedAt),
+      priority: "0.8",
+    }))),
     ...services.map((item) => ({
       path: `/uslugi/${item.slug}`,
       lastmod: day(item.updatedAt),

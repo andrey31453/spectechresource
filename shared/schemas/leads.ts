@@ -98,6 +98,7 @@ export const LeadSchema = v.object({
   utmTerm: optionalText(MAX.utm, `utm_term — не больше ${MAX.utm} символов`),
   /** Вид техники передаётся кодом (slug), а не id: клиент не знает внутренних id. */
   equipmentTypeSlug: equipmentSlugField,
+  equipmentModelId: optionalText(100, "Некорректный идентификатор модели"),
   /** Идемпотентность: один и тот же идентификатор не создаёт второй лид. */
   requestId: v.pipe(v.string("Не передан идентификатор запроса"), v.uuid("Некорректный идентификатор запроса")),
   /** Ловушка для ботов: люди это поле не видят и не заполняют. */

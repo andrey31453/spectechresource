@@ -1,12 +1,10 @@
 /**
- * Посадочная вида техники: /arenda-{typeSlug}-v-{citySlug}.
- * Страница передаёт слаги, сервер проверяет публикацию, подбирает город по умолчанию
- * и возвращает canonical-путь для 301, если город в URL не тот.
+ * Посадочная вида техники: /arenda-{typeSlug}.
+ * Город по умолчанию используется в контенте, но не в адресе.
  */
 export default defineEventHandler(async (event) => {
   const query = getQuery(event);
   const typeSlug = String(query.typeSlug ?? "");
-  const citySlug = String(query.citySlug ?? "");
 
   if (!typeSlug) {
     throw createError({ statusCode: 404, message: "Вид техники не найден" });
@@ -16,7 +14,7 @@ export default defineEventHandler(async (event) => {
 
   const [type, city] = await Promise.all([
     prisma.equipmentType.findFirst({
-      where: { slug: typeSlug, isPublished: true },
+      where: { slug: typeSlug, isPublished: true, category: { isPublished: true } },
       include: {
         category: true,
         models: {
@@ -59,8 +57,7 @@ export default defineEventHandler(async (event) => {
   }
 
   return {
-    canonicalPath: `/arenda-${type.slug}-v-${city.slug}`,
-    requestedCitySlug: citySlug,
+    canonicalPath: `/arenda-${type.slug}`,
     city: toCity(city),
     category: {
       slug: type.category.slug,
@@ -84,6 +81,7 @@ export default defineEventHandler(async (event) => {
       seoTextHtml: type.seoText ? renderMarkdown(type.seoText) : null,
     },
     models: type.models.map((model) => ({
+      slug: model.slug,
       id: model.id,
       brand: model.brand,
       model: model.model,

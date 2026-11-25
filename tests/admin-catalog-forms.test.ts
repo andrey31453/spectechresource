@@ -30,6 +30,7 @@ const categoryDto: AdminCategoryDto = {
 
 const modelDto: AdminModelDto = {
   id: "model-1",
+  slug: "test-model",
   brand: "JCB",
   model: "3CX",
   shortDesc: "Работы на ограниченной площадке",
@@ -133,6 +134,7 @@ describe("формы модели", () => {
   it("характеристики без названия и значения отбрасываются", () => {
     const body = modelFormBody({
       ...emptyModelForm(),
+      slug: "test-model",
       brand: " JCB ",
       model: " 3CX ",
       specs: [

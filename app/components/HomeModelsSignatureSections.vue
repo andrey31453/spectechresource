@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import type { HomeModelSection } from "~/utils/model-groups";
 import type { HomeModelGroup } from "~/utils/models";
-import { categoryPath, typePath } from "~/utils/routes";
+import { categoryPath, modelPath } from "~/utils/routes";
 import { formatMoney } from "~/utils/price";
 import { modelPage, showcaseShelf } from "~/utils/model-showcase";
 
@@ -113,7 +113,7 @@ const tones = [
           <div v-if="current(shelf)" class="mt-10 grid! min-w-0 gap-10 lg:grid-cols-[minmax(0,1.65fr)_minmax(0,1fr)] lg:gap-12">
             <div class="min-w-0">
               <Transition mode="out-in" enter-active-class="transition-opacity duration-300 motion-reduce:transition-none!" enter-from-class="opacity-0" leave-active-class="transition-opacity duration-150 motion-reduce:transition-none!" leave-to-class="opacity-0">
-                <a :key="current(shelf)!.id" :href="typePath(current(shelf)!.typeSlug, citySlug)" class="group relative block aspect-[4/3] overflow-hidden rounded-3xl bg-panel text-white! focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-current md:aspect-[16/10]" :aria-label="`Подробнее: ${current(shelf)!.brand} ${current(shelf)!.model}`">
+                <a :key="current(shelf)!.id" :href="modelPath(current(shelf)!.typeSlug, current(shelf)!.slug)" class="group relative block aspect-[4/3] overflow-hidden rounded-3xl bg-panel text-white! focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-current md:aspect-[16/10]" :aria-label="`Подробнее: ${current(shelf)!.brand} ${current(shelf)!.model}`">
                   <img v-if="current(shelf)!.photo" :src="current(shelf)!.photo!" :alt="`${current(shelf)!.brand} ${current(shelf)!.model}`" width="960" height="600" loading="lazy" class="h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.025] group-focus-visible:scale-[1.025] motion-reduce:scale-100! motion-reduce:transition-none!">
                   <span v-else class="absolute inset-0 grid! place-items-center text-lg">Фото уточняйте у менеджера</span>
                   <span v-if="variant !== 'h'" class="absolute right-4 bottom-4 inline-flex rounded-xl min-h-11 items-center gap-6 bg-ink px-5 py-3 text-sm font-bold text-sand">О машине <span aria-hidden="true">↗</span></span>
@@ -127,10 +127,10 @@ const tones = [
               <p class="mt-6! mb-0! text-[clamp(28px,3vw,44px)] font-bold leading-tight text-inherit!">{{ formatMoney(current(shelf)!.pricePerShift) ? `${formatMoney(current(shelf)!.pricePerShift)} ₽` : "Цена по запросу" }}<span v-if="current(shelf)!.pricePerShift" class="mt-1 block text-sm font-medium">за смену</span></p>
               <ModelSpecs :specs="current(shelf)!.specs" class="mt-6 py-5" />
               <div v-if="variant === 'h'" class="mt-auto flex w-full flex-wrap justify-end gap-3 pt-8">
-                <a :href="typePath(current(shelf)!.typeSlug, citySlug)" class="group inline-flex min-h-14 items-center justify-between gap-4 rounded-2xl px-5 py-3 text-base font-bold transition-colors motion-reduce:transition-none! focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-current" :class="index % 3 === 2 ? 'bg-flame text-ink! hover:bg-flame2' : 'bg-ink text-sand! hover:bg-ink2'">Подробнее о технике <span aria-hidden="true" class="transition-transform group-hover:translate-x-1 motion-reduce:translate-none! motion-reduce:transition-none!">→</span></a>
+                <a :href="modelPath(current(shelf)!.typeSlug, current(shelf)!.slug)" class="group inline-flex min-h-14 items-center justify-between gap-4 rounded-2xl px-5 py-3 text-base font-bold transition-colors motion-reduce:transition-none! focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-current" :class="index % 3 === 2 ? 'bg-flame text-ink! hover:bg-flame2' : 'bg-ink text-sand! hover:bg-ink2'">Подробнее о технике <span aria-hidden="true" class="transition-transform group-hover:translate-x-1 motion-reduce:translate-none! motion-reduce:transition-none!">→</span></a>
                 <SiteButton to="/#zayavka" variant="ghost" :tone="index % 3 === 2 ? 'light' : 'dark'">Заказать</SiteButton>
               </div>
-              <a v-else :href="typePath(current(shelf)!.typeSlug, citySlug)" class="group mt-8 inline-flex rounded-2xl min-h-14 w-full items-center justify-between gap-6 px-5 py-3 text-base font-bold transition-colors motion-reduce:transition-none! focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-current" :class="index % 3 === 2 ? 'bg-flame text-ink! hover:bg-flame2' : 'bg-ink text-sand! hover:bg-ink2'">Выбрать машину <span aria-hidden="true" class="transition-transform group-hover:translate-x-1 motion-reduce:translate-none! motion-reduce:transition-none!">→</span></a>
+              <a v-else :href="modelPath(current(shelf)!.typeSlug, current(shelf)!.slug)" class="group mt-8 inline-flex rounded-2xl min-h-14 w-full items-center justify-between gap-6 px-5 py-3 text-base font-bold transition-colors motion-reduce:transition-none! focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-current" :class="index % 3 === 2 ? 'bg-flame text-ink! hover:bg-flame2' : 'bg-ink text-sand! hover:bg-ink2'">Выбрать машину <span aria-hidden="true" class="transition-transform group-hover:translate-x-1 motion-reduce:translate-none! motion-reduce:transition-none!">→</span></a>
             </div>
           </div>
 

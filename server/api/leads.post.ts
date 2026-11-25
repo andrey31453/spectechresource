@@ -55,6 +55,16 @@ export default defineEventHandler(async (event) => {
       })
     : null;
 
+  const equipmentModel = input.equipmentModelId
+    ? await prisma.equipmentModel.findFirst({
+        where: { id: input.equipmentModelId, typeId: equipmentType?.id ?? "", isAvailable: true, type: { isPublished: true, category: { isPublished: true } } },
+        select: { id: true },
+      })
+    : null;
+  if (input.equipmentModelId && !equipmentModel) {
+    throw createError({ statusCode: 400, message: "Модель недоступна или не относится к выбранному виду" });
+  }
+
   const data = buildLeadCreateData(
     input,
     {
@@ -62,7 +72,7 @@ export default defineEventHandler(async (event) => {
       userAgent: getRequestHeader(event, "user-agent") ?? null,
       consentVersion: String(config.leadsConsentVersion),
     },
-    { equipmentTypeId: equipmentType?.id ?? null },
+    { equipmentTypeId: equipmentType?.id ?? null, equipmentModelId: equipmentModel?.id ?? null },
   );
 
   let leadId: string;

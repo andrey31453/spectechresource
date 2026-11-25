@@ -47,7 +47,7 @@ export default defineEventHandler(async (event) => {
 
     return { model: toAdminModel(model) };
   } catch (error) {
-    if (isUniqueViolation(error)) throwConflict("Такая модель у этого вида уже есть");
+    if (isUniqueViolation(error)) throwConflict("Модель с таким кодом или названием у этого вида уже есть");
     throw error;
   }
 });

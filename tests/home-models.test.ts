@@ -10,6 +10,7 @@ function model(patch: Partial<HomeModelDto> & { id: string; categorySlug: string
   return {
     typeSlug: "avtokrana",
     typeName: "Автокраны",
+    slug: "test-model",
     brand: "Ivanovets",
     model: "KS-45717",
     shortDesc: null,

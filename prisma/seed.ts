@@ -10,6 +10,7 @@
  * подлежит замене реальными данными заказчика через админку.
  */
 import "dotenv/config";
+import { modelSlug } from "../shared/utils/model-slug";
 import { PrismaPg } from "@prisma/adapter-pg";
 import { PrismaClient } from "../generated/prisma/client";
 
@@ -1375,6 +1376,7 @@ async function main() {
       update: { sortOrder: m.sortOrder },
       create: {
         typeId,
+        slug: modelSlug(m.brand, m.model),
         brand: m.brand,
         model: m.model,
         pricePerShift: m.pricePerShift,

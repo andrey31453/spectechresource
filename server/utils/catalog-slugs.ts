@@ -17,16 +17,6 @@ export function categorySlugRedirect(oldSlug: string, newSlug: string): SlugRedi
   return { from: `/katalog/${oldSlug}`, to: `/katalog/${newSlug}` };
 }
 
-/**
- * Посадочная вида техники содержит город: `/arenda-{slug}-v-{city}`.
- * Редирект делаем для города по умолчанию; пока город один, этого достаточно.
- */
-export function typeSlugRedirect(oldSlug: string, newSlug: string, citySlug: string | null): SlugRedirect | null {
-  if (oldSlug === newSlug || !citySlug) return null;
-
-  return { from: `/arenda-${oldSlug}-v-${citySlug}`, to: `/arenda-${newSlug}-v-${citySlug}` };
-}
-
 /** Услуга живёт в разделе `/uslugi/{slug}` — старый адрес после смены кода ведёт 301 на новый. */
 export function serviceSlugRedirect(oldSlug: string, newSlug: string): SlugRedirect | null {
   if (oldSlug === newSlug) return null;

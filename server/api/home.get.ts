@@ -26,6 +26,7 @@ export default defineEventHandler(async () => {
       ],
       select: {
         id: true,
+        slug: true,
         brand: true,
         model: true,
         shortDesc: true,

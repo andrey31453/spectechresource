@@ -1,4 +1,5 @@
 import { ModelCreateSchema } from "#shared/schemas/catalog";
+import { modelSlug } from "#shared/utils/model-slug";
 import { requireAdmin } from "../../../../../utils/admin-guard";
 import { readValidBody, requirePathParam, throwConflict, throwNotFound } from "../../../../../utils/admin-request";
 import { toAdminModel } from "../../../../../utils/catalog-admin";
@@ -18,6 +19,7 @@ export default defineEventHandler(async (event) => {
     const model = await prisma.equipmentModel.create({
       data: {
         typeId,
+        slug: input.slug ?? modelSlug(input.brand, input.model),
         brand: input.brand,
         model: input.model,
         shortDesc: input.shortDesc ?? null,
@@ -40,7 +42,7 @@ export default defineEventHandler(async (event) => {
     setResponseStatus(event, 201);
     return { model: toAdminModel(model) };
   } catch (error) {
-    if (isUniqueViolation(error)) throwConflict("Такая модель у этого вида уже есть");
+    if (isUniqueViolation(error)) throwConflict("Модель с таким кодом или названием у этого вида уже есть");
     throw error;
   }
 });

@@ -159,7 +159,7 @@ async function saveRelated() {
         </div>
         <h1 class="admin-page__title">{{ type?.name }}</h1>
         <p class="admin-page__lead">
-          Посадочная страница: <code>/arenda-{{ type?.slug }}-v-{город}</code>. Ниже — поля вида, модели и перелинковка.
+          Посадочная страница: <code>/arenda-{{ type?.slug }}</code>. Ниже — поля вида, модели и перелинковка.
         </p>
       </div>
       <div class="admin-page__actions">
@@ -188,7 +188,7 @@ async function saveRelated() {
     <div class="admin-page__head">
       <div>
         <h2 class="admin-page__title">Модели и характеристики</h2>
-        <p class="admin-page__lead">Таблица на посадочной странице. Характеристики показываются в карточке модели.</p>
+        <p class="admin-page__lead">Отдельные страницы моделей на сайте. Характеристики показываются в карточке модели.</p>
       </div>
       <div class="admin-page__actions">
         <button type="button" class="button" @click="addModel">+ Модель</button>

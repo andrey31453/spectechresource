@@ -4,19 +4,13 @@ import type { LandingDto } from "~/types/catalog";
 const route = useRoute();
 const segment = String(route.params.slug ?? "");
 
-// ЧПУ посадочной: /arenda-{typeSlug}-v-{citySlug}
-const markerIndex = segment.lastIndexOf("-v-");
-if (markerIndex <= 0) {
-  throw createError({ statusCode: 404, message: "Страница не найдена" });
-}
-
-const typeSlug = segment.slice(0, markerIndex);
-const citySlug = segment.slice(markerIndex + 3);
+// ЧПУ посадочной: /arenda-{typeSlug}
+const typeSlug = segment;
 
 const { data: site } = await useSite();
 const { data, error } = await useFetch<LandingDto>("/api/landing", {
   key: `landing-${segment}`,
-  query: { typeSlug, citySlug },
+  query: { typeSlug },
 });
 throwIfError(error.value);
 
@@ -28,10 +22,6 @@ const city = computed(() => landing.value?.city ?? { slug: "moskva", name: "Мо
 const companyName = computed(() => site.value?.companyName ?? "ООО «СПЕЦТЕХРЕСУРС»");
 const h1 = computed(() => `Аренда ${landing.value?.type.nameGenitive ?? ""} в ${city.value.nameIn}`);
 
-// Неверный город в URL (или город не из справочника) → 301 на город по умолчанию.
-if (data.value && data.value.requestedCitySlug !== data.value.city.slug) {
-  await navigateTo(data.value.canonicalPath, { redirectCode: 301, replace: true });
-}
 
 const fallbackDescription = computed(() => {
   const type = landing.value?.type;
@@ -50,7 +40,7 @@ const fallbackDescription = computed(() => {
 const { canonical } = usePageSeo({
   title: landing.value?.type.seoTitle ?? `${h1.value} — ${formatPriceFrom(landing.value?.type.priceFrom ?? null, landing.value?.type.priceUnit ?? "SHIFT").toLowerCase()} | ${companyName.value}`,
   description: landing.value?.type.seoDescription ?? fallbackDescription.value,
-  path: `/arenda-${typeSlug}-v-${citySlug}`,
+  path: `/arenda-${typeSlug}`,
   type: "article",
 });
 
@@ -156,7 +146,7 @@ if (landing.value?.type.priceFrom) {
           </thead>
           <tbody>
             <tr v-for="model in landing.models" :key="model.id">
-              <td>{{ model.brand }} {{ model.model }}</td>
+              <td><NuxtLink :to="modelPath(typeSlug, model.slug)">{{ model.brand }} {{ model.model }}</NuxtLink></td>
               <td>{{ formatPrice(model.pricePerShift) }}</td>
               <td>{{ formatPrice(model.pricePerHour) }}</td>
               <td><ModelSpecs :specs="model.specs" /></td>

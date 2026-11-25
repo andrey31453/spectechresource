@@ -65,6 +65,7 @@ async function remove() {
         <span v-if="model && !model.isAvailable" class="admin-badge admin-badge--off">недоступна</span>
       </h3>
       <div class="table__actions">
+        <NuxtLink v-if="model" :to="`/admin/catalog/models/${model.id}`" class="button button--ghost">Отдельная страница</NuxtLink>
         <button type="button" class="button" :disabled="pending" @click="save">
           {{ pending ? "Сохраняем…" : "Сохранить" }}
         </button>
@@ -82,6 +83,9 @@ async function remove() {
 
     <form class="admin-form" novalidate @submit.prevent="save">
       <div class="admin-form__grid">
+        <AdminField label="Код модели в URL" :error="fieldErrors.slug" hint="Например, cat-320. Пустой при создании — из марки и модели.">
+          <input v-model="form.slug" class="field__input" type="text" name="slug" autocomplete="off">
+        </AdminField>
         <AdminField label="Марка" :error="fieldErrors.brand" hint="JCB">
           <input v-model="form.brand" class="field__input" type="text" name="brand" autocomplete="off">
         </AdminField>

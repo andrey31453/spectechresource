@@ -76,6 +76,7 @@ describe("toTypeCard", () => {
 describe("toHomeModel", () => {
   const model = {
     id: "m1",
+    slug: "test-model",
     brand: "Hitachi",
     model: "ZX200-5G",
     shortDesc: "Разработка котлованов",
@@ -99,6 +100,7 @@ describe("toHomeModel", () => {
       categorySlug: "zemlyanye-raboty",
       typeSlug: "gusenichnogo-ekskavatora",
       typeName: "Гусеничные экскаваторы",
+      slug: "test-model",
       brand: "Hitachi",
       model: "ZX200-5G",
       shortDesc: "Разработка котлованов",

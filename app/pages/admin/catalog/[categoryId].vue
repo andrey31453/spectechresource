@@ -148,7 +148,7 @@ async function remove(type: AdminTypeListItemDto) {
         <h1 class="admin-page__title">{{ category?.title }}</h1>
         <p class="admin-page__lead">
           Виды техники раздела. У каждого вида своя посадочная страница
-          <code>/arenda-{код}-v-{город}</code>.
+          <code>/arenda-{код}</code>.
         </p>
       </div>
       <div class="admin-page__actions">

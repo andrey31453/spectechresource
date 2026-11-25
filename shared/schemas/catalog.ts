@@ -214,6 +214,7 @@ const specsField = v.optional(
 );
 
 const modelFields = {
+  slug: slugField(),
   brand: requiredText(80, "марку"),
   model: requiredText(80, "модель"),
   shortDesc: optionalText(600, "Краткое описание"),
@@ -227,6 +228,7 @@ const modelFields = {
 
 export const ModelCreateSchema = v.object({
   ...modelFields,
+  slug: v.optional(modelFields.slug),
   isAvailable: v.optional(modelFields.isAvailable, true),
   sortOrder: v.optional(sortOrderField, 10),
 });

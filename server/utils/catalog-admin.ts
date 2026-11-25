@@ -94,6 +94,7 @@ export function toAdminTypeListItem(type: {
 }
 
 export interface AdminModelDto {
+  slug: string;
   id: string;
   brand: string;
   model: string;
@@ -107,6 +108,7 @@ export interface AdminModelDto {
 }
 
 export function toAdminModel(model: {
+  slug: string;
   id: string;
   brand: string;
   model: string;
@@ -119,6 +121,7 @@ export function toAdminModel(model: {
   specs: Array<{ name: string; value: string }>;
 }): AdminModelDto {
   return {
+    slug: model.slug,
     id: model.id,
     brand: model.brand,
     model: model.model,

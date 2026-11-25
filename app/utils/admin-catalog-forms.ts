@@ -185,6 +185,7 @@ export function typeFormBody(form: TypeForm) {
 // ──────────────────────────────── Модели ────────────────────────────────
 
 export interface ModelForm {
+  slug: string;
   brand: string;
   model: string;
   shortDesc: string;
@@ -198,6 +199,7 @@ export interface ModelForm {
 
 export function emptyModelForm(): ModelForm {
   return {
+    slug: "",
     brand: "",
     model: "",
     shortDesc: "",
@@ -212,6 +214,7 @@ export function emptyModelForm(): ModelForm {
 
 export function modelFormFrom(model: AdminModelDto): ModelForm {
   return {
+    slug: model.slug,
     brand: model.brand,
     model: model.model,
     shortDesc: text(model.shortDesc),
@@ -227,6 +230,7 @@ export function modelFormFrom(model: AdminModelDto): ModelForm {
 /** Пустые строки характеристик отбрасываем: незаполненная строка — «ещё не вписали», а не ошибка. */
 export function modelFormBody(form: ModelForm) {
   return {
+    ...(form.slug.trim() ? { slug: form.slug.trim() } : {}),
     brand: form.brand.trim(),
     model: form.model.trim(),
     shortDesc: emptyToNull(form.shortDesc),

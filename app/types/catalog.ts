@@ -61,9 +61,10 @@ export interface SiteDto {
 /**
  * Модель техники на главной: конкретная машина с ценой за смену.
  * `categorySlug`/`typeSlug` связывают карточку с разделом и посадочной вида —
- * отдельных страниц моделей в каталоге нет.
+ * страницы моделей находятся внутри соответствующего вида техники.
  */
 export interface HomeModelDto {
+  slug: string;
   id: string;
   categorySlug: string;
   typeSlug: string;
@@ -98,6 +99,7 @@ export interface CategoryDetailDto extends CategoryCardDto {
 }
 
 export interface ModelDto {
+  slug: string;
   id: string;
   brand: string;
   model: string;
@@ -110,7 +112,6 @@ export interface ModelDto {
 
 export interface LandingDto {
   canonicalPath: string;
-  requestedCitySlug: string;
   city: CityDto;
   category: { slug: string; title: string };
   type: {

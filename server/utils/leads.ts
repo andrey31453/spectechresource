@@ -15,11 +15,13 @@ export interface LeadRequestContext {
 }
 
 export interface LeadRefs {
+  equipmentModelId?: string | null;
   equipmentTypeId?: string | null;
   equipmentTypeName?: string | null;
 }
 
 export interface LeadCreateData {
+  equipmentModelId?: string | null;
   requestId: string;
   name: string;
   phone: string;
@@ -62,6 +64,7 @@ export function buildLeadCreateData(
     utmContent: input.utmContent,
     utmTerm: input.utmTerm,
     equipmentTypeId: refs.equipmentTypeId ?? null,
+    ...(refs.equipmentModelId ? { equipmentModelId: refs.equipmentModelId } : {}),
     consentAt: context.now ?? new Date(),
     consentVersion: context.consentVersion,
     ip: context.ip,

@@ -14,6 +14,12 @@
 
 ## Контракт API
 
+Дополнение 24.11.2026: `GET /api/admin/catalog/models/:id` возвращает
+`{ model, type }` для отдельного редактора `/admin/catalog/models/:id`.
+`slug` модели сохраняется в БД, уникален внутри вида; при создании без кода
+генерируется из марки и модели. Конфликт требует другого кода (409).
+Смена кода вида или модели на этапе разработки не создаёт редиректы.
+
 Все хэндлеры под `/api/admin/**`: middleware проверяет сессию и CSRF, в каждом хэндлере —
 `requireAdmin(event)` (ADR-19, ADR-20). Ответы — JSON, ошибки в формате
 `{ message, data: { errors: [{ field, message }] } }`.
@@ -67,7 +73,7 @@
 ## Смена кода и редиректы (ADR-6)
 
 - Раздел: `/katalog/{old}` → 301 `/katalog/{new}`.
-- Вид: `/arenda-{old}-v-{city}` → 301 `/arenda-{new}-v-{city}` для города по умолчанию;
+- Вид и модель: старые адреса не сохраняются (решение 24.11.2026);
   пока город один, этого достаточно. Если активного города нет — редирект не создаётся.
 - Запись в `Redirect` — `upsert` по `from`; после записи кэш таблицы `redirects` (TTL 60 с)
   сбрасывается `invalidateRedirectCache()`, поэтому старый адрес работает сразу.
@@ -103,7 +109,7 @@
 | `shared/schemas/catalog.ts` | схемы и нормализация: `Category*Schema`, `Type*Schema`, `Model*Schema`, `RelatedUpdateSchema`, `normalizeMoneyInput` |
 | `server/utils/admin-request.ts` | `readValidBody`, `throwValidationError`, `throwFieldError`, `throwNotFound`, `throwConflict` |
 | `server/utils/catalog-admin.ts` | DTO админ-каталога (`toAdminCategory`, `toAdminTypeListItem`, `toAdminType`, `toAdminModel`) |
-| `server/utils/catalog-slugs.ts` | `categorySlugRedirect`, `typeSlugRedirect`, `saveSlugRedirect` |
+| `server/utils/catalog-slugs.ts` | `categorySlugRedirect`, `saveSlugRedirect` |
 | `server/utils/redirects.ts` | `getRedirectMap` + `invalidateRedirectCache` |
 | `server/api/admin/catalog/**` | 13 хэндлеров по таблице выше |
 | `app/pages/admin/catalog/index.vue`, `[categoryId].vue`, `types/[id].vue` | экраны |

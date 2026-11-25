@@ -37,6 +37,7 @@ export interface AdminSpecDto {
 }
 
 export interface AdminModelDto {
+  slug: string;
   id: string;
   brand: string;
   model: string;

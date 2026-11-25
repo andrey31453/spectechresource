@@ -12,7 +12,7 @@ import { toFieldErrors, type FieldError } from "./errors";
  */
 
 const RESERVED_SLUGS: readonly string[] = ["admin", "api", "uploads", "katalog", "uslugi", "kontakty", "_nuxt"];
-/** Посадочные живут по адресам `arenda-{вид}-v-{город}` — корневые страницы туда не пускаем. */
+/** Посадочные живут по адресам `arenda-{вид}` — корневые страницы туда не пускаем. */
 const LANDING_PREFIX = "arenda-";
 
 const contentField = v.pipe(

@@ -4,7 +4,7 @@ import { readValidBody, throwConflict, throwNotFound } from "../../../../utils/a
 import { toAdminTypeListItem } from "../../../../utils/catalog-admin";
 import { isUniqueViolation } from "../../../../utils/leads";
 
-/** Новый вид техники = новая посадочная страница `/arenda-{slug}-v-{город}`. */
+/** Новый вид техники = новая посадочная страница `/arenda-{slug}`. */
 export default defineEventHandler(async (event) => {
   requireAdmin(event);
   const input = await readValidBody(event, TypeCreateSchema);

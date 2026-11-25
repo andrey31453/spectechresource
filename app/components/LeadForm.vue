@@ -16,6 +16,8 @@ import { buildLeadPayload, createRequestId } from "~/utils/lead-form";
 const props = withDefaults(
   defineProps<{
     place: LeadPlace;
+    equipmentTypeSlug?: string;
+    equipmentModelId?: string;
     /** Виды техники для выпадающего списка; в CTA список не нужен. */
     equipmentTypes?: Array<{ slug: string; name: string }>;
     heading?: string;
@@ -26,6 +28,8 @@ const props = withDefaults(
     phone?: string | null;
   }>(),
   {
+    equipmentTypeSlug: undefined,
+    equipmentModelId: undefined,
     equipmentTypes: () => [],
     heading: "Расчёт за смену",
     lead: "Подберём технику под задачу и назовём цену с доставкой.",
@@ -46,7 +50,7 @@ const formEl = ref<HTMLFormElement | null>(null);
 const name = ref("");
 const phoneInput = ref("");
 const comment = ref("");
-const equipmentTypeSlug = ref("");
+const selectedTypeSlug = ref("");
 const consent = ref(false);
 const honeypot = ref("");
 const requestId = ref(createRequestId());
@@ -115,7 +119,8 @@ async function submit() {
     consent: consent.value,
     pageUrl: window.location.href,
     requestId: requestId.value,
-    equipmentTypeSlug: equipmentTypeSlug.value,
+    equipmentTypeSlug: props.equipmentTypeSlug ?? selectedTypeSlug.value,
+    equipmentModelId: props.equipmentModelId,
     honeypot: honeypot.value,
     pageTitle: document.title,
     referer: document.referrer,
@@ -145,7 +150,7 @@ function resetForm() {
   name.value = "";
   phoneInput.value = "";
   comment.value = "";
-  equipmentTypeSlug.value = "";
+  selectedTypeSlug.value = "";
   consent.value = false;
   honeypot.value = "";
   errors.value = {};
@@ -245,7 +250,7 @@ function resetForm() {
           <span class="text-xs font-semibold text-muted">Техника</span>
           <select
             :id="`lead-${place}-equipment`"
-            v-model="equipmentTypeSlug"
+            v-model="selectedTypeSlug"
             name="equipmentTypeSlug"
             :class="[fieldClass, 'border-line']"
           >

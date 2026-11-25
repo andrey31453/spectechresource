@@ -97,6 +97,7 @@ model EquipmentType {
 /// Конкретная модель в таблице на посадочной: JCB 3CX, Hitachi ZX200 и т.д.
 model EquipmentModel {
   id            String        @id @default(cuid())
+  slug          String
   typeId        String
   type          EquipmentType @relation(fields: [typeId], references: [id], onDelete: Cascade)
   brand         String // «JCB»
@@ -114,6 +115,7 @@ model EquipmentModel {
   leads Lead[]
 
   @@unique([typeId, brand, model])
+  @@unique([typeId, slug])
   @@index([typeId, sortOrder])
   @@map("equipment_models")
 }

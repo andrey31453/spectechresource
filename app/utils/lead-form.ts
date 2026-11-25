@@ -48,6 +48,7 @@ export interface LeadPayloadInput {
   pageUrl: string;
   requestId: string;
   equipmentTypeSlug?: string | null;
+  equipmentModelId?: string | null;
   honeypot?: string;
   pageTitle?: string | null;
   referer?: string | null;
@@ -75,6 +76,7 @@ export function buildLeadPayload(input: LeadPayloadInput) {
     referer: trimmedOrNull(input.referer, LIMITS.url),
     ...utmFromQuery(input.query ?? {}),
     equipmentTypeSlug: trimmedOrNull(input.equipmentTypeSlug, 80),
+    ...(input.equipmentModelId ? { equipmentModelId: input.equipmentModelId } : {}),
     requestId: input.requestId,
     honeypot: input.honeypot ?? "",
   };

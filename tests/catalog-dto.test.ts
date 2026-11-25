@@ -79,6 +79,7 @@ describe("toAdminModel", () => {
   it("характеристики отдаёт парами имя → значение в исходном порядке", () => {
     const dto = toAdminModel({
       id: "model-1",
+      slug: "test-model",
       brand: "JCB",
       model: "3CX",
       shortDesc: "Для погрузки и земляных работ",
@@ -130,6 +131,7 @@ describe("toAdminType", () => {
       models: [
         {
           id: "model-1",
+          slug: "test-model",
           brand: "JCB",
           model: "3CX",
           shortDesc: null,
