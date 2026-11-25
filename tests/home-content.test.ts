@@ -27,4 +27,16 @@ describe("consolidated homepage content", () => {
     expect(home).not.toContain('минимальный заказ — одна смена');
     expect(home).not.toContain('Заправка, ТО и текущий ремонт — наша зона');
   });
+
+  it("uses the approved warm palette by default on the homepage only", () => {
+    expect(home).not.toContain('route.query.palette');
+    expect(home).not.toContain('warmAmberPalette');
+    expect(home).toContain('class: "landing-page palette-warm-amber"');
+    expect(home).toContain('href: "/landing/warm-amber.css"');
+    expect(read("public/landing/warm-amber.css")).toContain("#f7f3ed");
+    expect(read("public/landing/warm-amber.css")).toContain("#ffa43e");
+    expect(read("app/assets/css/tailwind.css")).not.toContain("#f7f3ed");
+    expect(read("app/layouts/default.vue")).not.toContain("warm-amber.css");
+    expect(read("nuxt.config.ts")).not.toContain("warm-amber.css");
+  });
 });

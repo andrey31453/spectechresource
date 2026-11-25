@@ -1,0 +1,45 @@
+/* Основная палитра главной: «Мягкий янтарь».
+ * Фирменный графит и оранжевый сохраняются; меняются только светлые токены и
+ * оттенок CTA в сторону тёплого янтаря. Файл не подключается на других страницах.
+ */
+body.landing-page.palette-warm-amber {
+  --color-sand: #f7f3ed;
+  --color-sand2: #e4dbd1;
+  --color-paper: #fffdf9;
+  --color-ink2: #5f5149;
+  --color-steel: #786d66;
+  --color-cement: #eae1d7;
+  --color-cement2: #fbf5ec;
+  --color-cement-line: #e4dbd1;
+  --color-flame: #ff901e;
+  --color-flame2: #ffa43e;
+  --color-ember: #b34700;
+  --color-ember-ink: #9a4b00;
+  --color-brand: #9a4b00;
+  --color-brand-dark: #762d00;
+  --color-brand-soft: #fff8f0;
+  --color-accent: #ff901e;
+  --color-brand-light: #ffa43e;
+  --color-brand-bright: #b34700;
+  --grad-flame: linear-gradient(112deg, #ffa43e 0%, #ff901e 100%);
+  --grad-flame-soft: linear-gradient(112deg, #ffa43e29, #ff901e0f);
+}
+
+body.landing-page.palette-warm-amber .on-light {
+  background-color: var(--color-sand);
+}
+
+body.landing-page.palette-warm-amber .on-light .panel,
+body.landing-page.palette-warm-amber .catcard {
+  background-color: var(--color-paper);
+  border-color: var(--color-sand2);
+}
+
+body.landing-page.palette-warm-amber .btn--primary {
+  background-color: var(--color-flame);
+}
+
+body.landing-page.palette-warm-amber .btn--primary:hover {
+  background-image: none;
+  background-color: var(--color-flame2);
+}

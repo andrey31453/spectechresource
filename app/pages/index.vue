@@ -326,7 +326,9 @@ usePageSeo({
 useHead({
   // Метка на <body> отключает правила каркаса, которые пересекаются с макетом:
   // переносы в заголовках (`tailwind.css`) и классы `.lead`/`.grid` (`main.css`).
-  bodyAttrs: { class: "landing-page" },
+  bodyAttrs: {
+    class: "landing-page palette-warm-amber",
+  },
   // Тёмная строка браузера на мобильном — как у макета (`--color-night` = фон body).
   meta: [{ name: "theme-color", content: "#0b0f13", key: "theme-color" }],
   link: [
@@ -345,6 +347,12 @@ useHead({
       rel: "stylesheet",
       href: "/landing/style.css",
       key: "landing-style",
+      tagPriority: "low",
+    },
+    {
+      rel: "stylesheet",
+      href: "/landing/warm-amber.css",
+      key: "landing-warm-amber",
       tagPriority: "low",
     },
   ],
