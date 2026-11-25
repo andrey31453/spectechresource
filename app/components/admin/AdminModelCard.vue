@@ -103,6 +103,10 @@ async function remove() {
         </AdminField>
       </div>
 
+      <AdminField label="Краткое описание" :error="fieldErrors.shortDesc" hint="До 600 символов: для каких задач подходит эта модель">
+        <textarea v-model="form.shortDesc" class="field__input field__textarea" name="shortDesc" rows="3" maxlength="600" />
+      </AdminField>
+
       <AdminGalleryField
         v-model="form.photos"
         label="Фотографии модели"

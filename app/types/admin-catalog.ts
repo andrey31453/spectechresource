@@ -40,6 +40,7 @@ export interface AdminModelDto {
   id: string;
   brand: string;
   model: string;
+  shortDesc: string | null;
   pricePerShift: string | null;
   pricePerHour: string | null;
   photos: string[];

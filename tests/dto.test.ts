@@ -78,6 +78,7 @@ describe("toHomeModel", () => {
     id: "m1",
     brand: "Hitachi",
     model: "ZX200-5G",
+    shortDesc: "Разработка котлованов",
     pricePerShift: decimal("28000.00"),
     pricePerHour: decimal("4000.00"),
     photos: ["/uploads/model-cover.webp", "/uploads/model-2.webp"],
@@ -100,6 +101,7 @@ describe("toHomeModel", () => {
       typeName: "Гусеничные экскаваторы",
       brand: "Hitachi",
       model: "ZX200-5G",
+      shortDesc: "Разработка котлованов",
       pricePerShift: "28000.00",
       pricePerHour: "4000.00",
       photo: "/uploads/model-cover.webp",
@@ -115,6 +117,13 @@ describe("toHomeModel", () => {
 
     expect(dto.photo).toBeNull();
     expect(dto.pricePerHour).toBeNull();
+  });
+
+  it("не подменяет отсутствующее описание и сохраняет весь список характеристик", () => {
+    const specs = [...model.specs, { name: "Ширина, м", value: "1,7" }];
+    const dto = toHomeModel({ ...model, shortDesc: null, specs });
+    expect(dto.shortDesc).toBeNull();
+    expect(dto.specs).toEqual(specs);
   });
 });
 

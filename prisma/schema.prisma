@@ -101,6 +101,7 @@ model EquipmentModel {
   type          EquipmentType @relation(fields: [typeId], references: [id], onDelete: Cascade)
   brand         String // «JCB»
   model         String // «3CX»
+  shortDesc     String?
   pricePerShift Decimal?      @db.Decimal(12, 2)
   pricePerHour  Decimal?      @db.Decimal(12, 2)
   photos        String[]      @default([])

@@ -26,7 +26,7 @@ usePageSeo({
       после уточнения объёма и сроков.
     </p>
 
-    <ul class="grid" style="margin-top: 20px">
+    <ul class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3" style="margin-top: 20px">
       <li v-for="service in services ?? []" :key="service.slug">
         <NuxtLink :to="servicePath(service.slug)" class="card">
           <span class="card__title">{{ service.title }}</span>

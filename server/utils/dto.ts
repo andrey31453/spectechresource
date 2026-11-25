@@ -37,6 +37,7 @@ export function toHomeModel(model: {
   id: string;
   brand: string;
   model: string;
+  shortDesc: string | null;
   pricePerShift: Decimalish | null;
   pricePerHour: Decimalish | null;
   photos: string[];
@@ -50,6 +51,7 @@ export function toHomeModel(model: {
     typeName: model.type.name,
     brand: model.brand,
     model: model.model,
+    shortDesc: model.shortDesc,
     pricePerShift: money(model.pricePerShift),
     pricePerHour: money(model.pricePerHour),
     photo: model.photos[0] ?? null,

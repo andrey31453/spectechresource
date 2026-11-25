@@ -1,6 +1,6 @@
 <script setup lang="ts">
 /**
- * Синяя CTA-полоса: заголовок, телефон и переход в контакты.
+ * Акцентная CTA-полоса: заголовок, телефон и переход в контакты.
  * `bleed` — полоса во всю ширину экрана (страницы с полноэкранными секциями),
  * иначе — скруглённая плашка внутри контейнера страницы.
  *
@@ -43,12 +43,12 @@ const messengers = computed(() =>
 
 <template>
   <section
-    class="relative isolate overflow-hidden bg-brand-dark"
+    class="relative isolate overflow-hidden bg-flame"
     :class="bleed ? '' : 'mt-10 rounded-card'"
   >
     <div
       aria-hidden="true"
-      class="absolute inset-0 bg-linear-to-br from-brand/90 via-brand to-brand-dark"
+      class="absolute inset-0 bg-flame"
     />
     <div
       aria-hidden="true"
@@ -65,17 +65,17 @@ const messengers = computed(() =>
       >
         <div>
           <span
-            class="inline-flex items-center gap-3 font-mono text-[11px] font-semibold tracking-[0.22em] text-white/80 uppercase"
+            class="inline-flex items-center gap-3 font-mono text-[11px] font-semibold tracking-[0.22em] text-ink uppercase"
           >
-            <span aria-hidden="true" class="h-0.5 w-6 bg-white/70" />
+            <span aria-hidden="true" class="h-0.5 w-6 bg-ink" />
             {{ kicker }}
           </span>
           <h2
-            class="mt-4 text-[clamp(1.6rem,3vw,2.35rem)] leading-tight font-bold tracking-tight text-white"
+            class="mt-4 text-[clamp(1.6rem,3vw,2.35rem)] leading-tight font-bold tracking-tight text-ink"
           >
             {{ title }}
           </h2>
-          <p v-if="text" class="mt-4 max-w-2xl text-sm leading-relaxed text-white/85 sm:text-base">
+          <p v-if="text" class="mt-4 max-w-2xl text-sm leading-relaxed text-ink sm:text-base">
             {{ text }}
           </p>
 
@@ -89,7 +89,7 @@ const messengers = computed(() =>
               :key="item.label"
               :href="item.href"
               rel="noopener"
-              class="inline-flex min-h-10 items-center rounded-field border border-white/40 px-4 text-sm font-semibold text-white transition-colors hover:bg-white/10 hover:no-underline"
+              class="inline-flex min-h-10 items-center rounded-field border border-ink/40 px-4 text-sm font-semibold text-ink transition-colors hover:border-ink hover:no-underline"
             >
               {{ item.label }}
             </a>
@@ -110,7 +110,7 @@ const messengers = computed(() =>
         </div>
       </div>
 
-      <p v-if="note" class="mt-10 border-t border-white/25 pt-4 text-xs leading-relaxed text-white/70">
+      <p v-if="note" class="mt-10 border-t border-ink/25 pt-4 text-xs leading-relaxed text-ink">
         {{ note }}
       </p>
     </div>

@@ -45,6 +45,7 @@ const categories = computed(() => home.value?.categories.slice(0, 4) ?? []);
 const active = ref(false);
 const reduceMotion = ref(false);
 const hero = ref<HTMLElement | null>(null);
+let revealTimer: ReturnType<typeof setTimeout> | undefined;
 
 const fallbackImages = [
   "/landing/images/tech/hero.webp",
@@ -68,9 +69,17 @@ function categoryTitle(title: string) {
 }
 
 function reveal() {
-  if (active.value) return;
-  active.value = true;
-  emit("activate");
+  if (active.value || revealTimer !== undefined) return;
+  const activate = () => {
+    revealTimer = undefined;
+    active.value = true;
+    emit("activate");
+  };
+  if (props.variant === "dark" && !reduceMotion.value) {
+    revealTimer = setTimeout(activate, 50);
+  } else {
+    activate();
+  }
 }
 
 function onPointerMove(event: PointerEvent) {
@@ -97,6 +106,7 @@ onMounted(() => {
 });
 
 onBeforeUnmount(() => {
+  clearTimeout(revealTimer);
   window.removeEventListener("pointermove", onPointerMove);
   window.removeEventListener("keydown", onKeydown);
 });
@@ -123,9 +133,9 @@ onBeforeUnmount(() => {
       <div class="experimental__hero-copy">
         <p class="experimental__eyebrow">Спецтехника для задач, которые нельзя отложить</p>
         <h1 id="experimental-title">Аренда<br><em>спецтехники</em></h1>
-        <ul v-if="variant === 'dark'" class="experimental__benefits m-0 mt-8 grid w-max list-none gap-3 p-0 text-[clamp(20px,2.2vw,28px)] leading-tight font-semibold text-[#f2eee6]">
+        <ul v-if="variant === 'dark'" class="experimental__benefits m-0 mt-8 grid w-max list-none gap-3 p-0 text-[clamp(20px,2.2vw,28px)] leading-tight font-semibold text-snow">
           <li v-for="benefit in ['Машины с экипажем', 'Полный пакет документов', 'Подача к началу работ']" :key="benefit" class="flex items-center gap-3 whitespace-nowrap">
-            <span aria-hidden="true" class="size-2 shrink-0 rounded-full bg-[#f08a3c]" />
+            <span aria-hidden="true" class="size-2 shrink-0 rounded-full bg-flame" />
             {{ benefit }}
           </li>
         </ul>
@@ -202,7 +212,7 @@ onBeforeUnmount(() => {
   overflow: hidden;
   background: var(--exp-bg);
   color: var(--exp-ink);
-  font-family: Arial, sans-serif;
+  font-family: var(--font-sans);
 }
 .experimental__header { position: fixed; z-index: 10; top: 0; left: 0; right: 0; display: flex; align-items: center; justify-content: space-between; gap: 24px; padding: 22px clamp(20px, 4vw, 64px); transform: translateY(-110%); border-bottom: 1px solid rgb(21 24 23 / 12%); background: color-mix(in srgb, var(--exp-bg) 88%, transparent); backdrop-filter: blur(14px); transition: transform .7s cubic-bezier(.22,1,.36,1); }
 .is-active .experimental__header { transform: translateY(0); }
@@ -214,6 +224,7 @@ onBeforeUnmount(() => {
 .experimental__header-cta { padding: 12px 16px; border: 1px solid currentColor; font-size: 11px; font-weight: 800; text-transform: uppercase; }
 .experimental__header-cta span { margin-left: 10px; color: var(--exp-accent); font-size: 16px; }
 .experimental__hero { position: relative; display: flex; min-height: 100svh; align-items: center; padding: 12vh clamp(20px, 10vw, 160px); transition: min-height .95s cubic-bezier(.22,1,.36,1), padding .95s cubic-bezier(.22,1,.36,1); }
+.experimental--dark .experimental__hero { transition-duration: .8s; }
 .is-active .experimental__hero { min-height: 34svh; padding-top: 120px; padding-bottom: 38px; }
 .experimental--dark.is-active .experimental__hero { min-height: 30.6svh; padding-top: 108px; padding-bottom: 34px; }
 .experimental--dark.is-active h1 { font-size: clamp(40px, 6vw, 96px); }
@@ -271,8 +282,8 @@ onBeforeUnmount(() => {
   z-index: 4;
   inset: 0;
   content: "";
-  background: var(--exp-accent);
-  clip-path: polygon(calc(100% - 2px) 0, 100% 0, calc(100% - 40px) 100%, calc(100% - 42px) 100%);
+  background: #000;
+  clip-path: polygon(calc(100% - 8px) 0, 100% 0, calc(100% - 40px) 100%, calc(100% - 48px) 100%);
 }
 .experimental--dark .experimental__grid--banner .experimental__card-image img { transform: none; }
 .experimental--dark .experimental__grid--banner .experimental__card-image::after {
@@ -299,18 +310,11 @@ onBeforeUnmount(() => {
 .experimental__footer { display: flex; justify-content: space-between; gap: 20px; padding: 24px clamp(20px, 4vw, 64px); border-top: 1px solid rgb(21 24 23 / 14%); color: var(--exp-muted); font-size: 11px; }
 .experimental__footer a { color: inherit; text-decoration: none; }
 
-.experimental--dark { --exp-bg: #101416; --exp-ink: #f2eee6; --exp-muted: #a5aaa4; --exp-accent: #f08a3c; }
+.experimental--dark { --exp-bg: var(--color-ink); --exp-ink: var(--color-snow); --exp-muted: var(--color-mist); --exp-accent: var(--color-flame); }
 .experimental--dark .experimental__hero { background: radial-gradient(circle at 75% 42%, #39433d 0, transparent 31%), var(--exp-bg); }
 .experimental--dark .experimental__hero-machine img { filter: grayscale(.55) contrast(1.3); }
 .experimental--dark .experimental__categories, .experimental--dark .experimental__footer { background: #0b0e10; }
 .experimental--dark .experimental__card { border: 1px solid rgb(255 255 255 / 14%); }
-.experimental--editorial { --exp-bg: #f7f5f0; --exp-ink: #1e2020; --exp-muted: #737772; --exp-accent: #d9542c; }
-.experimental--editorial .experimental__hero { align-items: end; padding-bottom: 15vh; }
-.experimental--editorial h1 { font-size: clamp(68px, 13vw, 205px); line-height: .7; }
-.experimental--editorial .experimental__hero-copy { max-width: 1100px; }
-.experimental--editorial .experimental__hero-stamp { right: 7vw; top: 22%; bottom: auto; }
-.experimental--editorial .experimental__hero-machines { right: 5vw; bottom: 8%; width: min(52vw, 760px); transform: rotate(-4deg) translateY(20px); }
-.experimental--editorial.is-active .experimental__hero-machines { transform: rotate(-4deg) translateY(0); }
 
 @media (max-width: 800px) {
   .experimental__header { padding: 16px 20px; }

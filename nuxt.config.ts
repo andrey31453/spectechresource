@@ -35,6 +35,12 @@ export default defineNuxtConfig({
       // Класс `js` включает прогрессивные улучшения главной (макет `docs/sait-13`):
       // без него блоки `.reveal` видны сразу, а табы показывают все панели.
       htmlAttrs: { lang: "ru", class: "js" },
+      link: [
+        { rel: "icon", href: "/favicon.ico?v=6", sizes: "32x32 48x48" },
+        { rel: "icon", type: "image/png", sizes: "32x32", href: "/favicon-32x32.png?v=6" },
+        { rel: "icon", type: "image/svg+xml", href: "/favicon.svg?v=6" },
+        { rel: "apple-touch-icon", sizes: "180x180", href: "/apple-touch-icon.png?v=6" },
+      ],
       meta: [{ name: "format-detection", content: "telephone=no" }],
     },
   },

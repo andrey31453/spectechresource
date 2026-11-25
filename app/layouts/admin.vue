@@ -22,7 +22,7 @@ const wide = computed(
 <template>
   <div class="admin-shell">
     <header class="admin-shell__bar">
-      <NuxtLink to="/admin" class="admin-shell__brand">СПЕЦТЕХРЕСУРС · админка</NuxtLink>
+      <NuxtLink to="/admin" class="admin-shell__brand inline-flex min-h-11 items-center gap-3"><SiteLogo class="size-10 shrink-0" /><span>СПЕЦТЕХРЕСУРС · админка</span></NuxtLink>
       <nav class="admin-shell__nav" aria-label="Разделы админки">
         <NuxtLink to="/admin/leads" class="admin-shell__link">Заявки</NuxtLink>
         <NuxtLink to="/admin/catalog" class="admin-shell__link">Каталог</NuxtLink>

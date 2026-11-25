@@ -20,6 +20,7 @@ export default defineEventHandler(async (event) => {
         typeId,
         brand: input.brand,
         model: input.model,
+        shortDesc: input.shortDesc ?? null,
         pricePerShift: input.pricePerShift ?? null,
         pricePerHour: input.pricePerHour ?? null,
         photos: input.photos ?? [],

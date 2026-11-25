@@ -28,6 +28,7 @@ export default defineEventHandler(async () => {
         id: true,
         brand: true,
         model: true,
+        shortDesc: true,
         pricePerShift: true,
         pricePerHour: true,
         photos: true,

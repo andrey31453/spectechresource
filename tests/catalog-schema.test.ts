@@ -167,6 +167,16 @@ describe("TypeUpdateSchema", () => {
 });
 
 describe("ModelCreateSchema", () => {
+  it("принимает описание до 600 символов, обрезает пробелы и отклоняет превышение", () => {
+    const base = { brand: "Bobcat", model: "S650" };
+    const parsed = v.safeParse(ModelCreateSchema, { ...base, shortDesc: "  Для погрузки  " });
+    expect(parsed.success && parsed.output.shortDesc).toBe("Для погрузки");
+    expect(v.safeParse(ModelCreateSchema, { ...base, shortDesc: "а".repeat(600) }).success).toBe(true);
+    expect(errors(ModelCreateSchema, { ...base, shortDesc: "а".repeat(601) }).map(item => item.field)).toContain("shortDesc");
+    const empty = v.safeParse(ModelCreateSchema, base);
+    expect(empty.success && empty.output.shortDesc).toBeNull();
+  });
+
   it("по умолчанию доступна, порядок 10, характеристик нет", () => {
     const parsed = v.safeParse(ModelCreateSchema, { brand: " JCB ", model: " 3CX " });
 
@@ -199,6 +209,17 @@ describe("ModelCreateSchema", () => {
 });
 
 describe("ModelUpdateSchema", () => {
+  it("сохраняет описание при отсутствии поля и очищает при пустой строке или null", () => {
+    for (const shortDesc of ["  ", null]) {
+      const parsed = v.safeParse(ModelUpdateSchema, { shortDesc });
+      expect(parsed.success && parsed.output).toEqual({ shortDesc: null });
+    }
+    const omitted = v.safeParse(ModelUpdateSchema, {});
+    expect(omitted.success && omitted.output).toEqual({});
+    const updated = v.safeParse(ModelUpdateSchema, { shortDesc: "  Новый текст  " });
+    expect(updated.success && updated.output).toEqual({ shortDesc: "Новый текст" });
+  });
+
   it("не трогает характеристики, если поле не передано", () => {
     const parsed = v.safeParse(ModelUpdateSchema, { pricePerHour: "2 500" });
 

@@ -81,6 +81,7 @@ describe("toAdminModel", () => {
       id: "model-1",
       brand: "JCB",
       model: "3CX",
+      shortDesc: "Для погрузки и земляных работ",
       pricePerShift: decimal("26000.00"),
       pricePerHour: null,
       photos: ["/uploads/jcb-3cx.jpg"],
@@ -93,6 +94,7 @@ describe("toAdminModel", () => {
     });
 
     expect(dto.pricePerShift).toBe("26000.00");
+    expect(dto.shortDesc).toBe("Для погрузки и земляных работ");
     expect(dto.pricePerHour).toBeNull();
     expect(dto.specs).toEqual([
       { name: "Масса, т", value: "7,2" },
@@ -130,6 +132,7 @@ describe("toAdminType", () => {
           id: "model-1",
           brand: "JCB",
           model: "3CX",
+          shortDesc: null,
           pricePerShift: null,
           pricePerHour: null,
           photos: [],

@@ -80,9 +80,7 @@ if (landing.value?.type.priceFrom) {
   });
 }
 
-function specLine(specs: Array<{ name: string; value: string }>): string {
-  return specs.map((spec) => `${spec.name}: ${spec.value}`).join(" · ");
-}
+
 </script>
 
 <template>
@@ -161,7 +159,7 @@ function specLine(specs: Array<{ name: string; value: string }>): string {
               <td>{{ model.brand }} {{ model.model }}</td>
               <td>{{ formatPrice(model.pricePerShift) }}</td>
               <td>{{ formatPrice(model.pricePerHour) }}</td>
-              <td class="muted">{{ specLine(model.specs) }}</td>
+              <td><ModelSpecs :specs="model.specs" /></td>
             </tr>
           </tbody>
         </table>
@@ -176,7 +174,7 @@ function specLine(specs: Array<{ name: string; value: string }>): string {
 
     <section v-if="landing.related.length" class="section">
       <h2>Похожая техника</h2>
-      <ul class="grid">
+      <ul class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
         <li v-for="item in landing.related" :key="item.slug">
           <NuxtLink :to="typePath(item.slug, city.slug)" class="card">
             <span class="card__title">{{ item.name }}</span>

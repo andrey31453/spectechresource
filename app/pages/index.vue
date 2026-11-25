@@ -5,7 +5,6 @@ import type { HomeDto } from "~/types/catalog";
 import { buildLeadPayload, createRequestId } from "~/utils/lead-form";
 import { initLanding, type LandingLeadInput } from "~/utils/landing";
 import { groupModelsBySupergroup } from "~/utils/model-groups";
-import { HOME_MODEL_VARIANTS } from "~/utils/model-variants";
 import { groupModelsByCategory } from "~/utils/models";
 import { telHref } from "~/utils/phone";
 import { pluralRu } from "~/utils/plural";
@@ -68,20 +67,11 @@ const workingHours = computed(
   () => site.value?.workingHours ?? "Пн–Вс, 08:00–20:00",
 );
 const address = computed(() => site.value?.address ?? "");
-const requisites = computed(() =>
-  [
-    site.value?.legalName ?? companyName.value,
-    site.value?.inn ? `ИНН ${site.value.inn}` : null,
-    site.value?.ogrn ? `ОГРН ${site.value.ogrn}` : null,
-  ].filter((item): item is string => Boolean(item)),
-);
 const priceDisclaimer = computed(
   () =>
     site.value?.priceDisclaimer ??
     "Цены на сайте — ориентир и не являются публичной офертой: стоимость и наличие подтверждает менеджер.",
 );
-/** Год в подвале — из даты рендера страницы (в SSR и на клиенте совпадает в пределах года). */
-const currentYear = new Date().getFullYear();
 
 const categories = computed(() => home.value?.categories ?? []);
 const models = computed(() => home.value?.models ?? []);
@@ -162,33 +152,6 @@ const stepsLabel = computed(() => {
     ? `${count} ${pluralRu(count, ["шаг", "шага", "шагов"])}`
     : "Порядок заказа";
 });
-
-const SERVICE_PHOTOS: Record<string, string> = {
-  "zemlyanye-raboty": "/landing/images/tech/usluga-zemlyanye.webp",
-  "vyvoz-grunta": "/landing/images/tech/usluga-vyvoz.webp",
-  demontazh: "/landing/images/tech/usluga-demontazh.webp",
-  "planirovka-uchastka": "/landing/images/tech/usluga-planirovka.webp",
-  "perevozka-tehniki-tralom": "/landing/images/tech/usluga-perevozka.webp",
-};
-
-const SERVICE_CHIPS: Record<string, string[]> = {
-  "zemlyanye-raboty": ["Ковш 0,3–1,4 м³", "С машинистом"],
-  "vyvoz-grunta": ["Самосвалы 10–30 т", "С погрузкой"],
-  demontazh: ["Гидромолот", "Вывоз обломков"],
-  "planirovka-uchastka": ["Планировщик", "Уплотнение катком"],
-  "perevozka-tehniki-tralom": ["Низкорамная платформа", "С креплением"],
-};
-
-/** Услуги с фотографией и метками — галерея блока «Работы своей техникой». */
-const serviceCards = computed(() =>
-  services.value.map((service) => ({
-    slug: service.slug,
-    title: service.title,
-    description: service.description,
-    photo: service.image ?? SERVICE_PHOTOS[service.slug] ?? null,
-    chips: SERVICE_CHIPS[service.slug] ?? [],
-  })),
-);
 
 /** Все виды каталога одним списком: цена «от» на первом экране и в блоке техники. */
 const allTypes = computed(() =>
@@ -604,190 +567,7 @@ onBeforeUnmount(() => {
 </script>
 <template>
   <div>
-    <header class="site-header fixed! left-0 w-screen transition-[opacity,transform,visibility] duration-500 motion-reduce:transition-none" :class="heroActive ? 'visible translate-y-0 opacity-100' : 'invisible -translate-y-full opacity-0'" :inert="!heroActive">
-      <div class="shell flex flex-nowrap items-center justify-between gap-2! py-3 sm:gap-4!">
-        <a class="brand shrink-0" href="/" aria-label="СПЕЦТЕХРЕСУРС — на главную">
-          <svg
-            class="brand__mark"
-            viewBox="0 0 104 137"
-            xmlns="http://www.w3.org/2000/svg"
-            aria-hidden="true"
-            focusable="false"
-          >
-            <path fill="currentColor" d="M0 35.5L28 17.5V129.5L0 122Z" />
-            <path
-              fill="currentColor"
-              d="M36 11.7L52 0L68 7.1V125.3L52 137L36 129.9Z"
-            />
-            <path
-              class="brand__mark-accent"
-              d="M76 7.5L104 15V101.5L76 119.5Z"
-            />
-          </svg>
-          <span class="hidden sm:block">
-            <span class="brand__name"
-              >СПЕЦ<span class="brand__accent">ТЕХ</span>РЕСУРС</span
-            >
-            <span class="brand__tag">аренда спецтехники</span>
-          </span>
-        </a>
-
-        <nav
-          class="hidden lg:flex items-center gap-6"
-          aria-label="Основное меню"
-        >
-          <div class="nav-group">
-            <button class="nav-group__btn" type="button" aria-haspopup="true">
-              Каталог техники<svg
-                class="h-3.5 w-3.5"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="1.6"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                aria-hidden="true"
-                focusable="false"
-              >
-                <path d="m6 9.5 6 6 6-6" />
-              </svg>
-            </button>
-            <div class="nav-group__list">
-              <a
-                v-for="category in categories"
-                :key="category.slug"
-                :href="categoryPath(category.slug)"
-                >{{ category.title }}</a
-              >
-              <a href="/katalog">Весь каталог</a>
-            </div>
-          </div>
-          <div class="nav-group">
-            <button class="nav-group__btn" type="button" aria-haspopup="true">
-              Услуги<svg
-                class="h-3.5 w-3.5"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="1.6"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                aria-hidden="true"
-                focusable="false"
-              >
-                <path d="m6 9.5 6 6 6-6" />
-              </svg>
-            </button>
-            <div class="nav-group__list">
-              <a
-                v-for="service in services"
-                :key="service.slug"
-                :href="servicePath(service.slug)"
-                >{{ service.title }}</a
-              >
-              <a href="/uslugi">Все услуги</a>
-            </div>
-          </div>
-          <div class="nav-group">
-            <button class="nav-group__btn" type="button" aria-haspopup="true">
-              Цены и заявка<svg
-                class="h-3.5 w-3.5"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="1.6"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                aria-hidden="true"
-                focusable="false"
-              >
-                <path d="m6 9.5 6 6 6-6" />
-              </svg>
-            </button>
-            <div class="nav-group__list">
-              <a href="#ceny">Стоимость аренды</a>
-              <a href="#smena">Условия смены</a>
-              <a href="#zayavka">Оставить заявку</a>
-              <a href="/kontakty">Контакты</a>
-            </div>
-          </div>
-        </nav>
-
-        <div class="header-contacts ml-auto hidden shrink-0 xl:flex items-center">
-          <a class="header-phone" :href="phoneLink">
-            <svg
-              class="header-phone__icon"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="1.6"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              aria-hidden="true"
-              focusable="false"
-            >
-              <path
-                d="M6.4 3.5h3l1.5 4-2 1.4a11.2 11.2 0 0 0 5.6 5.6l1.4-2 4 1.5v3a2 2 0 0 1-2.2 2A16.6 16.6 0 0 1 4.5 5.7 2 2 0 0 1 6.4 3.5z"
-              /></svg
-            >{{ phone }}
-          </a>
-        </div>
-
-        <details class="mnav lg:hidden">
-          <summary>
-            Меню<svg
-              class="h-3.5 w-3.5"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="1.6"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              aria-hidden="true"
-              focusable="false"
-            >
-              <path d="m6 9.5 6 6 6-6" />
-            </svg>
-          </summary>
-          <div class="mnav__panel">
-            <div class="mnav__scroll">
-              <p class="mnav__title">Разделы</p>
-              <a href="/">Главная</a>
-              <a href="#katalog">Каталог техники</a>
-              <a href="#tehnika">Техника в парке</a>
-              <a href="#uslugi">Услуги</a>
-              <a href="#ceny">Стоимость</a>
-              <a href="#faq">Вопросы и ответы</a>
-              <p class="mnav__title mt-5">Разделы каталога</p>
-              <a
-                v-for="category in categories"
-                :key="category.slug"
-                :href="categoryPath(category.slug)"
-                >{{ category.title }}</a
-              >
-              <p class="mnav__title mt-5">Услуги</p>
-              <a
-                v-for="service in services"
-                :key="service.slug"
-                :href="servicePath(service.slug)"
-                >{{ service.title }}</a
-              >
-              <p class="mnav__title mt-5">Компания</p>
-              <a href="#o-kompanii">О компании</a>
-              <a href="#smena">Условия аренды</a>
-              <a href="/kontakty">Контакты</a>
-            </div>
-            <div class="mnav__foot">
-              <a class="btn btn--primary" href="#zayavka">Заказать технику</a>
-              <a class="btn btn--ghost mnav-phone" :href="phoneLink">{{
-                phone
-              }}</a>
-            </div>
-          </div>
-        </details>
-        <a class="inline-flex min-h-11 shrink-0 items-center justify-center whitespace-nowrap border border-[#ff8a2b] bg-[#ff8a2b] px-3 py-3 text-[11px] font-bold text-[#101416] transition-colors hover:bg-[#ffa24f] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#ff8a2b] sm:px-5 sm:text-sm" href="#zayavka">Заказать технику</a>
-      </div>
-    </header>
+    <SiteHeader v-if="site" :site="site" :categories="categories" :services="services" fixed :active="heroActive" />
     <main id="main">
       <HomeExperimentalLanding variant="dark" embedded @activate="heroActive = true" />
 
@@ -809,117 +589,8 @@ onBeforeUnmount(() => {
         </div>
       </section>
 
-      <!--
-        Каталог моделей — версии одного блока подряд, H → J → I → F → G → E → A → B → C → D.
-        Заказчик сравнивает вёрстку глазами, поэтому версии стоят на странице
-        одновременно, а данные у них общие: `modelSections`, `city.slug` и
-        дисклеймер о цене. Подпись над версией — `HomeModelsCaption` (данные из
-        `HOME_MODEL_VARIANTS`), якоря `#modeli-variant-*` совпадают с навигацией
-        сравнения выше. В продакшн останется одна версия: тогда лишние компоненты,
-        подписи и навигация удаляются (план — `docs/specs/home.md`).
-      -->
       <div v-if="models.length" id="modeli">
-        <div class="bg-[#0d1214] px-5 pt-12 pb-9 text-[#e8e2d2] md:px-8">
-          <div class="mx-auto max-w-site">
-            <span
-              class="font-mono text-[10px] font-semibold tracking-[0.24em] text-[#ff9c4a] uppercase"
-              >Сравнение · каталог моделей</span
-            >
-            <h2
-              class="mt-3 text-[clamp(1.5rem,3.4vw,2.35rem)] leading-tight font-bold tracking-tight text-white"
-            >
-               {{ HOME_MODEL_VARIANTS.length }} вариантов каталога — один под другим
-            </h2>
-            <p class="mt-3 max-w-3xl text-[15px] leading-7 text-[#a9a49a]">
-              Данные во всех версиях одни и те же:
-              {{ models.length }} {{ pluralRu(models.length, ["модель", "модели", "моделей"]) }} в
-              {{ modelSections.length }}
-               {{ pluralRu(modelSections.length, ["группе", "группах", "группах"]) }}, одинаковые цены
-               и ссылки. Листайте вниз: {{ HOME_MODEL_VARIANTS.map(variant => variant.key.toUpperCase()).join(" → ") }} — и скажите, какую оставляем.
-            </p>
-            <nav class="mt-6 flex flex-wrap gap-2" aria-label="Версии блока «Каталог моделей»">
-              <a
-                v-for="variant in HOME_MODEL_VARIANTS"
-                :key="variant.key"
-                :href="`#${variant.id}`"
-                class="inline-flex min-h-11 items-center gap-2 rounded-full border border-white/25 px-4 py-2 text-[13px] text-[#f4efe2] transition hover:border-[#ff9c4a] hover:text-[#ff9c4a]"
-              >
-                <b class="font-mono text-[11px] tracking-[0.18em]">{{ variant.key.toUpperCase() }}</b>
-                {{ variant.title }}
-              </a>
-            </nav>
-          </div>
-        </div>
-
-        <section id="modeli-variant-h" aria-label="Вариант H — Парк по задачам с миниатюрами">
-          <HomeModelsCaption variant="h" />
-          <HomeModelsSignatureSections :sections="modelSections" variant="h" :thumbnails="true" :city-slug="city.slug" :price-disclaimer="priceDisclaimer" />
-        </section>
-
-        <section id="modeli-variant-j" aria-label="Вариант J — Парк по задачам с текстом на фото">
-          <HomeModelsCaption variant="j" />
-          <HomeModelsSignatureSections :sections="modelSections" variant="j" :thumbnails="true" :city-slug="city.slug" :price-disclaimer="priceDisclaimer" />
-        </section>
-
-        <section id="modeli-variant-i" aria-label="Вариант I — Парк по задачам без миниатюр">
-          <HomeModelsCaption variant="i" />
-          <HomeModelsSignatureSections :sections="modelSections" variant="i" :thumbnails="false" :city-slug="city.slug" :price-disclaimer="priceDisclaimer" />
-        </section>
-
-        <section id="modeli-variant-f" aria-label="Вариант F — Парк крупным планом">
-          <HomeModelsCaption variant="f" />
-          <HomeModelsSignature :groups="modelGroups" :city-slug="city.slug" :price-disclaimer="priceDisclaimer" />
-        </section>
-
-        <section id="modeli-variant-g" aria-label="Вариант G — Редакционные полки">
-          <HomeModelsCaption variant="g" />
-          <HomeModelsEditorial :groups="modelGroups" :city-slug="city.slug" :price-disclaimer="priceDisclaimer" />
-        </section>
-
-        <section id="modeli-variant-e" aria-label="Вариант E — Коммерческая витрина">
-          <HomeModelsCaption variant="e" />
-          <HomeModelsCommercial
-            :sections="modelSections"
-            :city-slug="city.slug"
-            :price-disclaimer="priceDisclaimer"
-          />
-        </section>
-
-        <section id="modeli-variant-a" aria-label="Вариант A — Инженерный чертёж">
-          <HomeModelsCaption variant="a" />
-          <HomeModelsBlueprint
-            :sections="modelSections"
-            :city-slug="city.slug"
-            :price-disclaimer="priceDisclaimer"
-          />
-        </section>
-
-        <section id="modeli-variant-b" aria-label="Вариант B — Шоурум">
-          <HomeModelsCaption variant="b" />
-          <HomeModelsShowroom
-            :sections="modelSections"
-            :city-slug="city.slug"
-            :price-disclaimer="priceDisclaimer"
-          />
-        </section>
-
-        <section id="modeli-variant-c" aria-label="Вариант C — Полка-паспорт">
-          <HomeModelsCaption variant="c" />
-          <HomeModelsPassport
-            :sections="modelSections"
-            :city-slug="city.slug"
-            :price-disclaimer="priceDisclaimer"
-          />
-        </section>
-
-        <section id="modeli-variant-d" aria-label="Вариант D — Витрина">
-          <HomeModelsCaption variant="d" />
-          <HomeModelsShowcase
-            :sections="modelSections"
-            :city-slug="city.slug"
-            :price-disclaimer="priceDisclaimer"
-          />
-        </section>
+        <HomeModelsSignatureSections :sections="modelSections" variant="h" :thumbnails="true" :city-slug="city.slug" :price-disclaimer="priceDisclaimer" />
       </div>
 
       <section id="o-kompanii" class="band on-light">
@@ -1155,7 +826,7 @@ onBeforeUnmount(() => {
                     class="panel flex flex-col p-5"
                   >
                     <h3 class="h3">
-                      <a :href="typePath(type.slug, city.slug)">{{
+                      <a class="inline-flex min-h-6 items-center" :href="typePath(type.slug, city.slug)">{{
                         type.name
                       }}</a>
                     </h3>
@@ -1601,80 +1272,23 @@ onBeforeUnmount(() => {
         </div>
       </section>
 
-      <section id="uslugi" class="band flame-band">
+      <section id="uslugi" class="scroll-mt-24 bg-black py-12 text-white md:py-16" aria-labelledby="directions-title">
         <div class="shell">
-          <span class="kicker">Услуги</span>
-          <h2 class="h2 mt-4">{{ services.length }} услуг, где техника — только начало</h2>
-          <p class="lead mt-4 max-w-4xl">
-            Берём на себя цикл работ целиком: разработать грунт, вывезти его,
-            снести строение, спланировать участок, перевезти технику тралом. В
-            каждом блоке видно, что делаем и какой техникой; стоимость считаем по
-            объекту, а не по среднему прайсу.
-          </p>
-          <div class="shots mt-10">
-            <figure
-              v-for="card in serviceCards"
-              :key="card.slug"
-              class="shot reveal"
-            >
-              <img
-                v-if="card.photo"
-                class="shot__img"
-                :src="card.photo"
-                :alt="card.title"
-                width="1536"
-                height="960"
-                loading="lazy"
-                decoding="async"
-              />
-              <figcaption class="shot__cap">
-                <span class="shot__title"
-                  ><a :href="servicePath(card.slug)">{{ card.title }}</a></span
-                >
-                <p class="panel__meta">{{ card.description }}</p>
-                <div class="shot__tags flex flex-wrap gap-2">
-                  <span v-for="chip in card.chips" :key="chip" class="chip">{{
-                    chip
-                  }}</span>
-                </div>
-              </figcaption>
-            </figure>
+          <div class="mb-8 grid! gap-5 md:grid-cols-2">
+            <div>
+              <p class="mb-3 text-xs font-bold tracking-[0.14em] text-[#ff9e49] uppercase">Направления работ</p>
+              <h2 id="directions-title" class="m-0 text-[clamp(1.8rem,3.5vw,3rem)] leading-[1.12] font-extrabold tracking-[-0.035em] text-white">Сначала задача.<br>Затем нужная машина.</h2>
+            </div>
+            <p class="m-0 max-w-lg self-end text-sm leading-relaxed text-[#c7c7c7]">Расскажите об объекте, объёме и сроках. Уточним подъездные пути, ограничения и необходимое оборудование — подберём технику под реальные условия работы.</p>
           </div>
-          <div class="mt-10 flex flex-wrap items-center gap-3">
-            <a class="btn btn--primary" href="#zayavka"
-              >Обсудить работы на объекте<svg
-                class="h-4 w-4"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="1.6"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                aria-hidden="true"
-                focusable="false"
-              >
-                <path d="M4 12h15M13.5 6.5 19 12l-5.5 5.5" /></svg
-            ></a>
-            <a class="btn btn--ghost" href="/uslugi"
-              >Все услуги<svg
-                class="h-4 w-4"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="1.6"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                aria-hidden="true"
-                focusable="false"
-              >
-                <path d="M4 12h15M13.5 6.5 19 12l-5.5 5.5" /></svg
-            ></a>
+          <div v-if="services.length" class="grid! gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            <a v-for="(service, index) in services" :key="service.slug" :href="servicePath(service.slug)" class="group flex min-w-0 flex-col rounded-lg border border-[#424242] bg-[#141414] p-6 text-white! no-underline! transition-colors hover:border-[#ff7a00] hover:bg-[#242424] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#ffae66] motion-reduce:transition-none!" data-direction-card>
+              <span class="flex items-center justify-between text-xs font-bold text-[#ffb16d]">{{ String(index + 1).padStart(2, '0') }}<SiteIcon name="arrow" class="h-5 w-5" /></span>
+              <h3 class="mt-7 mb-3 text-xl font-bold text-white">{{ service.title }}</h3>
+              <p v-if="service.description" class="mt-0 mb-0 text-sm leading-relaxed text-[#d0d0d0]">{{ service.description }}</p>
+            </a>
           </div>
-          <p
-            class="note mt-6 border-l-2 px-4 py-3 text-sm border-ink/40 bg-ink/5"
-          >
-            {{ priceDisclaimer }}
-          </p>
+          <p v-else class="text-sm leading-relaxed text-[#d0d0d0]">Индивидуальный подбор для строительных, дорожных и коммунальных работ. <a href="#zayavka" class="inline-flex min-h-11 items-center font-semibold text-[#ffb16d]! hover:text-white!">Расскажите о своей задаче →</a></p>
         </div>
       </section>
 
@@ -2951,7 +2565,7 @@ onBeforeUnmount(() => {
                     <tbody>
                       <tr v-for="type in category.types" :key="type.slug">
                         <td>
-                          <a :href="typePath(type.slug, city.slug)">{{
+                          <a class="inline-flex min-h-6 items-center" :href="typePath(type.slug, city.slug)">{{
                             type.name
                           }}</a>
                         </td>
@@ -3167,177 +2781,6 @@ onBeforeUnmount(() => {
         </div>
       </section>
     </main>
-    <footer class="site-footer">
-      <div class="shell">
-        <div class="grid gap-10 lg:grid-cols-[1.5fr_repeat(4,1fr)]">
-          <div>
-            <a class="brand" href="/">
-              <svg
-                class="brand__mark"
-                viewBox="0 0 104 137"
-                xmlns="http://www.w3.org/2000/svg"
-                aria-hidden="true"
-                focusable="false"
-              >
-                <path fill="currentColor" d="M0 35.5L28 17.5V129.5L0 122Z" />
-                <path
-                  fill="currentColor"
-                  d="M36 11.7L52 0L68 7.1V125.3L52 137L36 129.9Z"
-                />
-                <path
-                  class="brand__mark-accent"
-                  d="M76 7.5L104 15V101.5L76 119.5Z"
-                />
-              </svg>
-              <span>
-                <span class="brand__name">{{ brandName }}</span>
-                <span class="brand__tag">аренда спецтехники</span>
-              </span>
-            </a>
-            <p class="mt-5 max-w-sm text-sm text-mist">
-              {{ companyName }} — аренда спецтехники с экипажем: экскаваторы,
-              автокраны, самосвалы, катки, погрузчики и сваебойные установки.
-              Работаем по договору, с доставкой на объект и полным комплектом
-              документов.
-            </p>
-            <ul class="mt-6 space-y-2">
-              <li>
-                <a class="inline-flex items-center gap-2" :href="phoneLink"
-                  ><svg
-                    class="h-4 w-4 text-flame"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    stroke-width="1.6"
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    aria-hidden="true"
-                    focusable="false"
-                  >
-                    <path
-                      d="M6.4 3.5h3l1.5 4-2 1.4a11.2 11.2 0 0 0 5.6 5.6l1.4-2 4 1.5v3a2 2 0 0 1-2.2 2A16.6 16.6 0 0 1 4.5 5.7 2 2 0 0 1 6.4 3.5z"
-                    /></svg
-                  >{{ phone }}</a
-                >
-              </li>
-              <li>
-                <a class="inline-flex items-center gap-2" :href="emailLink"
-                  ><svg
-                    class="h-4 w-4 text-flame"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    stroke-width="1.6"
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    aria-hidden="true"
-                    focusable="false"
-                  >
-                    <rect x="2.5" y="5" width="19" height="14" rx="1.5" />
-                    <path d="m3.5 6.5 8.5 6.5 8.5-6.5" /></svg
-                  >{{ email }}</a
-                >
-              </li>
-              <li class="inline-flex items-center gap-2 text-sm text-mist">
-                <svg
-                  class="h-4 w-4 text-flame"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  stroke-width="1.6"
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  aria-hidden="true"
-                  focusable="false"
-                >
-                  <circle cx="12" cy="12" r="8.5" />
-                  <path d="M12 7.5V12l3.2 2" /></svg
-                >{{ workingHours }}
-              </li>
-              <li class="inline-flex items-center gap-2 text-sm text-mist">
-                <svg
-                  class="h-4 w-4 text-flame"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  stroke-width="1.6"
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  aria-hidden="true"
-                  focusable="false"
-                >
-                  <path
-                    d="M12 21s6.5-5.6 6.5-10.5a6.5 6.5 0 1 0-13 0C5.5 15.4 12 21 12 21z"
-                  />
-                  <circle cx="12" cy="10.5" r="2.4" /></svg
-                ><template v-if="address">{{ address }}</template
-                ><template v-else>{{ city.name }} и область</template>
-              </li>
-            </ul>
-          </div>
-
-          <div>
-            <h3>Каталог</h3>
-            <ul class="space-y-2">
-              <li v-for="category in categories" :key="category.slug">
-                <a :href="categoryPath(category.slug)">{{ category.title }}</a>
-              </li>
-            </ul>
-          </div>
-          <div>
-            <h3>Услуги</h3>
-            <ul class="space-y-2">
-              <li v-for="service in services" :key="service.slug">
-                <a :href="servicePath(service.slug)">{{ service.title }}</a>
-              </li>
-            </ul>
-          </div>
-          <div>
-            <h3>Расчёт и заявка</h3>
-            <ul class="space-y-2">
-              <li><a href="#ceny">Стоимость</a></li>
-              <li><a href="#zayavka">Оставить заявку</a></li>
-              <li><a href="/kontakty">Контакты</a></li>
-            </ul>
-          </div>
-
-          <div>
-            <h3>Компания</h3>
-            <ul class="space-y-2">
-              <li><a href="#o-kompanii">О компании</a></li>
-              <li><a href="/katalog">Каталог техники</a></li>
-              <li><a href="#faq">Вопросы и ответы</a></li>
-            </ul>
-          </div>
-        </div>
-
-        <div class="mt-12 border-t border-line pt-6">
-          <p class="fnote max-w-4xl">
-            {{ requisites.join(" · ") }}. Аренда спецтехники с экипажем: подбор
-            машины, доставка, работа на объекте и закрывающие документы.
-            {{ priceDisclaimer }}
-          </p>
-          <div class="mt-5 flex flex-wrap items-center justify-between gap-3">
-            <p class="fnote">
-              © {{ currentYear }} {{ companyName }} · Аренда спецтехники
-            </p>
-            <a class="btn btn--ghost" :href="phoneLink"
-              >Заказать технику<svg
-                class="h-4 w-4"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="1.6"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                aria-hidden="true"
-                focusable="false"
-              >
-                <path d="M4 12h15M13.5 6.5 19 12l-5.5 5.5" /></svg
-            ></a>
-          </div>
-        </div>
-      </div>
-    </footer>
+    <SiteFooter v-if="site" :site="site" :categories="categories" :services="services" />
   </div>
 </template>

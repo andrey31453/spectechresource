@@ -1,105 +1,66 @@
 <script setup lang="ts">
 import type { SiteDto } from "~/types/catalog";
 
-defineProps<{
+withDefaults(defineProps<{
   site: SiteDto;
   categories: Array<{ slug: string; title: string }>;
-}>();
+  services?: Array<{ slug: string; title: string }>;
+  fixed?: boolean;
+  active?: boolean;
+}>(), { services: () => [], fixed: false, active: true });
 
-/** Ссылка в навигации: приглушённый цвет, бренд на наведении, без подчёркивания. */
-const navLink = "whitespace-nowrap text-muted transition-colors hover:text-brand hover:no-underline";
-const navLinkStrong = "whitespace-nowrap font-semibold text-ink transition-colors hover:text-brand hover:no-underline";
+const menuLink = "flex min-h-11 items-center px-4 py-2 text-sm text-snow transition-colors hover:text-flame2 hover:no-underline focus-visible:outline-flame";
+const header = ref<HTMLElement | null>(null);
+const route = useRoute();
+watch(() => route.fullPath, () => {
+  header.value?.querySelectorAll<HTMLDetailsElement>("details[open]").forEach(menu => { menu.open = false; });
+});
+function closeMenu(event: MouseEvent) {
+  if (!(event.target instanceof Element) || !event.target.closest("a")) return;
+  event.target.closest("details")?.removeAttribute("open");
+}
 </script>
 
 <template>
-  <header class="sticky top-0 z-40 border-b border-line bg-surface/95 backdrop-blur">
-    <div class="mx-auto flex max-w-site flex-wrap items-center justify-between gap-3 px-5 py-3 md:px-8">
-      <NuxtLink to="/" class="group flex flex-col leading-tight hover:no-underline">
-        <span class="text-base font-bold tracking-tight text-ink transition-colors group-hover:text-brand">
-          {{ site.companyName }}
-        </span>
-        <span class="text-xs text-muted">аренда спецтехники</span>
-      </NuxtLink>
-
-      <div class="hidden items-center gap-6 md:flex">
-        <div class="flex flex-col items-end leading-tight">
-          <a
-            :href="telHref(site.phone)"
-            class="text-lg font-bold whitespace-nowrap text-ink transition-colors hover:text-brand hover:no-underline"
-          >
-            {{ site.phone }}
-          </a>
-          <span v-if="site.workingHours" class="text-xs text-muted">{{ site.workingHours }}</span>
-        </div>
-
-        <a
-          v-if="site.email"
-          :href="`mailto:${site.email}`"
-          class="text-sm text-muted transition-colors hover:text-brand"
-        >
-          {{ site.email }}
-        </a>
-
-        <SiteButton to="/#zayavka" variant="primary" tone="dark" size="sm">
-          Заказать технику
-        </SiteButton>
-      </div>
-
-      <a
-        :href="telHref(site.phone)"
-        class="inline-flex items-center rounded-field bg-brand px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-brand-dark hover:no-underline md:hidden"
-      >
-        Позвонить
-      </a>
-    </div>
-
-    <nav aria-label="Каталог и разделы сайта" class="hidden border-t border-line md:block">
-      <div class="mx-auto flex max-w-site flex-wrap items-center gap-x-5 gap-y-1 px-5 py-2 text-sm md:px-8">
-        <NuxtLink to="/katalog" :class="navLinkStrong">Каталог</NuxtLink>
-        <NuxtLink
-          v-for="category in categories"
-          :key="category.slug"
-          :to="categoryPath(category.slug)"
-          :class="navLink"
-        >
-          {{ category.title }}
-        </NuxtLink>
-        <NuxtLink to="/uslugi" :class="['ml-auto', navLinkStrong]">Услуги</NuxtLink>
-        <NuxtLink to="/kontakty" :class="navLinkStrong">Контакты</NuxtLink>
-      </div>
-    </nav>
-
-    <details class="group border-t border-line md:hidden">
-      <summary
-        class="mx-auto flex max-w-site cursor-pointer list-none items-center justify-between px-5 py-3 text-sm font-semibold text-ink md:px-8 [&::-webkit-details-marker]:hidden"
-      >
-        Меню
-        <span aria-hidden="true" class="text-muted transition-transform group-open:rotate-180">▾</span>
-      </summary>
-
-      <nav aria-label="Мобильное меню" class="mx-auto max-w-site px-5 pb-3 md:px-8">
-        <ul class="flex flex-col divide-y divide-line text-sm">
-          <li>
-            <NuxtLink to="/katalog" class="block py-2 font-semibold text-ink">Каталог</NuxtLink>
-          </li>
-          <li v-for="category in categories" :key="category.slug">
-            <NuxtLink :to="categoryPath(category.slug)" class="block py-2 pl-3 text-muted">
-              {{ category.title }}
-            </NuxtLink>
-          </li>
-          <li>
-            <NuxtLink to="/uslugi" class="block py-2 font-semibold text-ink">Услуги</NuxtLink>
-          </li>
-          <li>
-            <NuxtLink to="/kontakty" class="block py-2 font-semibold text-ink">Контакты</NuxtLink>
-          </li>
-          <li>
-            <NuxtLink to="/#zayavka" class="block py-2 font-semibold text-brand">
-              Заказать технику
-            </NuxtLink>
-          </li>
-        </ul>
+  <header
+    ref="header"
+    class="inset-x-0 top-0 z-50 border-b border-line-dark bg-night/95 text-snow backdrop-blur transition-[opacity,transform,visibility] motion-reduce:transition-none"
+    :class="[fixed ? 'fixed' : 'sticky', active ? 'visible translate-y-0 opacity-100' : 'invisible -translate-y-full opacity-0']"
+    :inert="!active"
+  >
+    <div class="mx-auto flex max-w-site items-center justify-between gap-3 px-5 py-3 md:px-8">
+      <SiteBrand />
+      <nav class="hidden items-center gap-3 lg:flex" aria-label="Основное меню">
+        <details class="group relative" @click="closeMenu">
+          <summary class="flex min-h-11 cursor-pointer list-none items-center gap-2 text-sm font-semibold [&::-webkit-details-marker]:hidden">Каталог техники <SiteIcon name="chevron" class="size-3 transition-transform group-open:rotate-180" /></summary>
+          <div class="absolute left-0 top-full max-h-[70dvh] w-80 overflow-auto border border-line-dark bg-night p-2">
+            <NuxtLink v-for="category in categories" :key="category.slug" :to="categoryPath(category.slug)" :class="menuLink">{{ category.title }}</NuxtLink>
+            <NuxtLink to="/katalog" :class="menuLink">Весь каталог</NuxtLink>
+          </div>
+        </details>
+        <details class="group relative" @click="closeMenu">
+          <summary class="flex min-h-11 cursor-pointer list-none items-center gap-2 text-sm font-semibold [&::-webkit-details-marker]:hidden">Услуги <SiteIcon name="chevron" class="size-3 transition-transform group-open:rotate-180" /></summary>
+          <div class="absolute left-0 top-full max-h-[70dvh] w-72 overflow-auto border border-line-dark bg-night p-2">
+            <NuxtLink v-for="service in services" :key="service.slug" :to="servicePath(service.slug)" :class="menuLink">{{ service.title }}</NuxtLink>
+            <NuxtLink to="/uslugi" :class="menuLink">Все услуги</NuxtLink>
+          </div>
+        </details>
+        <NuxtLink to="/#ceny" :class="menuLink">Стоимость</NuxtLink>
+        <NuxtLink to="/kontakty" :class="menuLink">Контакты</NuxtLink>
       </nav>
-    </details>
+      <a :href="telHref(site.phone)" class="ml-auto hidden min-h-11 shrink-0 items-center text-sm font-bold text-snow hover:text-flame2 xl:inline-flex">{{ site.phone }}</a>
+      <details class="group lg:hidden" @click="closeMenu">
+        <summary class="flex min-h-11 cursor-pointer list-none items-center gap-1 text-sm font-bold [&::-webkit-details-marker]:hidden">Меню <SiteIcon name="chevron" class="size-3 group-open:rotate-180" /></summary>
+        <nav class="absolute inset-x-0 top-full max-h-[75dvh] overflow-auto border-y border-line-dark bg-night px-5 py-3" aria-label="Мобильное меню">
+          <NuxtLink to="/katalog" :class="menuLink">Каталог техники</NuxtLink>
+          <NuxtLink v-for="category in categories" :key="category.slug" :to="categoryPath(category.slug)" :class="menuLink">{{ category.title }}</NuxtLink>
+          <NuxtLink to="/uslugi" :class="menuLink">Услуги</NuxtLink>
+          <NuxtLink to="/#smena" :class="menuLink">Условия аренды</NuxtLink>
+          <NuxtLink to="/kontakty" :class="menuLink">Контакты</NuxtLink>
+          <a :href="telHref(site.phone)" :class="menuLink">{{ site.phone }}</a>
+        </nav>
+      </details>
+      <SiteButton to="/#zayavka" size="sm">Заказать технику</SiteButton>
+    </div>
   </header>
 </template>

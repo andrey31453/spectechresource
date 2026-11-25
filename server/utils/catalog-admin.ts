@@ -97,6 +97,7 @@ export interface AdminModelDto {
   id: string;
   brand: string;
   model: string;
+  shortDesc: string | null;
   pricePerShift: string | null;
   pricePerHour: string | null;
   photos: string[];
@@ -109,6 +110,7 @@ export function toAdminModel(model: {
   id: string;
   brand: string;
   model: string;
+  shortDesc: string | null;
   pricePerShift: Decimalish | null;
   pricePerHour: Decimalish | null;
   photos: string[];
@@ -120,6 +122,7 @@ export function toAdminModel(model: {
     id: model.id,
     brand: model.brand,
     model: model.model,
+    shortDesc: model.shortDesc,
     pricePerShift: money(model.pricePerShift),
     pricePerHour: money(model.pricePerHour),
     photos: model.photos,

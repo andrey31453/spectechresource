@@ -43,10 +43,10 @@ const requisites = computed(() =>
       и сроки подачи на объект.
     </p>
 
-    <div class="grid" style="margin: 24px 0">
+    <div class="my-6 grid grid-cols-1 gap-4 md:grid-cols-2">
       <div class="card">
         <span class="card__title">Телефон</span>
-        <a :href="telHref(site.phone)" class="text-lg font-bold text-ink transition-colors hover:text-brand">{{ site.phone }}</a>
+        <a :href="telHref(site.phone)" class="inline-flex min-h-6 items-center text-lg font-bold text-ink transition-colors hover:text-brand">{{ site.phone }}</a>
         <p v-if="site.workingHours" class="card__meta" style="margin: 6px 0 0">
           {{ site.workingHours }}
         </p>
@@ -54,7 +54,7 @@ const requisites = computed(() =>
 
       <div v-if="site.email" class="card">
         <span class="card__title">Электронная почта</span>
-        <a :href="`mailto:${site.email}`">{{ site.email }}</a>
+        <a :href="`mailto:${site.email}`" class="inline-flex min-h-6 items-center">{{ site.email }}</a>
       </div>
 
       <div v-if="site.address" class="card">

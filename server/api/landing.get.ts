@@ -87,6 +87,7 @@ export default defineEventHandler(async (event) => {
       id: model.id,
       brand: model.brand,
       model: model.model,
+      shortDesc: model.shortDesc,
       pricePerShift: money(model.pricePerShift),
       pricePerHour: money(model.pricePerHour),
       photos: model.photos,

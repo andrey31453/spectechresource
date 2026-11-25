@@ -216,6 +216,7 @@ const specsField = v.optional(
 const modelFields = {
   brand: requiredText(80, "марку"),
   model: requiredText(80, "модель"),
+  shortDesc: optionalText(600, "Краткое описание"),
   pricePerShift: moneyField("Цена за смену"),
   pricePerHour: moneyField("Цена за час"),
   photos: photosField("Фотографии модели"),

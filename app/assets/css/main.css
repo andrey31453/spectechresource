@@ -1,14 +1,14 @@
 /* Технические стили SEO-каркаса. Дизайн-система — отдельный слайс (ADR-7, Tailwind). */
 
 :root {
-  --bg: #ffffff;
-  --bg-soft: #f4f6f8;
-  --text: #1b1f24;
-  --muted: #5b6773;
-  --line: #dfe4ea;
-  --accent: #0f5c9c;
-  --accent-dark: #0b4575;
-  --radius: 10px;
+  --bg: var(--color-paper);
+  --bg-soft: var(--color-sand);
+  --text: var(--color-ink);
+  --muted: var(--color-steel);
+  --line: var(--color-cement-line);
+  --accent: var(--color-ember-ink);
+  --accent-dark: var(--color-brand-dark);
+  --radius: var(--radius-card);
   --container: 1240px;
 }
 
@@ -25,8 +25,7 @@
 @layer base {
   body {
     margin: 0;
-    font-family:
-      -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+    font-family: var(--font-sans);
     line-height: 1.55;
     color: var(--text);
     background: var(--bg);
@@ -98,11 +97,8 @@
   color: var(--muted);
 }
 
-/* .lead и .grid — только для страниц сайта: у главной по макету `docs/sait-13`
-   одноимённые классы свои, и наши свойства, которых у макета нет (max-width лида,
-   сетка auto-fill с отступом у .grid), ломали её вёрстку. Метку `landing-page`
-   ставит главная на <body>. Слой components — чтобы утилиты Tailwind оставались
-   сильнее этих классов. */
+/* Лид внутренних страниц. Сетки задаются утилитами на самих компонентах:
+   глобальное правило .grid конфликтовало с сетками Tailwind и удалено. */
 @layer components {
   body:not(.landing-page) .lead {
     font-size: 1.05rem;
@@ -110,14 +106,6 @@
     max-width: 70ch;
   }
 
-  body:not(.landing-page) .grid {
-    display: grid;
-    gap: 14px;
-    grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
-    margin: 0 0 8px;
-    padding: 0;
-    list-style: none;
-  }
 }
 
 /* ── Карточки и сетки ── */
@@ -176,7 +164,7 @@
 .badge {
   display: inline-block;
   padding: 2px 8px;
-  border-radius: 999px;
+  border-radius: var(--radius);
   background: var(--bg-soft);
   font-size: 0.8rem;
   color: var(--muted);
@@ -208,15 +196,17 @@
   display: inline-block;
   padding: 10px 18px;
   border-radius: var(--radius);
-  background: var(--accent);
-  color: #fff;
+  border: 1px solid var(--color-flame);
+  background: var(--color-flame);
+  color: var(--color-ink);
   font-weight: 600;
 }
 
 .button:hover,
 .button:focus-visible {
-  background: var(--accent-dark);
-  color: #fff;
+  border-color: var(--color-ink);
+  background: var(--color-flame);
+  color: var(--color-ink);
   text-decoration: none;
 }
 
@@ -226,9 +216,11 @@
   border: 1px solid var(--accent);
 }
 
-.button--ghost:hover {
-  background: var(--accent);
-  color: #fff;
+.button--ghost:hover,
+.button--ghost:focus-visible {
+  border-color: var(--text);
+  background: transparent;
+  color: var(--text);
 }
 
 /* ── Ошибки ── */
@@ -252,11 +244,13 @@
 }
 
 .card__title {
+  display: block;
   margin: 0 0 6px;
   font-weight: 600;
 }
 
 .card__meta {
+  display: block;
   font-size: 0.9rem;
   color: var(--muted);
 }
@@ -279,16 +273,21 @@
   gap: 12px;
   padding: 14px 20px;
   border-bottom: 1px solid var(--line);
-  background: var(--bg);
+  background: var(--color-night);
+  color: var(--color-snow);
 }
 
 .admin-shell__brand {
   font-weight: 700;
   letter-spacing: 0.02em;
-  color: var(--text);
+  color: var(--color-snow);
 }
 
 .admin-shell__link {
+  display: inline-flex;
+  min-height: 32px;
+  align-items: center;
+  color: var(--color-snow);
   font-size: 0.9rem;
 }
 
@@ -328,8 +327,8 @@
   margin: 0;
   padding: 10px 12px;
   border-radius: var(--radius);
-  background: #fdecec;
-  color: #8a1c1c;
+  background: var(--color-danger-soft);
+  color: var(--color-danger);
   font-size: 0.92rem;
 }
 
@@ -363,12 +362,12 @@
 }
 
 .field__input[aria-invalid="true"] {
-  border-color: #c0392b;
+  border-color: var(--color-danger);
 }
 
 .field__error {
   font-size: 0.85rem;
-  color: #c0392b;
+  color: var(--color-danger);
 }
 
 .button:disabled {
@@ -478,7 +477,7 @@
   align-items: center;
   padding: 7px 12px;
   border: 1px solid var(--line);
-  border-radius: 999px;
+  border-radius: var(--radius);
   font-size: 0.9rem;
   color: var(--text);
   text-decoration: none;
@@ -517,7 +516,7 @@
 .admin-form__grid {
   display: grid;
   gap: 14px;
-  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 240px), 1fr));
 }
 
 .admin-form__grid--half {
@@ -595,15 +594,15 @@
   margin: 0 0 14px;
   padding: 10px 12px;
   border-radius: var(--radius);
-  background: #e8f5ec;
-  color: #1e6b35;
+  background: var(--color-success-soft);
+  color: var(--color-success);
   font-size: 0.92rem;
 }
 
 .admin-badge {
   display: inline-block;
   padding: 2px 8px;
-  border-radius: 999px;
+  border-radius: var(--radius);
   background: var(--bg-soft);
   font-size: 0.8rem;
   color: var(--muted);
@@ -611,13 +610,13 @@
 }
 
 .admin-badge--on {
-  background: #e8f5ec;
-  color: #1e6b35;
+  background: var(--color-success-soft);
+  color: var(--color-success);
 }
 
 .admin-badge--off {
-  background: #fdecec;
-  color: #8a1c1c;
+  background: var(--color-danger-soft);
+  color: var(--color-danger);
 }
 
 .table__actions {
@@ -632,8 +631,8 @@
 }
 
 .button--danger {
-  color: #a12424;
-  border-color: #e6bcbc;
+  color: var(--color-danger);
+  border-color: var(--color-danger-line);
 }
 
 .admin-subcard {
@@ -700,7 +699,7 @@
 
 .admin-related__item--active {
   border-color: var(--accent);
-  background: #f2f7fc;
+  background: var(--color-brand-soft);
 }
 
 .admin-related__title {
@@ -732,7 +731,7 @@
   align-items: center;
   padding: 6px 12px;
   border: 1px solid var(--line);
-  border-radius: 999px;
+  border-radius: var(--radius);
   background: var(--bg);
   color: var(--muted);
   font: inherit;
@@ -746,7 +745,7 @@
 
 .admin-tabs__item--active {
   border-color: var(--accent);
-  background: #f2f7fc;
+  background: var(--color-brand-soft);
   color: var(--text);
 }
 
@@ -852,8 +851,8 @@
   margin: 12px 0 0;
   padding: 10px 12px;
   border-radius: var(--radius);
-  background: #fdecec;
-  color: #8a1c1c;
+  background: var(--color-danger-soft);
+  color: var(--color-danger);
   font-size: 0.9rem;
   overflow-wrap: anywhere;
 }
@@ -914,4 +913,18 @@
 
 .admin-images__input {
   display: none;
+}
+
+.admin-shell__link:hover,
+.admin-shell__link:focus-visible,
+.admin-shell__link.router-link-active {
+  color: var(--color-flame2);
+}
+
+.admin-shell__main, .admin-page, .admin-subcard, .field {
+  min-width: 0;
+}
+
+.admin-page__title, .admin-shell__brand {
+  overflow-wrap: anywhere;
 }

@@ -187,6 +187,7 @@ export function typeFormBody(form: TypeForm) {
 export interface ModelForm {
   brand: string;
   model: string;
+  shortDesc: string;
   pricePerShift: string;
   pricePerHour: string;
   photos: string[];
@@ -199,6 +200,7 @@ export function emptyModelForm(): ModelForm {
   return {
     brand: "",
     model: "",
+    shortDesc: "",
     pricePerShift: "",
     pricePerHour: "",
     photos: [],
@@ -212,6 +214,7 @@ export function modelFormFrom(model: AdminModelDto): ModelForm {
   return {
     brand: model.brand,
     model: model.model,
+    shortDesc: text(model.shortDesc),
     pricePerShift: priceInput(model.pricePerShift),
     pricePerHour: priceInput(model.pricePerHour),
     photos: [...model.photos],
@@ -226,6 +229,7 @@ export function modelFormBody(form: ModelForm) {
   return {
     brand: form.brand.trim(),
     model: form.model.trim(),
+    shortDesc: emptyToNull(form.shortDesc),
     pricePerShift: emptyToNull(form.pricePerShift),
     pricePerHour: emptyToNull(form.pricePerHour),
     photos: cleanUrls(form.photos),

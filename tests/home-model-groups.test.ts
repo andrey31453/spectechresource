@@ -3,6 +3,18 @@ import type { HomeModelDto } from "~/types/catalog";
 import type { HomeModelSupergroup } from "~/utils/model-groups";
 import { groupModelsBySupergroup, HOME_MODEL_SUPERGROUPS } from "~/utils/model-groups";
 import { groupModelsByCategory } from "~/utils/models";
+import { modelPage, showcaseShelf } from "~/utils/model-showcase";
+
+describe("modelPage", () => {
+  it("делит модели на страницы и сохраняет неполную последнюю", () => {
+    expect(modelPage([1, 2, 3, 4, 5], 1, 2)).toEqual({ count: 3, index: 1, models: [3, 4] });
+    expect(modelPage([1, 2, 3, 4, 5], 2, 2).models).toEqual([5]);
+  });
+  it("ограничивает страницу после изменения ширины и обрабатывает пустой список", () => {
+    expect(modelPage([1, 2, 3], 9, 4)).toEqual({ count: 1, index: 0, models: [1, 2, 3] });
+    expect(modelPage([], -1, 0)).toEqual({ count: 0, index: 0, models: [] });
+  });
+});
 
 /** Intl разделяет разряды неразрывным пробелом — как в `price.ts`. */
 const NBSP = "\u00A0";
@@ -14,6 +26,7 @@ function model(patch: Partial<HomeModelDto> & { id: string; categorySlug: string
     typeName: "Автокраны",
     brand: "Ivanovets",
     model: "KS-45717",
+    shortDesc: null,
     pricePerShift: "26000.00",
     pricePerHour: null,
     photo: null,
@@ -63,6 +76,14 @@ function supergroup(patch: Partial<HomeModelSupergroup> & { slug: string }): Hom
 }
 
 describe("groupModelsBySupergroup", () => {
+  it("объединяет разделы в одну витрину с чередованием моделей", () => {
+    const own = shelves();
+    own[0]!.models.push(model({ id: "e2", categorySlug: "zemleroynaya-tehnika" }));
+    const section = groupModelsBySupergroup(own, [supergroup({ slug: "all", categorySlugs: categories.map(c => c.slug) })])[0]!;
+    expect(showcaseShelf(section).models.map(m => m.id)).toEqual(["e1", "l1", "t1", "e2"]);
+    expect(showcaseShelf(section, "pogruzochnaya-tehnika").models.map(m => m.id)).toEqual(["l1"]);
+    expect(showcaseShelf(section, "missing").models).toEqual([]);
+  });
   it("раскладывает полки по надгруппам в порядке конфига", () => {
     const sections = groupModelsBySupergroup(shelves(), [
       supergroup({ slug: "transport", categorySlugs: ["transportnaya-tehnika"] }),

@@ -17,7 +17,7 @@ const number = (index: number) => String(index + 1).padStart(2, "0");
     <article
       v-for="(category, index) in categories"
       :key="category.slug"
-      class="flex h-full flex-col overflow-hidden rounded-card border border-line bg-surface p-5 transition hover:-translate-y-0.5 hover:border-brand/40 hover:shadow-card"
+      class="flex h-full flex-col overflow-hidden rounded-card border border-line bg-surface p-5 transition-colors hover:border-brand"
     >
       <NuxtLink
         v-if="category.image"
@@ -32,7 +32,7 @@ const number = (index: number) => String(index + 1).padStart(2, "0");
           loading="lazy"
           width="640"
           height="360"
-          class="aspect-[16/9] w-full object-cover transition-transform duration-500 hover:scale-[1.03]"
+            class="aspect-[16/9] w-full object-cover"
         >
       </NuxtLink>
 
@@ -43,7 +43,7 @@ const number = (index: number) => String(index + 1).padStart(2, "0");
       <h3
         class="mt-3 text-[clamp(1.1rem,2vw,1.4rem)] leading-snug font-bold tracking-tight text-ink"
       >
-        <NuxtLink :to="categoryPath(category.slug)" class="transition-colors hover:text-brand">
+        <NuxtLink :to="categoryPath(category.slug)" class="inline-flex min-h-6 items-center transition-colors hover:text-brand">
           {{ category.title }}
         </NuxtLink>
       </h3>
@@ -56,7 +56,7 @@ const number = (index: number) => String(index + 1).padStart(2, "0");
         <li v-for="type in category.types.slice(0, VISIBLE_TYPES)" :key="type.slug">
           <NuxtLink
             :to="typePath(type.slug, citySlug)"
-            class="flex items-start gap-2 text-sm text-muted transition-colors hover:text-brand"
+            class="flex min-h-6 items-start gap-2 text-sm text-muted transition-colors hover:text-brand"
           >
             <span aria-hidden="true" class="mt-[0.45rem] h-1 w-1 shrink-0 rounded-full bg-brand/50" />
             <span class="min-w-0 flex-1">{{ type.name }}</span>

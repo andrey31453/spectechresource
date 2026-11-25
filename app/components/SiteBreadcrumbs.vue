@@ -29,7 +29,7 @@ useJsonLd("breadcrumbs", {
   <nav class="breadcrumbs" aria-label="Хлебные крошки">
     <ol>
       <li v-for="item in items" :key="item.name">
-        <NuxtLink v-if="item.path" :to="item.path">{{ item.name }}</NuxtLink>
+        <NuxtLink v-if="item.path" :to="item.path" class="inline-flex min-h-6 items-center">{{ item.name }}</NuxtLink>
         <span v-else aria-current="page">{{ item.name }}</span>
       </li>
     </ol>

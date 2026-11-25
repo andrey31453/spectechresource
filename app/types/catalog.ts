@@ -70,6 +70,7 @@ export interface HomeModelDto {
   typeName: string;
   brand: string;
   model: string;
+  shortDesc: string | null;
   pricePerShift: string | null;
   /** Цена за час, если заполнена в админке: вторая строка под ценой смены. */
   pricePerHour: string | null;
@@ -100,6 +101,7 @@ export interface ModelDto {
   id: string;
   brand: string;
   model: string;
+  shortDesc: string | null;
   pricePerShift: string | null;
   pricePerHour: string | null;
   photos: string[];

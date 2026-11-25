@@ -12,6 +12,7 @@ function model(patch: Partial<HomeModelDto> & { id: string; categorySlug: string
     typeName: "Автокраны",
     brand: "Ivanovets",
     model: "KS-45717",
+    shortDesc: null,
     pricePerShift: "26000.00",
     pricePerHour: null,
     photo: null,

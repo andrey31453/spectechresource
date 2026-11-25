@@ -32,6 +32,7 @@ const modelDto: AdminModelDto = {
   id: "model-1",
   brand: "JCB",
   model: "3CX",
+  shortDesc: "Работы на ограниченной площадке",
   pricePerShift: "26000.00",
   pricePerHour: null,
   photos: ["/uploads/jcb-1.jpg", "/uploads/jcb-2.jpg"],
@@ -122,6 +123,13 @@ describe("формы вида техники", () => {
 });
 
 describe("формы модели", () => {
+  it("читает, обрезает и очищает краткое описание", () => {
+    expect(modelFormFrom(modelDto).shortDesc).toBe(modelDto.shortDesc);
+    expect(modelFormFrom({ ...modelDto, shortDesc: null }).shortDesc).toBe("");
+    expect(modelFormBody({ ...emptyModelForm(), shortDesc: "  Для погрузки  " }).shortDesc).toBe("Для погрузки");
+    expect(modelFormBody({ ...emptyModelForm(), shortDesc: "  " }).shortDesc).toBeNull();
+  });
+
   it("характеристики без названия и значения отбрасываются", () => {
     const body = modelFormBody({
       ...emptyModelForm(),

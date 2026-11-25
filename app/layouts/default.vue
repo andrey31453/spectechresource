@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { CategoryCardDto } from "~/types/catalog";
+import type { CategoryCardDto, ServiceCardDto } from "~/types/catalog";
 
 const { data: site } = await useSite();
 
@@ -12,6 +12,10 @@ const { data: categories } = await useAsyncData<CategoryCardDto[]>(
   "nav-categories",
   () => $fetch<CategoryCardDto[]>("/api/catalog"),
   { deep: false },
+);
+
+const { data: services } = await useAsyncData<ServiceCardDto[]>(
+  "nav-services", () => $fetch<ServiceCardDto[]>("/api/services"), { deep: false },
 );
 
 const navCategories = computed(() =>
@@ -45,8 +49,8 @@ if (site.value) {
 </script>
 
 <template>
-  <div>
-    <SiteHeader v-if="site" :site="site" :categories="navCategories" />
+  <div class="min-h-screen bg-sand text-ink">
+    <SiteHeader v-if="site" :site="site" :categories="navCategories" :services="services ?? []" />
 
     <main v-if="fullBleed">
       <slot />
@@ -58,6 +62,6 @@ if (site.value) {
       </div>
     </main>
 
-    <SiteFooter v-if="site" :site="site" />
+    <SiteFooter v-if="site" :site="site" :categories="navCategories" :services="services ?? []" />
   </div>
 </template>

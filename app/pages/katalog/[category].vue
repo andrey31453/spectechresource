@@ -47,11 +47,11 @@ usePageSeo({
       >
     </figure>
 
-    <ul class="grid" style="margin-top: 20px">
+    <ul class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3" style="margin-top: 20px">
       <li v-for="type in category.types" :key="type.slug">
         <NuxtLink
           :to="typePath(type.slug, city.slug)"
-          class="flex h-full flex-col overflow-hidden rounded-card border border-line bg-surface transition hover:-translate-y-0.5 hover:border-brand/40 hover:shadow-card"
+          class="flex h-full flex-col overflow-hidden rounded-card border border-line bg-surface transition hover:border-brand"
         >
           <img
             v-if="type.image"
