@@ -119,6 +119,7 @@ describe("toAdminType", () => {
       deliveryPrice: decimal("5000.00"),
       crewAvailable: true,
       withoutCrewAvailable: false,
+      descriptionTop: "Описание перед моделями",
       worksPerformed: null,
       gallery: [],
       seoTitle: null,
@@ -147,6 +148,7 @@ describe("toAdminType", () => {
     });
 
     expect(dto.category.slug).toBe("zemleroynaya-tehnika");
+    expect(dto.descriptionTop).toBe("Описание перед моделями");
     expect(dto.models[0]?.specs).toEqual([{ name: "Масса, т", value: "7,2" }]);
     expect(dto.related).toEqual([{ id: "type-2", slug: "mini-ekskavatora", name: "Мини-экскаваторы" }]);
     expect(dto.deliveryPrice).toBe("5000.00");

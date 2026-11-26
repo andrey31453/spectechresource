@@ -74,6 +74,7 @@ export default defineEventHandler(async (event) => {
       deliveryPrice: money(type.deliveryPrice),
       crewAvailable: type.crewAvailable,
       withoutCrewAvailable: type.withoutCrewAvailable,
+      descriptionTopHtml: type.descriptionTop ? renderMarkdown(type.descriptionTop) : null,
       worksPerformedHtml: type.worksPerformed ? renderMarkdown(type.worksPerformed) : null,
       gallery: type.gallery,
       seoTitle: type.seoTitle,

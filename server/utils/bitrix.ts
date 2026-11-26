@@ -7,6 +7,8 @@
  */
 
 export interface CrmLead {
+  sourceLabel?: string | null;
+  sourceButton?: string | null;
   name: string;
   phone: string;
   email: string | null;
@@ -72,6 +74,8 @@ export function mapLeadToBitrix(lead: CrmLead): BitrixLeadRequest {
   const comments = [
     lead.comment,
     `Форма: ${lead.place}`,
+    lead.sourceLabel ? `Источник: ${lead.sourceLabel}` : null,
+    lead.sourceButton ? `Кнопка: ${lead.sourceButton}` : null,
     `Страница: ${lead.pageUrl}${lead.pageTitle ? ` (${lead.pageTitle})` : ""}`,
     lead.equipmentTypeName ? `Техника: ${lead.equipmentTypeName}` : null,
     `Создана: ${lead.createdAt.toISOString()}`,
@@ -83,7 +87,7 @@ export function mapLeadToBitrix(lead: CrmLead): BitrixLeadRequest {
     TITLE: `Заявка с сайта: ${lead.name || "Без имени"}${lead.equipmentTypeName ? ` — ${lead.equipmentTypeName}` : ""}`,
     COMMENTS: comments,
     SOURCE_ID: "WEB",
-    SOURCE_DESCRIPTION: `spectechresource / ${lead.place}`,
+    SOURCE_DESCRIPTION: ["spectechresource", lead.place, lead.sourceLabel, lead.sourceButton].filter(Boolean).join(" / "),
   };
 
   if (lead.name) fields.NAME = lead.name;

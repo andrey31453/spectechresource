@@ -107,6 +107,7 @@ describe("toHomeModel", () => {
       pricePerShift: "28000.00",
       pricePerHour: "4000.00",
       photo: "/uploads/model-cover.webp",
+      photos: model.photos,
       specs: [
         { name: "Масса, т", value: "20" },
         { name: "Глубина копания, м", value: "6,7" },

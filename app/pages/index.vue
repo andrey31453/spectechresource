@@ -59,12 +59,9 @@ const city = computed(
 );
 const phone = computed(() => site.value?.phone ?? "+7 (495) 000-00-00");
 const phoneLink = computed(() => telHref(phone.value));
-const email = computed(() => site.value?.email ?? "info@example.ru");
-const emailLink = computed(() => `mailto:${email.value}`);
 const workingHours = computed(
   () => site.value?.workingHours ?? "Пн–Вс, 08:00–20:00",
 );
-const address = computed(() => site.value?.address ?? "");
 const priceDisclaimer = computed(
   () =>
     site.value?.priceDisclaimer ??
@@ -633,7 +630,7 @@ onBeforeUnmount(() => {
                         :href="typePath(type.slug, city.slug)"
                         >Подробнее</a
                       >
-                      <a class="btn btn--sm btn--ink" href="#zayavka"
+                      <a class="btn btn--sm btn--ink" href="#zayavka" :data-equipment-type-slug="type.slug" :data-equipment-label="type.name"
                         >Заказать</a
                       >
                     </div>
@@ -1204,20 +1201,6 @@ onBeforeUnmount(() => {
         </div>
       </section>
 
-      <section id="geografiya" class="band on-light">
-        <div class="shell">
-          <span class="kicker">Доставка и допуск</span>
-          <h2 class="h2 mt-4">Доставка в Москву и область: что подготовить</h2>
-          <p class="lead mt-4 max-w-4xl">Гусеничную и тяжёлую технику доставляем тралом, колёсную — своим ходом. Стоимость считаем по адресу объекта; выезд за пределы области согласуем отдельно.</p>
-          <ul class="tick mt-7">
-            <li>Сообщите адрес, дату и удобное время подачи.</li>
-            <li>Проверьте ширину въезда, покрытие и место для разгрузки или стоянки.</li>
-            <li>Подготовьте пропуска; для работ в охранных зонах — необходимый наряд-допуск.</li>
-            <li>Назначьте ответственного за приём машины и инструктаж на площадке.</li>
-          </ul>
-        </div>
-      </section>
-
       <section id="cta" class="cta-band band">
         <div class="shell cta-band__inner">
           <div class="grid gap-8 lg:grid-cols-[1.15fr_1fr] lg:items-end">
@@ -1260,7 +1243,21 @@ onBeforeUnmount(() => {
         </div>
       </section>
 
-      <section id="faq" class="band on-light">
+      <section id="geografiya" class="band on-light">
+        <div class="shell">
+          <span class="kicker">Доставка и допуск</span>
+          <h2 class="h2 mt-4">Доставка в Москву и область: что подготовить</h2>
+          <p class="lead mt-4 max-w-4xl">Гусеничную и тяжёлую технику доставляем тралом, колёсную — своим ходом. Стоимость считаем по адресу объекта; выезд за пределы области согласуем отдельно.</p>
+          <ul class="tick mt-7">
+            <li>Сообщите адрес, дату и удобное время подачи.</li>
+            <li>Проверьте ширину въезда, покрытие и место для разгрузки или стоянки.</li>
+            <li>Подготовьте пропуска; для работ в охранных зонах — необходимый наряд-допуск.</li>
+            <li>Назначьте ответственного за приём машины и инструктаж на площадке.</li>
+          </ul>
+        </div>
+      </section>
+
+      <section id="faq" class="band bg-night text-snow">
         <div class="shell">
           <span class="kicker">Вопросы и ответы</span>
           <h2 class="h2 mt-4">Частые вопросы об аренде</h2>
@@ -1268,7 +1265,7 @@ onBeforeUnmount(() => {
             Собрали то, что чаще всего спрашивают до подписания договора: про
             смену, топливо, доставку, документы и замену техники.
           </p>
-          <div class="mt-10 grid gap-4 md:grid-cols-2">
+          <div class="mt-10 grid grid-cols-1 gap-4">
             <details
               v-for="item in faq"
               :key="item.question"
@@ -1281,110 +1278,11 @@ onBeforeUnmount(() => {
         </div>
       </section>
 
-      <section id="zayavka" class="band band--stars">
-        <div class="stars-bg" aria-hidden="true">
-          <div class="stars stars--far" />
-          <div class="stars stars--mid" />
-          <div class="stars stars--near" />
-          <div class="stars stars--spark" />
-
-          <div class="stars stars--giant" />
-        </div>
-        <div
-          class="shell grid gap-10 lg:grid-cols-[1fr_minmax(0,500px)] lg:items-start lg:gap-14"
-        >
-          <div>
-            <span class="kicker">Обратная связь</span>
-            <h2 class="h2 mt-4">Заказать технику</h2>
-
-            <ul class="mt-9 space-y-4 text-base md:text-lg">
-              <li>
-                <a
-                  class="inline-flex items-center gap-4 font-medium text-snow transition-colors hover:text-flame"
-                  :href="phoneLink"
-                  ><svg
-                    class="h-5 w-5 shrink-0 text-flame md:h-6 md:w-6"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    stroke-width="1.6"
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    aria-hidden="true"
-                    focusable="false"
-                  >
-                    <path
-                      d="M6.4 3.5h3l1.5 4-2 1.4a11.2 11.2 0 0 0 5.6 5.6l1.4-2 4 1.5v3a2 2 0 0 1-2.2 2A16.6 16.6 0 0 1 4.5 5.7 2 2 0 0 1 6.4 3.5z"
-                    /></svg
-                  >{{ phone }}</a
-                >
-              </li>
-              <li>
-                <a
-                  class="inline-flex items-center gap-4 font-medium text-snow transition-colors hover:text-flame"
-                  :href="emailLink"
-                  ><svg
-                    class="h-5 w-5 shrink-0 text-flame md:h-6 md:w-6"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    stroke-width="1.6"
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    aria-hidden="true"
-                    focusable="false"
-                  >
-                    <rect x="2.5" y="5" width="19" height="14" rx="1.5" />
-                    <path d="m3.5 6.5 8.5 6.5 8.5-6.5" /></svg
-                  >{{ email }}</a
-                >
-              </li>
-              <li class="flex items-center gap-4 text-mist">
-                <svg
-                  class="h-5 w-5 shrink-0 text-flame md:h-6 md:w-6"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  stroke-width="1.6"
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  aria-hidden="true"
-                  focusable="false"
-                >
-                  <circle cx="12" cy="12" r="8.5" />
-                  <path d="M12 7.5V12l3.2 2" /></svg
-                >{{ workingHours }}
-              </li>
-              <li class="flex items-center gap-4 text-mist">
-                <svg
-                  class="h-5 w-5 shrink-0 text-flame md:h-6 md:w-6"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  stroke-width="1.6"
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  aria-hidden="true"
-                  focusable="false"
-                >
-                  <path
-                    d="M12 21s6.5-5.6 6.5-10.5a6.5 6.5 0 1 0-13 0C5.5 15.4 12 21 12 21z"
-                  />
-                  <circle cx="12" cy="10.5" r="2.4" /></svg
-                ><template v-if="address">{{ address }}</template
-                ><template v-else
-                  >Работаем в {{ city.nameIn }} и по области</template
-                >
-              </li>
-            </ul>
-          </div>
-
-          <div class="stars-lead-form">
-            <LeadForm place="callback" :equipment-types="allTypes.map(type => ({ slug: type.slug, name: type.name }))" :phone="phone" heading="Оставьте заявку" lead="Укажите контакты и задачу — уточним наличие, стоимость и сроки подачи." submit-label="Получить расчёт" />
-          </div>
-        </div>
-      </section>
     </main>
-    <SiteFooter v-if="site" :site="site" :categories="categories" :services="services" />
+    <SiteFooter v-if="site" :site="site" :categories="categories" :services="services" stars>
+      <template #form>
+        <LeadForm place="callback" :equipment-types="allTypes.map(type => ({ slug: type.slug, name: type.name }))" :phone="phone" heading="Оставьте заявку" lead="Укажите контакты и задачу — уточним наличие, стоимость и сроки подачи." submit-label="Получить расчёт" />
+      </template>
+    </SiteFooter>
   </div>
 </template>

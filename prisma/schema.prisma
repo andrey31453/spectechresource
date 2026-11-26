@@ -73,6 +73,7 @@ model EquipmentType {
   deliveryPrice        Decimal?  @db.Decimal(12, 2) // если доставка считается отдельно
   crewAvailable        Boolean   @default(true) // с экипажем
   withoutCrewAvailable Boolean   @default(false) // без экипажа
+  descriptionTop       String? // Markdown перед моделями; seoText — после моделей.
   worksPerformed       String? // «какие работы выполняет»
   gallery              String[]  @default([])
   seoTitle             String?
@@ -350,6 +351,8 @@ model Lead {
   place     String
   pageUrl   String
   pageTitle String?
+  sourceLabel String?
+  sourceButton String?
   referer   String?
 
   utmSource   String?

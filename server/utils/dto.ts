@@ -57,6 +57,7 @@ export function toHomeModel(model: {
     pricePerShift: money(model.pricePerShift),
     pricePerHour: money(model.pricePerHour),
     photo: model.photos[0] ?? null,
+    photos: model.photos,
     specs: model.specs.map((spec) => ({ name: spec.name, value: spec.value })),
   };
 }

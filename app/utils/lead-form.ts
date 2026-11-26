@@ -52,6 +52,8 @@ export interface LeadPayloadInput {
   equipmentModelId?: string | null;
   honeypot?: string;
   pageTitle?: string | null;
+  sourceLabel?: string | null;
+  sourceButton?: string | null;
   referer?: string | null;
   query?: LocationQuery;
 }
@@ -74,6 +76,8 @@ export function buildLeadPayload(input: LeadPayloadInput) {
     place: input.place,
     pageUrl: input.pageUrl,
     pageTitle: trimmedOrNull(input.pageTitle, LIMITS.pageTitle),
+    sourceLabel: trimmedOrNull(input.sourceLabel, 300),
+    sourceButton: trimmedOrNull(input.sourceButton, 300),
     referer: trimmedOrNull(input.referer, LIMITS.url),
     ...utmFromQuery(input.query ?? {}),
     equipmentTypeSlug: trimmedOrNull(input.equipmentTypeSlug, 80),

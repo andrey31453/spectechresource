@@ -141,6 +141,7 @@ export interface AdminTypeDto extends Omit<AdminTypeListItemDto, "modelsCount"> 
   deliveryPrice: string | null;
   crewAvailable: boolean;
   withoutCrewAvailable: boolean;
+  descriptionTop: string | null;
   worksPerformed: string | null;
   gallery: string[];
   seoTitle: string | null;
@@ -165,6 +166,7 @@ export function toAdminType(type: {
   deliveryPrice: Decimalish | null;
   crewAvailable: boolean;
   withoutCrewAvailable: boolean;
+  descriptionTop: string | null;
   worksPerformed: string | null;
   gallery: string[];
   seoTitle: string | null;
@@ -190,6 +192,7 @@ export function toAdminType(type: {
     deliveryPrice: money(type.deliveryPrice),
     crewAvailable: type.crewAvailable,
     withoutCrewAvailable: type.withoutCrewAvailable,
+    descriptionTop: type.descriptionTop,
     worksPerformed: type.worksPerformed,
     gallery: type.gallery,
     seoTitle: type.seoTitle,

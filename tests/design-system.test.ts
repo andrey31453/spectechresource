@@ -4,6 +4,29 @@ import { describe, expect, it } from "vitest";
 const read = (path: string) => readFileSync(new URL(`../${path}`, import.meta.url), "utf8");
 
 describe("shared design system", () => {
+  it("centers desktop navigation independently of side content and removes redundant menu entries", () => {
+    const header = read("app/components/SiteHeader.vue");
+    expect(header).toContain("lg:grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)]");
+    expect(header).toContain("justify-self-center");
+    expect(header).not.toContain("Весь каталог");
+    expect(header).not.toContain("Все услуги");
+  });
+  it("uses the same fixed 50/25/25 columns for every price table", () => {
+    const prices = read("app/pages/stoimost.vue");
+    expect(prices).toContain("table-fixed");
+    expect(prices).toContain('<col class="w-1/2">');
+    expect(prices.split('<col class="w-1/4">')).toHaveLength(3);
+  });
+  it("shares soft corner tokens with legacy landing components", () => {
+    const tokens = read("app/assets/css/tailwind.css");
+    expect(tokens).toContain("--radius-card: 8px;");
+    expect(tokens).toContain("--radius-field: 6px;");
+    const landing = read("public/landing/style.css");
+    expect(landing).toContain("border-radius:var(--radius-card)");
+    expect(landing).toContain("border-radius:var(--radius-field)");
+    expect(landing).not.toMatch(/border-radius:[23]px/);
+    expect(read("app/pages/stoimost.vue")).toContain("overflow-x-auto rounded-card border");
+  });
   it("uses selected interlocking logo across public and admin shells", () => {
     const logo = read("app/components/SiteLogo.vue");
     expect(logo).toContain("M512 822L818 645");
@@ -43,11 +66,38 @@ describe("shared design system", () => {
     expect(css).toContain("body.landing-page");
     expect(read("app/assets/css/main.css")).not.toMatch(/body:not\(\.landing-page\) \.grid\s*\{/);
   });
+  it("keeps the desktop catalog filter sticky and scrollable within the viewport", () => {
+    const catalog = read("app/pages/katalog/index.vue");
+    expect(catalog).toContain("lg:sticky lg:top-24");
+    expect(catalog).toContain("lg:max-h-[calc(100dvh-7rem)] lg:overflow-y-auto");
+  });
+  it("uses a wider shared card grid on type pages without a sidebar", () => {
+    const landing = read("app/pages/arenda-[slug].vue");
+    expect(landing).toContain('<CatalogModelsGrid :models="models" wide :equipment-type-slug="typeSlug" :equipment-label="landing.type.name" />');
+    expect(landing).not.toContain("<aside");
+    expect(read("app/components/CatalogModelsGrid.vue")).toContain("wide ? 'lg:grid-cols-3 xl:grid-cols-4' : 'xl:grid-cols-3'");
+    expect(read("app/pages/katalog/index.vue")).not.toContain(" wide");
+  });
+  it("offers contextual help and the shared lead form when models are unavailable", () => {
+    const grid = read("app/components/CatalogModelsGrid.vue");
+    expect(grid).toContain('v-else class="flex min-w-0');
+    expect(grid).toContain("data-catalog-empty");
+    expect(grid).toContain("border-danger-line bg-danger-soft");
+    expect(grid).toContain("size-16 shrink-0 text-danger sm:size-20");
+    expect(grid).toContain('aria-hidden="true"');
+    expect(grid).toContain('role="status"');
+    expect(grid).toContain("Нет техники в списке? Поможем решить вашу задачу");
+    expect(grid).toContain("предложим возможные варианты решения");
+    expect(grid).toContain('<SiteButton href="#zayavka" :data-equipment-type-slug="equipmentTypeSlug" :data-equipment-label="equipmentLabel"');
+    expect(grid).toContain("Обсудить задачу");
+    expect(read("app/pages/katalog/index.vue")).toContain(':equipment-type-slug="selectedType?.slug" :equipment-label="selectedType?.name"');
+  });
   it("shares model specifications and compact shelf spacing", () => {
     const shelf = read("app/components/HomeModelsSignatureSections.vue");
     expect(shelf).toContain("mt-6 min-w-0 scroll-mt-24 md:mt-8");
     expect(shelf).not.toContain("scroll-mt-24 pt-10");
     expect(shelf).toContain("<ModelSpecs");
-    expect(read("app/pages/arenda-[slug].vue")).toContain("<ModelSpecs");
+    expect(read("app/pages/arenda-[slug].vue")).toContain("<CatalogModelsGrid");
+    expect(read("app/components/CatalogModelsGrid.vue")).toContain("<ModelSpecs");
   });
 });

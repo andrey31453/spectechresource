@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { imageVariantUrl } from "#shared/utils/uploads";
 import type { HomeModelSection } from "~/utils/model-groups";
 import type { HomeModelGroup } from "~/utils/models";
 import { categoryPath, modelPath } from "~/utils/routes";
@@ -114,7 +115,7 @@ const tones = [
             <div class="min-w-0">
               <Transition mode="out-in" enter-active-class="transition-opacity duration-300 motion-reduce:transition-none!" enter-from-class="opacity-0" leave-active-class="transition-opacity duration-150 motion-reduce:transition-none!" leave-to-class="opacity-0">
                 <a :key="current(shelf)!.id" :href="modelPath(current(shelf)!.typeSlug, current(shelf)!.slug)" class="group relative block aspect-[4/3] overflow-hidden rounded-3xl bg-panel text-white! focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-current md:aspect-[16/10]" :aria-label="`Подробнее: ${current(shelf)!.brand} ${current(shelf)!.model}`">
-                  <img v-if="current(shelf)!.photo" :src="current(shelf)!.photo!" :alt="`${current(shelf)!.brand} ${current(shelf)!.model}`" width="960" height="600" loading="lazy" class="h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.025] group-focus-visible:scale-[1.025] motion-reduce:scale-100! motion-reduce:transition-none!">
+                  <img v-if="current(shelf)!.photo" :src="imageVariantUrl(current(shelf)!.photo!, 'medium')" :alt="`${current(shelf)!.brand} ${current(shelf)!.model}`" width="960" height="600" loading="lazy" class="h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.025] group-focus-visible:scale-[1.025] motion-reduce:scale-100! motion-reduce:transition-none!">
                   <span v-else class="absolute inset-0 grid! place-items-center text-lg">Фото уточняйте у менеджера</span>
                   <span v-if="variant !== 'h'" class="absolute right-4 bottom-4 inline-flex rounded-xl min-h-11 items-center gap-6 bg-ink px-5 py-3 text-sm font-bold text-sand">О машине <span aria-hidden="true">↗</span></span>
                 </a>

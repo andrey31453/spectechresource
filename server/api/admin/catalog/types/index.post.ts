@@ -31,6 +31,7 @@ export default defineEventHandler(async (event) => {
         deliveryPrice: input.deliveryPrice ?? null,
         crewAvailable: input.crewAvailable ?? true,
         withoutCrewAvailable: input.withoutCrewAvailable ?? false,
+        descriptionTop: input.descriptionTop ?? null,
         worksPerformed: input.worksPerformed ?? null,
         gallery: input.gallery ?? [],
         seoTitle: input.seoTitle ?? null,

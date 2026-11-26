@@ -88,6 +88,8 @@ export const LeadSchema = v.pipe(v.object({
     v.regex(/^https?:\/\/\S+$/i, "Адрес страницы должен начинаться с http:// или https://"),
   ),
   pageTitle: optionalText(MAX.pageTitle, `Заголовок страницы — не больше ${MAX.pageTitle} символов`),
+  sourceLabel: optionalText(300, "Источник — не больше 300 символов"),
+  sourceButton: optionalText(300, "Кнопка — не больше 300 символов"),
   referer: optionalText(MAX.url, `Referer — не больше ${MAX.url} символов`),
   utmSource: optionalText(MAX.utm, `utm_source — не больше ${MAX.utm} символов`),
   utmMedium: optionalText(MAX.utm, `utm_medium — не больше ${MAX.utm} символов`),

@@ -13,6 +13,7 @@ const model = (typeSlug: string, typeName: string, id: string) => ({
   pricePerShift: null,
   pricePerHour: null,
   photo: null,
+  photos: [],
   specs: [],
 });
 

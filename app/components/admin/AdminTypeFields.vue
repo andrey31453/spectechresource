@@ -100,8 +100,15 @@ function errorFor(field: string): string | undefined {
     </label>
   </div>
 
+  <AdminField label="Описание сверху (markdown)" :error="errors.descriptionTop" hint="Перед списком моделей техники">
+    <textarea v-model="form.descriptionTop" class="field__input field__textarea" name="descriptionTop" rows="6" />
+  </AdminField>
+  <AdminField label="Описание снизу (markdown)" :error="errors.seoText" hint="После списка моделей. Ранее — SEO-текст вида">
+    <textarea v-model="form.seoText" class="field__input field__textarea" name="seoText" rows="6" />
+  </AdminField>
+
   <details>
-    <summary class="field__hint">SEO-поля и текст вида</summary>
+    <summary class="field__hint">SEO-поля вида</summary>
     <div class="admin-form__grid">
       <AdminField label="SEO-заголовок" :error="errors.seoTitle">
         <input v-model="form.seoTitle" class="field__input" type="text" name="seoTitle">
@@ -110,8 +117,5 @@ function errorFor(field: string): string | undefined {
         <input v-model="form.seoDescription" class="field__input" type="text" name="seoDescription">
       </AdminField>
     </div>
-    <AdminField label="SEO-текст (markdown)" :error="errors.seoText">
-      <textarea v-model="form.seoText" class="field__input field__textarea" name="seoText" rows="6" />
-    </AdminField>
   </details>
 </template>

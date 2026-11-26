@@ -30,6 +30,8 @@ export interface LeadCreateData {
   place: string;
   pageUrl: string;
   pageTitle: string | null;
+  sourceLabel?: string | null;
+  sourceButton?: string | null;
   referer: string | null;
   utmSource: string | null;
   utmMedium: string | null;
@@ -57,6 +59,8 @@ export function buildLeadCreateData(
     place: input.place,
     pageUrl: input.pageUrl,
     pageTitle: input.pageTitle,
+    sourceLabel: input.sourceLabel,
+    sourceButton: input.sourceButton,
     referer: input.referer,
     utmSource: input.utmSource,
     utmMedium: input.utmMedium,
@@ -81,6 +85,8 @@ export function toCrmLead(data: LeadCreateData, equipmentTypeName: string | null
     comment: data.comment,
     pageUrl: data.pageUrl,
     pageTitle: data.pageTitle,
+    sourceLabel: data.sourceLabel ?? null,
+    sourceButton: data.sourceButton ?? null,
     place: data.place,
     utmSource: data.utmSource,
     utmMedium: data.utmMedium,
@@ -93,6 +99,8 @@ export function toCrmLead(data: LeadCreateData, equipmentTypeName: string | null
 }
 
 export interface LeadRecordSource {
+  sourceLabel?: string | null;
+  sourceButton?: string | null;
   name: string;
   phone: string;
   email: string | null;
@@ -118,6 +126,8 @@ export function crmLeadFromRecord(record: LeadRecordSource): CrmLead {
     comment: record.comment,
     pageUrl: record.pageUrl,
     pageTitle: record.pageTitle,
+    sourceLabel: record.sourceLabel ?? null,
+    sourceButton: record.sourceButton ?? null,
     place: record.place,
     utmSource: record.utmSource,
     utmMedium: record.utmMedium,

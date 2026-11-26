@@ -1,6 +1,7 @@
 import type { Ref } from "vue";
+import { buildLeadSource, readLeadPageContext, type LeadSourceContext } from "~/utils/lead-source";
 
-export interface LeadDrawerContext {
+export interface LeadDrawerContext extends LeadSourceContext {
   equipmentTypeSlug?: string;
   equipmentModelId?: string;
   equipmentLabel?: string;
@@ -15,7 +16,7 @@ export function useLeadDrawer(): {
   const isOpen = useState<boolean>("lead-drawer-open", () => false);
   const context = useState<LeadDrawerContext>("lead-drawer-context", () => ({}));
   function open(next: LeadDrawerContext = {}) {
-    context.value = { ...next };
+    context.value = buildLeadSource(readLeadPageContext(), next);
     isOpen.value = true;
   }
 

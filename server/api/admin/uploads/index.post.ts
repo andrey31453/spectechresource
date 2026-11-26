@@ -2,6 +2,7 @@ import { detectImageMime, formatFileSize, MAX_IMAGE_BYTES } from "#shared/utils/
 import { requireAdmin } from "../../../utils/admin-guard";
 import { throwFieldError } from "../../../utils/admin-request";
 import { saveUploadImage } from "../../../utils/uploads";
+import { InvalidUploadImage } from "../../../utils/image-processing";
 
 /** Запас на границы multipart и имя файла: тело чуть больше самого изображения. */
 const MULTIPART_OVERHEAD_BYTES = 64 * 1024;
@@ -42,7 +43,10 @@ export default defineEventHandler(async (event) => {
     throwFieldError("file", "Поддерживаются изображения JPEG, PNG, WebP, AVIF и GIF");
   }
 
-  const upload = await saveUploadImage(file.data, mime);
+  const upload = await saveUploadImage(file.data, mime).catch((error: unknown) => {
+    if (error instanceof InvalidUploadImage) throwFieldError("file", error.message);
+    throw error;
+  });
 
   setResponseStatus(event, 201);
 
@@ -52,6 +56,7 @@ export default defineEventHandler(async (event) => {
       url: upload.url,
       size: upload.size,
       mime: upload.mime,
+      variants: upload.variants,
       originalName: file.filename ?? null,
     },
   };

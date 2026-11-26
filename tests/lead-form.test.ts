@@ -62,6 +62,8 @@ describe("buildLeadPayload", () => {
       place: "hero",
       pageUrl: "https://spectech.example/",
       pageTitle: null,
+      sourceLabel: null,
+      sourceButton: null,
       referer: null,
       utmSource: "yandex",
       utmMedium: null,

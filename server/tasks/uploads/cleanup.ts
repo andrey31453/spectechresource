@@ -1,5 +1,5 @@
-import { uploadUrlFromPath } from "#shared/utils/uploads";
-import { loadUploadReferences, referencedUploadUrls } from "../../utils/upload-references";
+import { uploadGroupPaths } from "#shared/utils/uploads";
+import { loadUploadReferences, referencedUploadUrls, referencedUploadPaths } from "../../utils/upload-references";
 import { listUploadFiles, removeUploadFile } from "../../utils/uploads";
 
 /**
@@ -28,19 +28,18 @@ export default defineTask({
     const prisma = usePrisma();
     const references = await loadUploadReferences(prisma);
     const referencedUrls = referencedUploadUrls(references);
-    const referencedPaths = new Set(
-      [...referencedUrls].map(uploadUrlFromPath).filter((path): path is string => Boolean(path)),
-    );
+    const referencedPaths = referencedUploadPaths(referencedUrls);
 
     const files = await listUploadFiles();
     const now = Date.now();
+    const freshPaths = new Set(files.filter((file) => now - file.modifiedAt.getTime() < MIN_AGE_MS).flatMap((file) => uploadGroupPaths(file.path)));
     let removed = 0;
     let keptRecent = 0;
 
     for (const file of files) {
       if (referencedPaths.has(file.path)) continue;
 
-      if (now - file.modifiedAt.getTime() < MIN_AGE_MS) {
+      if (freshPaths.has(file.path)) {
         keptRecent += 1;
         continue;
       }

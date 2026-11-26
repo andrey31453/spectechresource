@@ -153,6 +153,15 @@ describe("TypeCreateSchema", () => {
 });
 
 describe("TypeUpdateSchema", () => {
+  it("обрезает и очищает оба описания без изменения отсутствующих полей", () => {
+    expect(v.parse(TypeUpdateSchema, { descriptionTop: "  Верх  ", seoText: "  Низ  " })).toEqual({ descriptionTop: "Верх", seoText: "Низ" });
+    expect(v.parse(TypeUpdateSchema, { descriptionTop: "  ", seoText: null })).toEqual({ descriptionTop: null, seoText: null });
+    expect(v.parse(TypeUpdateSchema, { seoText: "Низ" })).toEqual({ seoText: "Низ" });
+    expect(v.safeParse(TypeUpdateSchema, { descriptionTop: "а".repeat(20000) }).success).toBe(true);
+    expect(v.safeParse(TypeUpdateSchema, { descriptionTop: "а".repeat(20001) }).success).toBe(false);
+    expect(v.safeParse(TypeUpdateSchema, { seoText: "а".repeat(20001) }).success).toBe(false);
+  });
+
   it("на пустом объекте не добавляет ни одного поля", () => {
     const parsed = v.safeParse(TypeUpdateSchema, {});
 

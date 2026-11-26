@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import {
   IMAGE_ACCEPT,
+  imageVariantUrl,
   MAX_IMAGE_BYTES,
   MAX_IMAGES_PER_FIELD,
   formatFileSize,
@@ -108,7 +109,7 @@ async function deleteFile(index: number) {
     <div class="admin-images">
       <div v-if="model.length" class="admin-images__grid">
         <div v-for="(url, index) in model" :key="`${url}-${index}`" class="admin-images__item">
-          <img :src="url" alt="" class="admin-images__thumb" loading="lazy">
+          <img :src="imageVariantUrl(url, 'small')" alt="" class="admin-images__thumb" loading="lazy">
           <code class="admin-images__url">{{ url }}</code>
           <div class="admin-images__actions">
             <button

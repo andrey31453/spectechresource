@@ -60,6 +60,7 @@ const typeDto: AdminTypeDto = {
   deliveryPrice: "5000.00",
   crewAvailable: true,
   withoutCrewAvailable: false,
+  descriptionTop: null,
   worksPerformed: null,
   gallery: ["/uploads/type-1.jpg", "/uploads/type-2.jpg"],
   seoTitle: null,
@@ -93,6 +94,15 @@ describe("формы раздела", () => {
 });
 
 describe("формы вида техники", () => {
+  it("читает, обрезает и очищает оба описания независимо", () => {
+    const form = typeFormFrom({ ...typeDto, descriptionTop: "Верх", seoText: "Низ" });
+    expect(form.descriptionTop).toBe("Верх");
+    expect(form.seoText).toBe("Низ");
+    expect(typeFormFrom(typeDto).descriptionTop).toBe("");
+    expect(typeFormBody({ ...form, descriptionTop: "  Верх  ", seoText: "  Низ  " })).toMatchObject({ descriptionTop: "Верх", seoText: "Низ" });
+    expect(typeFormBody({ ...form, descriptionTop: "  ", seoText: "" })).toMatchObject({ descriptionTop: null, seoText: null });
+  });
+
   it("цена и галерея читаются из DTO без хвостовых нулей", () => {
     const form = typeFormFrom(typeDto);
 

@@ -73,6 +73,11 @@ describe("toAdminLeadListItem", () => {
 });
 
 describe("toAdminLead", () => {
+  it("отдаёт снимок источника и кнопки, для старых заявок — null", () => {
+    expect(toAdminLead({ ...row, sourceLabel: "Товар: CAT 320", sourceButton: "Заказать" }))
+      .toMatchObject({ sourceLabel: "Товар: CAT 320", sourceButton: "Заказать" });
+    expect(toAdminLead(row)).toMatchObject({ sourceLabel: null, sourceButton: null });
+  });
   it("добавляет UTM, согласие и контекст запроса", () => {
     const lead = toAdminLead(row);
 

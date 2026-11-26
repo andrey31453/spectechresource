@@ -27,7 +27,8 @@ useJsonLd("product", {
 </script>
 
 <template>
-  <div v-if="model && landing" id="equipment-page" class="bg-[#f4f5f6] py-6 text-[#20272d] [--color-brand:#9c4100] [--color-brand-dark:#7d3400] [--color-brand-soft:#fff0df] [&_label[aria-hidden=true]]:hidden">
+  <div v-if="model && landing" id="equipment-page" data-lead-page :data-equipment-type-slug="typeSlug" :data-equipment-model-id="model.id" :data-equipment-label="title" class="relative isolate bg-[#f4f5f6] py-6 text-[#20272d] [--color-brand:#9c4100] [--color-brand-dark:#7d3400] [--color-brand-soft:#fff0df] [&_label[aria-hidden=true]]:hidden">
+    <EquipmentPageBackground />
     <div :class="shell">
       <SiteBreadcrumbs :items="[{ name: 'Главная', path: '/' }, { name: 'Каталог', path: '/katalog' }, { name: landing.type.name, path: typePath(typeSlug) }, { name: title }]" />
       <h1 class="my-6 text-[clamp(1.65rem,3vw,2.5rem)] font-extrabold leading-tight tracking-tight [overflow-wrap:anywhere]">{{ h1 }}</h1>

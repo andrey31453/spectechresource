@@ -78,6 +78,7 @@ onBeforeUnmount(() => {
           :place="context.equipmentTypeSlug || context.equipmentModelId ? 'equipment' : 'callback'"
           :equipment-type-slug="context.equipmentTypeSlug"
           :equipment-model-id="context.equipmentModelId"
+          :source="context"
           :phone="phone"
           heading="Оставьте контакты"
           lead="Достаточно телефона или e-mail — остальное уточним при звонке."

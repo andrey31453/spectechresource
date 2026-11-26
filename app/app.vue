@@ -22,9 +22,10 @@ function onLeadLinkClick(event: MouseEvent) {
   if (url.origin !== window.location.origin || !["#zayavka", "#raschet", "#model-order"].includes(url.hash)) return;
   event.preventDefault();
   open({
-    equipmentTypeSlug: link.dataset.equipmentTypeSlug,
-    equipmentModelId: link.dataset.equipmentModelId,
-    equipmentLabel: link.dataset.equipmentLabel,
+    ...(link.dataset.equipmentTypeSlug ? { equipmentTypeSlug: link.dataset.equipmentTypeSlug } : {}),
+    ...(link.dataset.equipmentModelId ? { equipmentModelId: link.dataset.equipmentModelId } : {}),
+    ...(link.dataset.equipmentLabel ? { equipmentLabel: link.dataset.equipmentLabel } : {}),
+    sourceButton: (link.getAttribute("aria-label") || link.textContent || "").replace(/\s+/g, " ").trim(),
   });
 }
 

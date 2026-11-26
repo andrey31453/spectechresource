@@ -2,7 +2,7 @@ import { isSafeUploadPath, uploadUrlFromPath } from "#shared/utils/uploads";
 import { requireAdmin } from "../../../utils/admin-guard";
 import { throwConflict, throwNotFound } from "../../../utils/admin-request";
 import { findUploadUsages } from "../../../utils/upload-references";
-import { removeUploadFile } from "../../../utils/uploads";
+import { removeUploadGroup } from "../../../utils/uploads";
 
 /**
  * Удаление загруженного файла: `DELETE /api/admin/uploads/2026/11/<uuid>.jpg`.
@@ -25,7 +25,7 @@ export default defineEventHandler(async (event) => {
     throwConflict(`Файл используется: ${usages.join(", ")}. Сначала уберите его из этих записей.`);
   }
 
-  const removed = await removeUploadFile(relativePath);
+  const removed = await removeUploadGroup(relativePath);
 
   if (!removed) {
     throwNotFound("Файл не найден");

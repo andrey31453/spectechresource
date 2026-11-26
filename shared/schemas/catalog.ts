@@ -164,6 +164,7 @@ const typeFields = {
   deliveryPrice: moneyField("Цена доставки"),
   crewAvailable: v.boolean("С экипажем — да или нет"),
   withoutCrewAvailable: v.boolean("Без экипажа — да или нет"),
+  descriptionTop: optionalText(20000, "описание сверху"),
   worksPerformed: optionalText(20000, "какие работы выполняет"),
   gallery: photosField("Фотографии вида"),
   seoTitle: optionalText(255, "SEO-заголовок"),

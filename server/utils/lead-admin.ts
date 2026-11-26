@@ -23,6 +23,8 @@ export interface AdminLeadListItemDto {
 }
 
 export interface AdminLeadDto extends AdminLeadListItemDto {
+  sourceLabel: string | null;
+  sourceButton: string | null;
   comment: string | null;
   referer: string | null;
   utmSource: string | null;
@@ -56,6 +58,8 @@ export interface LeadListRow {
 }
 
 export interface LeadDetailRow extends LeadListRow {
+  sourceLabel?: string | null;
+  sourceButton?: string | null;
   comment: string | null;
   referer: string | null;
   utmSource: string | null;
@@ -93,6 +97,8 @@ export function toAdminLeadListItem(lead: LeadListRow): AdminLeadListItemDto {
 export function toAdminLead(lead: LeadDetailRow): AdminLeadDto {
   return {
     ...toAdminLeadListItem(lead),
+    sourceLabel: lead.sourceLabel ?? null,
+    sourceButton: lead.sourceButton ?? null,
     comment: lead.comment,
     referer: lead.referer,
     utmSource: lead.utmSource,

@@ -35,9 +35,13 @@ export const LEAD_CSV_HEADERS = [
   "Referer",
   "IP",
   "User-Agent",
+  "Источник",
+  "Кнопка",
 ] as const;
 
 export interface LeadCsvSource {
+  sourceLabel?: string | null;
+  sourceButton?: string | null;
   id: string;
   createdAt: Date;
   status: keyof typeof LEAD_STATUS_LABELS;
@@ -93,6 +97,8 @@ export function leadToCsvRow(lead: LeadCsvSource): Array<string | number | null>
     lead.referer,
     lead.ip,
     lead.userAgent,
+    lead.sourceLabel ?? null,
+    lead.sourceButton ?? null,
   ];
 }
 

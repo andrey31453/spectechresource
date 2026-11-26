@@ -103,6 +103,7 @@ export interface TypeForm {
   deliveryPrice: string;
   crewAvailable: boolean;
   withoutCrewAvailable: boolean;
+  descriptionTop: string;
   worksPerformed: string;
   gallery: string[];
   seoTitle: string;
@@ -125,6 +126,7 @@ export function emptyTypeForm(categoryId = ""): TypeForm {
     deliveryPrice: "",
     crewAvailable: true,
     withoutCrewAvailable: false,
+    descriptionTop: "",
     worksPerformed: "",
     gallery: [],
     seoTitle: "",
@@ -148,6 +150,7 @@ export function typeFormFrom(type: AdminTypeDto): TypeForm {
     deliveryPrice: priceInput(type.deliveryPrice),
     crewAvailable: type.crewAvailable,
     withoutCrewAvailable: type.withoutCrewAvailable,
+    descriptionTop: text(type.descriptionTop),
     worksPerformed: text(type.worksPerformed),
     gallery: [...type.gallery],
     seoTitle: text(type.seoTitle),
@@ -171,6 +174,7 @@ export function typeFormBody(form: TypeForm) {
     deliveryPrice: emptyToNull(form.deliveryPrice),
     crewAvailable: form.crewAvailable,
     withoutCrewAvailable: form.withoutCrewAvailable,
+    descriptionTop: emptyToNull(form.descriptionTop),
     worksPerformed: emptyToNull(form.worksPerformed),
     gallery: cleanUrls(form.gallery),
     seoTitle: emptyToNull(form.seoTitle),

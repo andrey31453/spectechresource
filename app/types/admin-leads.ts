@@ -20,6 +20,8 @@ export interface AdminLeadListItemDto {
 }
 
 export interface AdminLeadDto extends AdminLeadListItemDto {
+  sourceLabel: string | null;
+  sourceButton: string | null;
   comment: string | null;
   referer: string | null;
   utmSource: string | null;

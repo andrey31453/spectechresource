@@ -2,11 +2,14 @@ import { randomUUID } from "node:crypto";
 import type { Dirent } from "node:fs";
 import { mkdir, readFile, readdir, stat, unlink, writeFile } from "node:fs/promises";
 import { dirname, join, resolve, sep } from "node:path";
+import { processUploadImage } from "./image-processing";
 import {
   type ImageMime,
   isSafeUploadPath,
   uploadStoragePath,
   uploadUrlFromPath,
+  uploadGroupPaths,
+  type ImageVariant,
 } from "#shared/utils/uploads";
 
 /**
@@ -27,6 +30,7 @@ export interface UploadFileInfo {
 export interface SavedUpload extends UploadFileInfo {
   url: string;
   mime: ImageMime;
+  variants: Record<ImageVariant, string>;
 }
 
 /** Абсолютный путь папки загрузок: `UPLOADS_DIR` или `.data/uploads` от корня проекта. */
@@ -52,18 +56,28 @@ function absoluteUploadPath(relativePath: string): string {
 }
 
 /** Пишет файл под сгенерированным именем и возвращает данные для ответа админке. */
-export async function saveUploadImage(bytes: Uint8Array, mime: ImageMime): Promise<SavedUpload> {
-  const relativePath = uploadStoragePath(new Date(), randomUUID(), mime);
+export async function saveUploadImage(bytes: Uint8Array, _mime: ImageMime): Promise<SavedUpload> {
+  const images = await processUploadImage(bytes);
+  const relativePath = uploadStoragePath(new Date(), randomUUID(), "image/webp").replace(/\.webp$/, "-full.webp");
   const absolutePath = absoluteUploadPath(relativePath);
-
+  const paths = uploadGroupPaths(relativePath);
   await mkdir(dirname(absolutePath), { recursive: true });
-  await writeFile(absolutePath, bytes);
+  try {
+    for (const path of paths) {
+      const variant = path.match(/-(small|medium|full)\.webp$/)![1] as ImageVariant;
+      await writeFile(absoluteUploadPath(path), images[variant]);
+    }
+  } catch (error) {
+    await Promise.allSettled(paths.map((path) => unlink(absoluteUploadPath(path))));
+    throw error;
+  }
 
   return {
     path: relativePath,
     url: uploadUrlFromPath(relativePath),
-    size: bytes.byteLength,
-    mime,
+    size: images.full.byteLength,
+    mime: "image/webp",
+    variants: Object.fromEntries(paths.map((path) => [path.match(/-(small|medium|full)\.webp$/)![1], uploadUrlFromPath(path)])) as Record<ImageVariant, string>,
     modifiedAt: new Date(),
   };
 }
@@ -89,6 +103,14 @@ export async function removeUploadFile(relativePath: string): Promise<boolean> {
     if ((error as NodeJS.ErrnoException).code === "ENOENT") return false;
     throw error;
   }
+}
+
+export async function removeUploadGroup(relativePath: string): Promise<boolean> {
+  let removed = false;
+  for (const path of uploadGroupPaths(relativePath)) {
+    if (await removeUploadFile(path)) removed = true;
+  }
+  return removed;
 }
 
 /** Все файлы загрузок: два уровня (`год/месяц`), только наши имена. */

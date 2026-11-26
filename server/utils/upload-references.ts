@@ -1,5 +1,5 @@
 import type { PrismaClient } from "../../generated/prisma/client";
-import { uploadPathFromUrl } from "#shared/utils/uploads";
+import { uploadPathFromUrl, uploadGroupPaths, uploadUrlFromPath } from "#shared/utils/uploads";
 
 /**
  * Кто ссылается на загруженный файл.
@@ -66,7 +66,7 @@ export function referencedUploadPaths(urls: Iterable<string>): Set<string> {
 
   for (const url of urls) {
     const path = uploadPathFromUrl(url);
-    if (path) paths.add(path);
+    if (path) for (const sibling of uploadGroupPaths(path)) paths.add(sibling);
   }
 
   return paths;
@@ -97,7 +97,9 @@ export async function loadUploadReferences(
 
 /** Где используется файл: пустой массив — «сирота», удалять можно. */
 export async function findUploadUsages(prisma: PrismaClient, url: string): Promise<string[]> {
-  const references = await loadUploadReferences(prisma, { imageUrl: url });
-  return uploadUsages(references, url);
+  const path = uploadPathFromUrl(url);
+  const urls = path ? uploadGroupPaths(path).map(uploadUrlFromPath) : [url];
+  const usages = await Promise.all(urls.map(async (item) => uploadUsages(await loadUploadReferences(prisma, { imageUrl: item }), item)));
+  return [...new Set(usages.flat())];
 }
 

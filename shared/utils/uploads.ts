@@ -31,7 +31,29 @@ export const IMAGE_ACCEPT = Object.keys(IMAGE_MIME_EXTENSIONS).join(",");
 
 /** Имя файла генерируем сами: год/месяц/`<uuid>.<ext>`. */
 const UPLOAD_PATH_RE =
-  /^\d{4}\/(?:0[1-9]|1[0-2])\/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\.(?:jpg|png|webp|avif|gif)$/;
+  /^\d{4}\/(?:0[1-9]|1[0-2])\/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}(?:-(?:small|medium|full))?\.(?:jpg|png|webp|avif|gif)$/;
+
+export type ImageVariant = "small" | "medium" | "full";
+export const IMAGE_VARIANTS = {
+  small: { width: 480, height: 360, quality: 76 },
+  medium: { width: 960, height: 720, quality: 82 },
+  full: { width: 1920, height: 1080, quality: 86 },
+} as const;
+
+/** Only generated, validated paths have sibling variants. */
+export function imageVariantUrl(url: string, variant: ImageVariant): string {
+  const path = uploadPathFromUrl(url);
+  return path && /-(small|medium|full)\.webp$/.test(path)
+    ? uploadUrlFromPath(path.replace(/-(small|medium|full)\.webp$/, `-${variant}.webp`))
+    : url;
+}
+
+export function uploadGroupPaths(path: string): string[] {
+  if (!isSafeUploadPath(path)) return [];
+  return /-(small|medium|full)\.webp$/.test(path)
+    ? Object.keys(IMAGE_VARIANTS).map((variant) => path.replace(/-(small|medium|full)\.webp$/, `-${variant}.webp`))
+    : [path];
+}
 
 function ascii(bytes: Uint8Array, offset: number, length: number): string {
   let text = "";

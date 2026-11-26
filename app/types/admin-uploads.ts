@@ -7,4 +7,5 @@ export interface AdminUploadDto {
   size: number;
   mime: ImageMime;
   originalName: string | null;
+  variants: Record<"small" | "medium" | "full", string>;
 }

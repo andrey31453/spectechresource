@@ -31,6 +31,7 @@ function model(patch: Partial<HomeModelDto> & { id: string; categorySlug: string
     pricePerShift: "26000.00",
     pricePerHour: null,
     photo: null,
+    photos: [],
     specs: [],
     ...patch,
   };

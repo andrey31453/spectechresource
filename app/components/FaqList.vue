@@ -28,7 +28,7 @@ const number = (index: number) => String(index + 1).padStart(2, "0");
 </script>
 
 <template>
-  <ul v-if="items.length" class="grid gap-3">
+  <ul v-if="items.length" class="grid grid-cols-1 gap-3">
     <li v-for="(item, index) in items" :key="item.question">
       <details
         class="group rounded-card border border-line bg-surface transition-colors hover:border-brand/40 open:border-brand/50"

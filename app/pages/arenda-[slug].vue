@@ -15,9 +15,14 @@ const { data, error } = await useFetch<LandingDto>("/api/landing", {
 throwIfError(error.value);
 
 const landing = computed(() => data.value);
-/** Первое фото показываем крупно, остальные — плиткой ниже. */
+const models = computed(() => (landing.value?.models ?? []).map((model) => ({
+  ...model,
+  categorySlug: landing.value!.category.slug,
+  typeSlug,
+  typeName: landing.value!.type.name,
+  photo: model.photos[0] ?? null,
+})));
 const gallery = computed(() => landing.value?.type.gallery ?? []);
-const coverPhoto = computed(() => gallery.value[0] ?? null);
 const city = computed(() => landing.value?.city ?? { slug: "moskva", name: "Москва", nameIn: "Москве" });
 const companyName = computed(() => site.value?.companyName ?? "ООО «СПЕЦТЕХРЕСУРС»");
 const h1 = computed(() => `Аренда ${landing.value?.type.nameGenitive ?? ""} в ${city.value.nameIn}`);
@@ -74,7 +79,7 @@ if (landing.value?.type.priceFrom) {
 </script>
 
 <template>
-  <div v-if="landing">
+  <div v-if="landing" data-lead-page :data-equipment-type-slug="typeSlug" :data-equipment-label="landing.type.name">
     <SiteBreadcrumbs
       :items="[
         { name: 'Главная', path: '/' },
@@ -88,6 +93,16 @@ if (landing.value?.type.priceFrom) {
       {{ landing.type.name }} в аренду в {{ city.nameIn }} и области: подача с экипажем, работа по
       договору с закрывающими документами.
     </p>
+
+    <div v-if="landing.type.descriptionTopHtml" class="section [overflow-wrap:anywhere]" data-description-top v-html="landing.type.descriptionTopHtml" />
+
+    <section class="section" data-model-list>
+      <h2>Модели в парке</h2>
+      <CatalogModelsGrid :models="models" wide :equipment-type-slug="typeSlug" :equipment-label="landing.type.name" />
+      <p class="muted">Наличие конкретной модели уточняйте по телефону — парк обновляется.</p>
+    </section>
+
+    <TypePhotoGallery :photos="gallery" :label="landing.type.name" />
 
     <CtaBlock :phone="site?.phone ?? ''" />
 
@@ -106,55 +121,7 @@ if (landing.value?.type.priceFrom) {
       </ul>
     </section>
 
-    <section v-if="gallery.length" class="section">
-      <h2>Фото техники</h2>
-      <figure v-if="coverPhoto" class="mt-4 overflow-hidden rounded-card border border-line bg-line">
-        <img
-          :src="coverPhoto"
-          :alt="`${landing.type.name} — фото 1`"
-          width="1280"
-          height="720"
-          class="aspect-[16/9] w-full object-cover"
-        >
-      </figure>
-      <div v-if="gallery.length > 1" class="mt-3 flex flex-wrap gap-3">
-        <img
-          v-for="(photo, index) in gallery.slice(1)"
-          :key="`${photo}-${index}`"
-          :src="photo"
-          :alt="`${landing.type.name} — фото ${index + 2}`"
-          loading="lazy"
-          width="640"
-          height="480"
-          class="aspect-[4/3] w-full rounded-card border border-line bg-line object-cover sm:w-[calc(50%-0.375rem)]"
-        >
-      </div>
-    </section>
-
-    <section v-if="landing.models.length" class="section">
-      <h2>Модели в парке</h2>
-      <div class="table-wrap">
-        <table class="table">
-          <thead>
-            <tr>
-              <th>Модель</th>
-              <th>Цена за смену</th>
-              <th>Цена за час</th>
-              <th>Характеристики</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr v-for="model in landing.models" :key="model.id">
-              <td><NuxtLink :to="modelPath(typeSlug, model.slug)">{{ model.brand }} {{ model.model }}</NuxtLink></td>
-              <td>{{ formatPrice(model.pricePerShift) }}</td>
-              <td>{{ formatPrice(model.pricePerHour) }}</td>
-              <td><ModelSpecs :specs="model.specs" /></td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-      <p class="muted">Наличие конкретной модели уточняйте по телефону — парк обновляется.</p>
-    </section>
+    <div v-if="landing.type.seoTextHtml" class="section [overflow-wrap:anywhere]" data-description-bottom v-html="landing.type.seoTextHtml" />
 
     <section v-if="landing.type.worksPerformedHtml" class="section">
       <h2>Какие работы выполняем</h2>
@@ -176,11 +143,6 @@ if (landing.value?.type.priceFrom) {
     <section v-if="landing.faq.length" class="section">
       <h2>Вопросы и ответы</h2>
       <FaqList :items="landing.faq" />
-    </section>
-
-    <section v-if="landing.type.seoTextHtml" class="section">
-      <h2>Подробнее об аренде</h2>
-      <div v-html="landing.type.seoTextHtml" />
     </section>
 
     <CtaBlock

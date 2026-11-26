@@ -113,6 +113,14 @@ async function retry() {
     <section class="lead-card__section">
       <h2 class="lead-card__title">Откуда заявка</h2>
       <dl class="lead-card__grid">
+        <div v-if="lead.sourceLabel" class="lead-card__row">
+          <dt class="lead-card__term">Источник</dt>
+          <dd class="lead-card__value">{{ lead.sourceLabel }}</dd>
+        </div>
+        <div v-if="lead.sourceButton" class="lead-card__row">
+          <dt class="lead-card__term">Кнопка</dt>
+          <dd class="lead-card__value">{{ lead.sourceButton }}</dd>
+        </div>
         <div class="lead-card__row">
           <dt class="lead-card__term">Форма</dt>
           <dd class="lead-card__value">{{ leadPlaceLabel(lead.place) }} <span class="muted">({{ lead.place }})</span></dd>

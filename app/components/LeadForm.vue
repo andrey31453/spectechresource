@@ -4,6 +4,7 @@ import { nextTick, ref } from "vue";
 import { safeParse } from "valibot";
 import { LeadSchema, toLeadFieldErrors, type LeadPlace } from "#shared/schemas/leads";
 import { buildLeadPayload, createRequestId } from "~/utils/lead-form";
+import { readLeadPageContext, type LeadSourceContext } from "~/utils/lead-source";
 
 /**
  * Форма заявки публичных страниц. Валидация — та же схема, что у `POST /api/leads`
@@ -18,6 +19,7 @@ const props = withDefaults(
     place: LeadPlace;
     equipmentTypeSlug?: string;
     equipmentModelId?: string;
+    source?: LeadSourceContext;
     /** Виды техники для выпадающего списка; в CTA список не нужен. */
     equipmentTypes?: Array<{ slug: string; name: string }>;
     heading?: string;
@@ -30,6 +32,7 @@ const props = withDefaults(
   {
     equipmentTypeSlug: undefined,
     equipmentModelId: undefined,
+    source: undefined,
     equipmentTypes: () => [],
     heading: "Расчёт за смену",
     lead: "Подберём технику под задачу и назовём цену с доставкой.",
@@ -112,6 +115,7 @@ async function submit() {
   errors.value = {};
   formError.value = null;
 
+  const source = props.source ?? readLeadPageContext();
   const payload = buildLeadPayload({
     place: props.place,
     name: name.value,
@@ -119,12 +123,14 @@ async function submit() {
     email: emailInput.value,
     comment: comment.value,
     consent: consent.value,
-    pageUrl: window.location.href,
+    pageUrl: source.pageUrl ?? window.location.href,
+    sourceLabel: source.sourceLabel,
+    sourceButton: source.sourceButton ?? props.submitLabel,
     requestId: requestId.value,
     equipmentTypeSlug: props.equipmentTypeSlug ?? selectedTypeSlug.value,
     equipmentModelId: props.equipmentModelId,
     honeypot: honeypot.value,
-    pageTitle: document.title,
+    pageTitle: source.pageTitle ?? document.title,
     referer: document.referrer,
     query: route.query,
   });

@@ -21,6 +21,18 @@ export interface TypeCardDto {
 /** Плоский пункт публичного каталога: категория из ТЗ = вид техники. */
 export type CatalogTypeDto = TypeCardDto;
 
+export interface CatalogFilterDto {
+  slug: string;
+  name: string;
+  descriptionTopHtml: string | null;
+  descriptionBottomHtml: string | null;
+}
+
+export interface CatalogModelsDto {
+  types: CatalogFilterDto[];
+  models: HomeModelDto[];
+}
+
 export interface CategoryCardDto {
   slug: string;
   title: string;
@@ -80,6 +92,7 @@ export interface HomeModelDto {
   pricePerHour: string | null;
   /** Первое фото из галереи модели; null — фото ещё не загружено. */
   photo: string | null;
+  photos: string[];
   specs: Array<{ name: string; value: string }>;
 }
 
@@ -128,6 +141,7 @@ export interface LandingDto {
     deliveryPrice: string | null;
     crewAvailable: boolean;
     withoutCrewAvailable: boolean;
+    descriptionTopHtml: string | null;
     worksPerformedHtml: string | null;
     gallery: string[];
     seoTitle: string | null;

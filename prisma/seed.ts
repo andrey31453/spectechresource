@@ -1370,7 +1370,7 @@ async function main() {
     const typeId = typeIds.get(m.typeSlug);
     if (!typeId) throw new Error(`Неизвестный вид техники: ${m.typeSlug}`);
 
-    const demoPhotos = typeDetails[m.typeSlug]?.photos.slice(0, 1) ?? [];
+    const demoPhotos = typeDetails[m.typeSlug]?.photos ?? [];
     const row = await prisma.equipmentModel.upsert({
       where: { typeId_brand_model: { typeId, brand: m.brand, model: m.model } },
       update: { sortOrder: m.sortOrder },

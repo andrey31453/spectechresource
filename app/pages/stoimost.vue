@@ -29,8 +29,13 @@ usePageSeo({
         <h2 :id="`price-${type.slug}`" class="mb-4 mt-0 text-xl font-bold">
           <NuxtLink :to="typePath(type.slug)">{{ type.name }}</NuxtLink>
         </h2>
-        <div class="overflow-x-auto border border-line">
-          <table class="w-full min-w-[36rem] border-collapse text-left text-sm">
+        <div class="overflow-x-auto rounded-card border border-line">
+          <table class="w-full min-w-[36rem] table-fixed border-collapse text-left text-sm">
+            <colgroup>
+              <col class="w-1/2">
+              <col class="w-1/4">
+              <col class="w-1/4">
+            </colgroup>
             <thead class="bg-surface-soft text-muted">
               <tr><th class="p-3 font-semibold">Модель</th><th class="p-3 font-semibold">За час</th><th class="p-3 font-semibold">За смену</th></tr>
             </thead>

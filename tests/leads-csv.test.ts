@@ -91,6 +91,12 @@ const lead: LeadCsvSource = {
 };
 
 describe("leadsToCsv", () => {
+  it("выгружает источник и кнопку в соответствующие столбцы", () => {
+    const row = leadToCsvRow({ ...lead, sourceLabel: "Товар: CAT 320", sourceButton: "Заказать" });
+    expect(row).toHaveLength(LEAD_CSV_HEADERS.length);
+    expect(row[LEAD_CSV_HEADERS.indexOf("Источник")]).toBe("Товар: CAT 320");
+    expect(row[LEAD_CSV_HEADERS.indexOf("Кнопка")]).toBe("Заказать");
+  });
   it("первая строка — заголовки, дальше по строке на заявку", () => {
     const csv = leadsToCsv([lead]);
     const lines = csv.replace(/^\uFEFF/, "").trimEnd().split("\r\n");

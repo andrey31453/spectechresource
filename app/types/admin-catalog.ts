@@ -62,6 +62,7 @@ export interface AdminTypeDto extends Omit<AdminTypeListItemDto, "modelsCount"> 
   deliveryPrice: string | null;
   crewAvailable: boolean;
   withoutCrewAvailable: boolean;
+  descriptionTop: string | null;
   worksPerformed: string | null;
   gallery: string[];
   seoTitle: string | null;
