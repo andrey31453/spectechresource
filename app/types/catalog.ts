@@ -18,6 +18,9 @@ export interface TypeCardDto {
   image: string | null;
 }
 
+/** Плоский пункт публичного каталога: категория из ТЗ = вид техники. */
+export type CatalogTypeDto = TypeCardDto;
+
 export interface CategoryCardDto {
   slug: string;
   title: string;

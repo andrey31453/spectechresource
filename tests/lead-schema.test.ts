@@ -47,9 +47,10 @@ describe("LeadSchema", () => {
     expect(issue?.message).toContain("+7 (999) 123-45-67");
   });
 
-  it("имя из одного символа отклоняется", () => {
+  it("непустое имя из одного символа отклоняется, но имя можно не указывать", () => {
     const errors = issuesFor({ name: " И " });
     expect(errors).toEqual([{ field: "name", message: "Имя — минимум 2 символа" }]);
+    expect(v.safeParse(LeadSchema, { ...valid, name: "", phone: "", email: "ivan@example.ru" }).success).toBe(true);
   });
 
   it("без согласия заявку не принять", () => {
@@ -69,6 +70,14 @@ describe("LeadSchema", () => {
     const [issue] = issuesFor({ email: "ivan@" });
     expect(issue?.field).toBe("email");
     expect(issue?.message).toContain("name@example.ru");
+  });
+
+  it("принимает заявку только с e-mail и без имени", () => {
+    const result = v.safeParse(LeadSchema, { ...valid, name: "", phone: "", email: "ivan@example.ru" });
+    expect(result.success).toBe(true);
+    if (!result.success) return;
+    expect(result.output.name).toBeNull();
+    expect(result.output.phone).toBeNull();
   });
 
   it("комментарий и UTM обрезаются по краям, пустые — null", () => {
@@ -111,9 +120,10 @@ describe("LeadSchema", () => {
 });
 
 describe("toLeadFieldErrors", () => {
-  it("несколько ошибок сразу — по одной на поле", () => {
-    const errors = issuesFor({ name: "", phone: "", consent: false });
-    expect(errors.map((error) => error.field)).toEqual(["name", "phone", "consent"]);
+  it("без телефона и e-mail выдаёт ошибку контакта", () => {
+    const errors = issuesFor({ name: "", phone: "", email: "", consent: false });
+    expect(errors.map((error) => error.field)).toContain("phone");
+    expect(errors.map((error) => error.field)).toContain("consent");
     expect(errors.every((error) => error.message.length > 0)).toBe(true);
   });
 

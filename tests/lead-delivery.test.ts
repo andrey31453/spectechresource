@@ -47,6 +47,11 @@ const crm: CrmLead = {
 const now = new Date("2026-11-15T12:00:00.000Z");
 
 describe("buildLeadCreateData", () => {
+  it("сохраняет заявку только с email без обязательных имени и телефона", () => {
+    const parsed = v.parse(LeadSchema, { ...input, name: null, phone: null, email: "client@example.ru" });
+    const data = buildLeadCreateData(parsed, { ip: null, userAgent: null, consentVersion: "v1", now });
+    expect(data).toMatchObject({ name: "", phone: "", email: "client@example.ru" });
+  });
   it("переносит поля формы и контекст запроса", () => {
     const data = buildLeadCreateData(
       input,

@@ -86,20 +86,168 @@
     linear-gradient(to bottom, var(--site-grid-brand-line) 1px, transparent 1px);
 }
 
+/* Компактный скроллбар в графитовом тоне с фирменным оранжевым бегунком. */
+@layer base {
+  * {
+    scrollbar-color: var(--color-line2) var(--color-night);
+    scrollbar-width: thin;
+  }
+
+  *::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+
+  *::-webkit-scrollbar-track {
+    background: var(--color-night);
+  }
+
+  *::-webkit-scrollbar-thumb {
+    border: 2px solid var(--color-night);
+    border-radius: 999px;
+    background: var(--color-line2);
+  }
+
+  *::-webkit-scrollbar-thumb:hover {
+    background: var(--color-flame);
+  }
+}
+
 /* Базовая линия: сглаживание и перенос длинных слов в заголовках.
  * Правила переносов действуют только на страницах сайта: у главной по макету
  * `docs/sait-13` (метка `landing-page` на <body>) переносы — часть вёрстки,
  * а `text-wrap` перебил бы и `white-space: nowrap` его утилит. */
 @layer base {
   html {
+    min-height: 100%;
     -webkit-text-size-adjust: 100%;
     scroll-behavior: smooth;
   }
 
   body {
+    min-height: 100%;
     font-family: var(--font-sans);
     color: var(--color-ink);
     background-color: var(--color-surface);
+  }
+
+  #__nuxt {
+    min-height: 100vh;
+  }
+
+  /* Форма на звёздной подложке сохраняет стиль исходного макета:
+     полупрозрачная графитовая панель, primary-рамка и мягкое свечение.
+     Модификатор локален, поэтому обычные LeadForm остаются светлыми. */
+  .stars-lead-form form {
+    border: 1px solid var(--color-flame) !important;
+    background-image: linear-gradient(112deg, rgb(255 156 74 / 16%), rgb(207 68 24 / 6%)), linear-gradient(180deg, #141c25 0%, #101720 100%);
+    color: var(--color-snow) !important;
+    box-shadow: 0 0 120px 24px rgb(255 122 47 / 18%) !important;
+  }
+
+  .stars-lead-form form::before {
+    position: absolute;
+    top: -1px;
+    left: 18px;
+    width: 64px;
+    height: 2px;
+    content: "";
+    background: var(--color-flame2);
+  }
+
+  .stars-lead-form form p.text-ink,
+  .stars-lead-form form p.text-muted,
+  .stars-lead-form form label > span.text-muted,
+  .stars-lead-form form label.text-muted,
+  .stars-lead-form form [role="status"] p.text-ink,
+  .stars-lead-form form [role="status"] p.text-muted {
+    color: var(--color-snow);
+  }
+
+  .stars-lead-form form > p.text-ink {
+    color: #fff !important;
+  }
+
+  .stars-lead-form form > div > p.text-muted,
+  .stars-lead-form form label > span.text-muted,
+  .stars-lead-form form label.text-muted,
+  .stars-lead-form form p.text-muted {
+    color: var(--color-mist);
+  }
+
+  .stars-lead-form form input,
+  .stars-lead-form form select,
+  .stars-lead-form form textarea {
+    border-color: var(--color-line2) !important;
+    background: var(--color-void) !important;
+    background-color: var(--color-void) !important;
+    color: var(--color-snow) !important;
+  }
+
+  .stars-lead-form form select option {
+    background: var(--color-night);
+    color: var(--color-snow);
+  }
+
+  .stars-lead-form form input[type="checkbox"] {
+    border-color: var(--color-line2);
+    background-color: var(--color-night);
+    accent-color: var(--color-flame);
+  }
+
+  .stars-lead-form form input::placeholder,
+  .stars-lead-form form textarea::placeholder {
+    color: var(--color-mist);
+  }
+
+  .stars-lead-form form input:focus,
+  .stars-lead-form form select:focus,
+  .stars-lead-form form textarea:focus {
+    border-color: var(--color-flame);
+    box-shadow: 0 0 0 1px rgb(255 122 47 / 25%);
+  }
+
+  .stars-lead-form form label > span {
+    color: var(--color-mist);
+  }
+
+  .stars-lead-form form button[type="submit"] {
+    background-image: linear-gradient(112deg, #ff9c4a 0%, #ff7a2f 42%, #cf4418 100%);
+    color: #14100a;
+    box-shadow: 0 12px 30px -16px rgb(255 122 47 / 85%);
+  }
+
+  .stars-lead-form form button[type="submit"]:hover:not(:disabled) {
+    box-shadow: 0 18px 38px -16px rgb(255 122 47 / 95%);
+  }
+
+  .stars-lead-form form a {
+    color: var(--color-flame2);
+  }
+
+  .stars-lead-form form .bg-brand-soft {
+    background: rgb(201 242 74 / 10%);
+  }
+
+  .stars-lead-form form .text-brand {
+    color: var(--color-flame2);
+  }
+
+  .stars-lead-form form .text-brand-dark {
+    color: var(--color-flame2);
+  }
+
+  .stars-lead-form form .bg-red-50 {
+    background: rgb(138 28 28 / 18%);
+  }
+
+  .stars-lead-form form .text-red-700,
+  .stars-lead-form form .text-red-600 {
+    color: #ffb4a8;
+  }
+
+  .stars-lead-form form [role="status"] {
+    color: var(--color-snow);
   }
 
   body:not(.landing-page) :is(h1, h2, h3) {

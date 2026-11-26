@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { computed, onBeforeUnmount, onMounted, ref } from "vue";
 import type { HomeDto, SiteDto } from "~/types/catalog";
-import { categoryPath } from "~/utils/routes";
 import { telHref } from "~/utils/phone";
 
 type ExperimentalVariant = "light" | "dark" | "editorial";
@@ -171,7 +170,7 @@ onBeforeUnmount(() => {
           v-for="category in categoryCards"
           :key="category.slug"
           class="experimental__card"
-          :href="variant !== 'dark' ? categoryPath(category.slug) : undefined"
+          :href="undefined"
         >
           <div class="experimental__card-image">
             <img :src="category.image" :alt="category.title" loading="lazy">

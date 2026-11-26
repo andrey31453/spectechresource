@@ -15,10 +15,42 @@ const route = useRoute();
 watch(() => route.fullPath, () => {
   header.value?.querySelectorAll<HTMLDetailsElement>("details[open]").forEach(menu => { menu.open = false; });
 });
-function closeMenu(event: MouseEvent) {
-  if (!(event.target instanceof Element) || !event.target.closest("a")) return;
-  event.target.closest("details")?.removeAttribute("open");
+function handleMenuClick(event: MouseEvent) {
+  if (!(event.currentTarget instanceof HTMLDetailsElement)) return;
+  const current = event.currentTarget;
+  if (event.target instanceof Element && event.target.closest("a")) {
+    current.open = false;
+    return;
+  }
+  if (!(event.target instanceof Element) || !event.target.closest('summary')) return;
+  event.preventDefault();
+  current.open = !current.open;
+  if (current.open) {
+    header.value?.querySelectorAll<HTMLDetailsElement>("details[open]").forEach(menu => {
+      if (menu !== current) menu.open = false;
+    });
+  }
 }
+function closeMenusOutside(event: MouseEvent) {
+  if (event.target instanceof Element && !event.target.closest('details')) {
+    header.value?.querySelectorAll<HTMLDetailsElement>("details[open]").forEach(menu => { menu.open = false; });
+  }
+}
+function closeMenusOnEscape(event: KeyboardEvent) {
+  if (event.key !== "Escape") return;
+  header.value?.querySelectorAll<HTMLDetailsElement>("details[open]").forEach(menu => { menu.open = false; });
+}
+onMounted(() => {
+  document.addEventListener("click", closeMenusOutside);
+  document.addEventListener("keydown", closeMenusOnEscape);
+});
+onBeforeUnmount(() => {
+  document.removeEventListener("click", closeMenusOutside);
+  document.removeEventListener("keydown", closeMenusOnEscape);
+});
+const isActive = (path: string) => path === "/arenda-"
+  ? route.path.startsWith("/arenda-")
+  : route.path === path || (path !== "/" && route.path.startsWith(`${path}/`));
 </script>
 
 <template>
@@ -31,36 +63,37 @@ function closeMenu(event: MouseEvent) {
     <div class="mx-auto flex max-w-site items-center justify-between gap-3 px-5 py-3 md:px-8">
       <SiteBrand />
       <nav class="hidden items-center gap-3 lg:flex" aria-label="Основное меню">
-        <details class="group relative" @click="closeMenu">
-          <summary class="flex min-h-11 cursor-pointer list-none items-center gap-2 text-sm font-semibold [&::-webkit-details-marker]:hidden">Каталог техники <SiteIcon name="chevron" class="size-3 transition-transform group-open:rotate-180" /></summary>
+        <details class="group relative" @click="handleMenuClick">
+          <summary :class="['flex min-h-11 cursor-pointer list-none items-center gap-2 text-sm font-semibold hover:text-flame2 [&::-webkit-details-marker]:hidden', isActive('/arenda-') || isActive('/katalog') ? 'text-flame2' : 'text-snow']">Каталог техники <SiteIcon name="chevron" class="size-3 transition-transform group-open:rotate-180" /></summary>
           <div class="absolute left-0 top-full max-h-[70dvh] w-80 overflow-auto border border-line-dark bg-night p-2">
-            <NuxtLink v-for="category in categories" :key="category.slug" :to="categoryPath(category.slug)" :class="menuLink">{{ category.title }}</NuxtLink>
+            <NuxtLink v-for="category in categories" :key="category.slug" :to="typePath(category.slug)" :class="[menuLink, isActive(typePath(category.slug)) ? 'bg-panel text-flame2!' : '']">{{ category.title }}</NuxtLink>
             <NuxtLink to="/katalog" :class="menuLink">Весь каталог</NuxtLink>
           </div>
         </details>
-        <details class="group relative" @click="closeMenu">
-          <summary class="flex min-h-11 cursor-pointer list-none items-center gap-2 text-sm font-semibold [&::-webkit-details-marker]:hidden">Услуги <SiteIcon name="chevron" class="size-3 transition-transform group-open:rotate-180" /></summary>
+        <details class="group relative" @click="handleMenuClick">
+          <summary :class="['flex min-h-11 cursor-pointer list-none items-center gap-2 text-sm font-semibold [&::-webkit-details-marker]:hidden', isActive('/uslugi') ? 'text-flame2' : 'text-snow']">Услуги <SiteIcon name="chevron" class="size-3 transition-transform group-open:rotate-180" /></summary>
           <div class="absolute left-0 top-full max-h-[70dvh] w-72 overflow-auto border border-line-dark bg-night p-2">
-            <NuxtLink v-for="service in services" :key="service.slug" :to="servicePath(service.slug)" :class="menuLink">{{ service.title }}</NuxtLink>
+            <NuxtLink v-for="service in services" :key="service.slug" :to="servicePath(service.slug)" :class="[menuLink, isActive(servicePath(service.slug)) ? 'bg-panel text-flame2!' : '']">{{ service.title }}</NuxtLink>
             <NuxtLink to="/uslugi" :class="menuLink">Все услуги</NuxtLink>
           </div>
         </details>
-        <NuxtLink to="/#tehnika" :class="menuLink">Стоимость</NuxtLink>
-        <NuxtLink to="/kontakty" :class="menuLink">Контакты</NuxtLink>
+        <NuxtLink to="/stoimost" :class="[menuLink, isActive('/stoimost') ? 'bg-panel text-flame2!' : '']">Стоимость</NuxtLink>
+        <NuxtLink to="/kontakty" :class="[menuLink, isActive('/kontakty') ? 'bg-panel text-flame2!' : '']">Контакты</NuxtLink>
       </nav>
       <a :href="telHref(site.phone)" class="ml-auto hidden min-h-11 shrink-0 items-center text-sm font-bold text-snow hover:text-flame2 xl:inline-flex">{{ site.phone }}</a>
-      <details class="group lg:hidden" @click="closeMenu">
+      <details class="group lg:hidden" @click="handleMenuClick">
         <summary class="flex min-h-11 cursor-pointer list-none items-center gap-1 text-sm font-bold [&::-webkit-details-marker]:hidden">Меню <SiteIcon name="chevron" class="size-3 group-open:rotate-180" /></summary>
         <nav class="absolute inset-x-0 top-full max-h-[75dvh] overflow-auto border-y border-line-dark bg-night px-5 py-3" aria-label="Мобильное меню">
-          <NuxtLink to="/katalog" :class="menuLink">Каталог техники</NuxtLink>
-          <NuxtLink v-for="category in categories" :key="category.slug" :to="categoryPath(category.slug)" :class="menuLink">{{ category.title }}</NuxtLink>
-          <NuxtLink to="/uslugi" :class="menuLink">Услуги</NuxtLink>
+          <NuxtLink to="/katalog" :class="[menuLink, isActive('/katalog') ? 'bg-panel text-flame2!' : '']">Каталог техники</NuxtLink>
+          <NuxtLink v-for="category in categories" :key="category.slug" :to="typePath(category.slug)" :class="[menuLink, isActive(typePath(category.slug)) ? 'bg-panel text-flame2!' : '']">{{ category.title }}</NuxtLink>
+          <NuxtLink to="/uslugi" :class="[menuLink, isActive('/uslugi') ? 'text-flame2' : '']">Услуги</NuxtLink>
+          <NuxtLink to="/stoimost" :class="[menuLink, isActive('/stoimost') ? 'text-flame2' : '']">Стоимость</NuxtLink>
           <NuxtLink to="/#smena" :class="menuLink">Условия аренды</NuxtLink>
-          <NuxtLink to="/kontakty" :class="menuLink">Контакты</NuxtLink>
+          <NuxtLink to="/kontakty" :class="[menuLink, isActive('/kontakty') ? 'text-flame2' : '']">Контакты</NuxtLink>
           <a :href="telHref(site.phone)" :class="menuLink">{{ site.phone }}</a>
         </nav>
       </details>
-      <SiteButton to="/#zayavka" size="sm">Заказать технику</SiteButton>
+      <SiteButton href="#zayavka" size="sm">Заказать технику</SiteButton>
     </div>
   </header>
 </template>

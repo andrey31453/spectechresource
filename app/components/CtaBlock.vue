@@ -19,6 +19,8 @@ const props = withDefaults(
     telegram?: string | null;
     whatsapp?: string | null;
     maxMessenger?: string | null;
+    equipmentTypeSlug?: string;
+    equipmentLabel?: string;
   }>(),
   {
     title: "Нужна техника под задачу?",
@@ -29,6 +31,8 @@ const props = withDefaults(
     telegram: null,
     whatsapp: null,
     maxMessenger: null,
+    equipmentTypeSlug: undefined,
+    equipmentLabel: undefined,
   },
 );
 
@@ -104,7 +108,7 @@ const messengers = computed(() =>
             <SiteIcon name="phone" class="h-4 w-4" />
             {{ phone }}
           </SiteButton>
-          <SiteButton to="/kontakty" variant="ghost" tone="on-brand" with-arrow>
+          <SiteButton href="#zayavka" :data-equipment-type-slug="equipmentTypeSlug" :data-equipment-label="equipmentLabel" variant="ghost" tone="on-brand" with-arrow>
             Оставить заявку
           </SiteButton>
         </div>

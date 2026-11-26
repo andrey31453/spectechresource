@@ -42,6 +42,7 @@ export interface LeadPayloadInput {
   place: LeadPlace;
   name: string;
   phone: string;
+  email?: string | null;
   comment?: string | null;
   consent: boolean;
   /** Абсолютный адрес страницы: схема требует `http://` или `https://`. */
@@ -67,7 +68,7 @@ export function buildLeadPayload(input: LeadPayloadInput) {
   return {
     name: input.name.trim(),
     phone: input.phone.trim(),
-    email: null,
+    email: trimmedOrNull(input.email, 254),
     comment: trimmedOrNull(input.comment, 2000),
     consent: input.consent,
     place: input.place,

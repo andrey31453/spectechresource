@@ -12,7 +12,7 @@ describe("consolidated homepage content", () => {
     for (const id of ["ceny", "populyarnoe", "pochemu-my", "zadacha", "dopusk", "raschet", "usloviya"]) {
       expect(home).not.toContain(`id="${id}"`);
     }
-    expect(read("app/components/SiteHeader.vue")).toContain('to="/#tehnika"');
+    expect(read("app/components/SiteHeader.vue")).toContain('to="/stoimost"');
     expect(read("app/components/SiteHeader.vue")).not.toContain('/#ceny');
   });
 

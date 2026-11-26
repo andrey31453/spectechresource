@@ -1,23 +1,11 @@
-/** Все опубликованные разделы каталога с видами техники. */
+/** Плоский каталог видов техники. Группы Category используются только на главной. */
 export default defineEventHandler(async () => {
   const prisma = usePrisma();
 
-  const categories = await prisma.category.findMany({
-    where: { isPublished: true },
-    orderBy: [{ sortOrder: "asc" }, { title: "asc" }],
-    include: {
-      types: {
-        where: { isPublished: true },
-        orderBy: [{ sortOrder: "asc" }, { name: "asc" }],
-      },
-    },
+  const types = await prisma.equipmentType.findMany({
+    where: { isPublished: true, category: { isPublished: true } },
+    orderBy: [{ category: { sortOrder: "asc" } }, { sortOrder: "asc" }, { name: "asc" }],
   });
 
-  return categories.map((category) => ({
-    slug: category.slug,
-    title: category.title,
-    shortDesc: category.shortDesc,
-    image: category.image,
-    types: category.types.map(toTypeCard),
-  }));
+  return types.map(toTypeCard);
 });

@@ -80,13 +80,14 @@ export function mapLeadToBitrix(lead: CrmLead): BitrixLeadRequest {
     .join("\n");
 
   const fields: BitrixFields = {
-    TITLE: `Заявка с сайта: ${lead.name}${lead.equipmentTypeName ? ` — ${lead.equipmentTypeName}` : ""}`,
-    NAME: lead.name,
-    PHONE: [{ VALUE: lead.phone, VALUE_TYPE: "WORK" }],
+    TITLE: `Заявка с сайта: ${lead.name || "Без имени"}${lead.equipmentTypeName ? ` — ${lead.equipmentTypeName}` : ""}`,
     COMMENTS: comments,
     SOURCE_ID: "WEB",
     SOURCE_DESCRIPTION: `spectechresource / ${lead.place}`,
   };
+
+  if (lead.name) fields.NAME = lead.name;
+  if (lead.phone) fields.PHONE = [{ VALUE: lead.phone, VALUE_TYPE: "WORK" }];
 
   if (lead.email) {
     fields.EMAIL = [{ VALUE: lead.email, VALUE_TYPE: "WORK" }];

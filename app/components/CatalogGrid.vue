@@ -1,92 +1,22 @@
 <script setup lang="ts">
-import type { CategoryCardDto } from "~/types/catalog";
+import type { CatalogTypeDto } from "~/types/catalog";
 
-defineProps<{
-  categories: CategoryCardDto[];
-  citySlug: string;
-}>();
-
-/** На карточке показываем первые виды; остальные доступны на странице раздела. */
-const VISIBLE_TYPES = 4;
-
+defineProps<{ types: CatalogTypeDto[]; citySlug: string }>();
 const number = (index: number) => String(index + 1).padStart(2, "0");
 </script>
 
 <template>
   <div class="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-    <article
-      v-for="(category, index) in categories"
-      :key="category.slug"
-      class="flex h-full flex-col overflow-hidden rounded-card border border-line bg-surface p-5 transition-colors hover:border-brand"
-    >
-      <NuxtLink
-        v-if="category.image"
-        :to="categoryPath(category.slug)"
-        class="-mx-5 -mt-5 mb-4 block overflow-hidden bg-line"
-        tabindex="-1"
-        aria-hidden="true"
-      >
-        <img
-          :src="category.image"
-          :alt="category.title"
-          loading="lazy"
-          width="640"
-          height="360"
-            class="aspect-[16/9] w-full object-cover"
-        >
+    <article v-for="(type, index) in types" :key="type.slug" class="flex h-full flex-col overflow-hidden rounded-card border border-line bg-surface p-5 transition-colors hover:border-brand">
+      <NuxtLink v-if="type.image" :to="typePath(type.slug, citySlug)" class="-mx-5 -mt-5 mb-4 block overflow-hidden bg-line" tabindex="-1" aria-hidden="true">
+        <img :src="type.image" :alt="type.name" loading="lazy" width="640" height="360" class="aspect-[16/9] w-full object-cover">
       </NuxtLink>
-
-      <span aria-hidden="true" class="font-mono text-xs font-semibold tracking-[0.18em] text-brand">
-        {{ number(index) }}
-      </span>
-
-      <h3
-        class="mt-3 text-[clamp(1.1rem,2vw,1.4rem)] leading-snug font-bold tracking-tight text-ink"
-      >
-        <NuxtLink :to="categoryPath(category.slug)" class="inline-flex min-h-6 items-center transition-colors hover:text-brand">
-          {{ category.title }}
-        </NuxtLink>
-      </h3>
-
-      <p v-if="category.shortDesc" class="mt-2 text-sm leading-relaxed text-muted">
-        {{ category.shortDesc }}
-      </p>
-
-      <ul v-if="category.types.length" class="mt-4 space-y-1.5">
-        <li v-for="type in category.types.slice(0, VISIBLE_TYPES)" :key="type.slug">
-          <NuxtLink
-            :to="typePath(type.slug, citySlug)"
-            class="flex min-h-6 items-start gap-2 text-sm text-muted transition-colors hover:text-brand"
-          >
-            <span aria-hidden="true" class="mt-[0.45rem] h-1 w-1 shrink-0 rounded-full bg-brand/50" />
-            <span class="min-w-0 flex-1">{{ type.name }}</span>
-            <span class="shrink-0 text-right text-xs leading-5 font-medium text-brand">
-              {{ formatPriceShort(type.priceFrom, type.priceUnit) }}
-            </span>
-          </NuxtLink>
-        </li>
-      </ul>
-
-      <p v-if="category.types.length > VISIBLE_TYPES" class="mt-2 text-xs text-muted">
-        ещё {{ category.types.length - VISIBLE_TYPES }}
-        {{ pluralRu(category.types.length - VISIBLE_TYPES, ["вид", "вида", "видов"]) }}
-      </p>
-
-      <div class="mt-auto pt-6">
-        <NuxtLink
-          :to="categoryPath(category.slug)"
-          class="flex items-center justify-between gap-3 border-t border-line pt-4 text-xs text-muted transition-colors hover:text-brand"
-        >
-          <span>
-            {{ category.types.length }}
-            {{ pluralRu(category.types.length, ["вид", "вида", "видов"]) }}
-          </span>
-          <span class="flex items-center gap-2">
-            <span class="sr-only">Смотреть раздел</span>
-            <SiteIcon name="arrow" class="h-4 w-4 text-brand" />
-          </span>
-        </NuxtLink>
-      </div>
+      <span aria-hidden="true" class="font-mono text-xs font-semibold tracking-[0.18em] text-brand">{{ number(index) }}</span>
+      <h2 class="mt-3 text-[clamp(1.1rem,2vw,1.4rem)] leading-snug font-bold tracking-tight text-ink">
+        <NuxtLink :to="typePath(type.slug, citySlug)" class="inline-flex min-h-6 items-center transition-colors hover:text-brand">{{ type.name }}</NuxtLink>
+      </h2>
+      <p class="mt-2 text-sm leading-relaxed text-muted">Модели и характеристики</p>
+      <div class="mt-auto pt-6"><span class="flex items-center justify-between border-t border-line pt-4 text-xs text-muted"><span>{{ formatPriceShort(type.priceFrom, type.priceUnit) }}</span><SiteIcon name="arrow" class="h-4 w-4 text-brand" /></span></div>
     </article>
   </div>
 </template>

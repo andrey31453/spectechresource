@@ -49,6 +49,7 @@ const route = useRoute();
 const formEl = ref<HTMLFormElement | null>(null);
 const name = ref("");
 const phoneInput = ref("");
+const emailInput = ref("");
 const comment = ref("");
 const selectedTypeSlug = ref("");
 const consent = ref(false);
@@ -115,6 +116,7 @@ async function submit() {
     place: props.place,
     name: name.value,
     phone: phoneInput.value,
+    email: emailInput.value,
     comment: comment.value,
     consent: consent.value,
     pageUrl: window.location.href,
@@ -149,6 +151,7 @@ async function submit() {
 function resetForm() {
   name.value = "";
   phoneInput.value = "";
+  emailInput.value = "";
   comment.value = "";
   selectedTypeSlug.value = "";
   consent.value = false;
@@ -198,7 +201,7 @@ function resetForm() {
       <div class="mt-5 grid gap-4">
         <div class="grid gap-4 sm:grid-cols-2">
           <label class="block">
-            <span class="text-xs font-semibold text-muted">Имя</span>
+            <span class="text-xs font-semibold text-muted">Имя (необязательно)</span>
             <input
               :id="`lead-${place}-name`"
               v-model="name"
@@ -246,6 +249,22 @@ function resetForm() {
             </span>
           </label>
         </div>
+        <label class="block">
+          <span class="text-xs font-semibold text-muted">E-mail</span>
+          <input
+            :id="`lead-${place}-email`"
+            v-model="emailInput"
+            type="email"
+            name="email"
+            autocomplete="email"
+            placeholder="name@example.ru"
+            :class="[fieldClass, errors.email ? 'border-red-500' : 'border-line']"
+            :aria-invalid="Boolean(errors.email)"
+            :aria-describedby="errors.email ? `lead-${place}-email-error` : undefined"
+            @input="clearError('email'); clearError('phone')"
+          >
+          <span v-if="errors.email" :id="`lead-${place}-email-error`" :class="errorClass" role="alert">{{ errors.email }}</span>
+        </label>
         <label v-if="equipmentTypes.length" class="block">
           <span class="text-xs font-semibold text-muted">Техника</span>
           <select
@@ -290,7 +309,7 @@ function resetForm() {
               v-model="consent"
               type="checkbox"
               name="consent"
-              class="mt-0.5 h-4 w-4 shrink-0 rounded border-line accent-brand"
+              class="mt-0.5 h-6 w-6 shrink-0 rounded border-line accent-brand"
               :aria-invalid="Boolean(errors.consent)"
               :aria-describedby="errors.consent ? `lead-${place}-consent-error` : undefined"
             >
@@ -298,7 +317,7 @@ function resetForm() {
               Согласен на обработку персональных данных по
               <NuxtLink
                 to="/politika-obrabotki-personalnyh-dannyh"
-                class="text-brand underline underline-offset-2 hover:text-brand-dark"
+                class="inline-flex min-h-6 items-center text-brand underline underline-offset-2 hover:text-brand-dark"
                 >политике</NuxtLink
               >
             </span>

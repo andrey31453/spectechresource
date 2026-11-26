@@ -6,11 +6,7 @@ export default defineEventHandler(async (event) => {
   } = useRuntimeConfig();
   const base = String(siteUrl).replace(/\/+$/, "");
 
-  const [categories, types, services, pages] = await Promise.all([
-    prisma.category.findMany({
-      where: { isPublished: true },
-      select: { slug: true, updatedAt: true },
-    }),
+  const [types, services, pages] = await Promise.all([
     prisma.equipmentType.findMany({
       where: { isPublished: true, category: { isPublished: true } },
       orderBy: { sortOrder: "asc" },
@@ -31,13 +27,9 @@ export default defineEventHandler(async (event) => {
   const entries: Array<{ path: string; lastmod?: string; priority: string }> = [
     { path: "/", priority: "1.0" },
     { path: "/katalog", priority: "0.9" },
+    { path: "/stoimost", priority: "0.8" },
     { path: "/uslugi", priority: "0.7" },
     { path: "/kontakty", priority: "0.6" },
-    ...categories.map((item) => ({
-      path: `/katalog/${item.slug}`,
-      lastmod: day(item.updatedAt),
-      priority: "0.8",
-    })),
     ...types.map((item) => ({
           path: `/arenda-${item.slug}`,
           lastmod: day(item.updatedAt),

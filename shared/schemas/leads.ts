@@ -67,17 +67,15 @@ const equipmentSlugField = v.optional(
   null,
 );
 
-export const LeadSchema = v.object({
+export const LeadSchema = v.pipe(v.object({
   name: v.pipe(
-    v.string("Укажите, как к вам обращаться"),
-    v.trim(),
-    v.minLength(2, "Имя — минимум 2 символа"),
-    v.maxLength(MAX.name, `Имя — не больше ${MAX.name} символов`),
+    optionalText(MAX.name, `Имя — не больше ${MAX.name} символов`),
+    v.check((value) => value === null || value.length >= 2, "Имя — минимум 2 символа"),
   ),
   phone: v.pipe(
-    v.string("Укажите телефон"),
-    v.transform(normalizePhone),
-    v.regex(/^\+7\d{10}$/, "Телефон в формате +7 (999) 123-45-67"),
+    optionalText(32, "Телефон — не больше 32 символов"),
+    v.transform((value) => (value === null ? null : normalizePhone(value))),
+    v.check((value) => value === null || /^\+7\d{10}$/.test(value), "Телефон в формате +7 (999) 123-45-67"),
   ),
   email: emailField,
   comment: optionalText(MAX.comment, `Комментарий — не больше ${MAX.comment} символов`),
@@ -109,7 +107,12 @@ export const LeadSchema = v.object({
     ),
     "",
   ),
-});
+}),
+  v.forward(
+    v.partialCheck([["phone"], ["email"]], (input) => input.phone !== null || input.email !== null, "Укажите телефон или e-mail"),
+    ["phone"],
+  ),
+);
 
 export type LeadInput = v.InferOutput<typeof LeadSchema>;
 

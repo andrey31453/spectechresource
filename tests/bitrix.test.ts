@@ -21,6 +21,14 @@ const lead: CrmLead = {
 
 const webhookUrl = "https://portal.bitrix24.ru/rest/1/token/crm.lead.add.json";
 
+it("не отправляет пустые имя и телефон для email-заявки", () => {
+  const { fields } = mapLeadToBitrix({ ...lead, name: "", phone: "" });
+  expect(fields.NAME).toBeUndefined();
+  expect(fields.PHONE).toBeUndefined();
+  expect(fields.EMAIL).toEqual([{ VALUE: "ivan@example.ru", VALUE_TYPE: "WORK" }]);
+  expect(fields.TITLE).toContain("Без имени");
+});
+
 function jsonResponse(body: unknown, status = 200): Response {
   return new Response(JSON.stringify(body), {
     status,

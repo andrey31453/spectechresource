@@ -1,16 +1,14 @@
 <script setup lang="ts">
-import type { FetchError } from "ofetch";
 import { computed, nextTick, onBeforeUnmount, onMounted, ref } from "vue";
 import type { HomeDto } from "~/types/catalog";
-import { buildLeadPayload, createRequestId } from "~/utils/lead-form";
-import { initLanding, type LandingLeadInput } from "~/utils/landing";
+import { initLanding } from "~/utils/landing";
 import { groupModelsBySupergroup } from "~/utils/model-groups";
 import { groupModelsByCategory } from "~/utils/models";
 import { telHref } from "~/utils/phone";
 import { pluralRu } from "~/utils/plural";
 import { formatPriceFrom, formatPriceShort, lowestPrice } from "~/utils/price";
-import { categoryPath, servicePath, typePath } from "~/utils/routes";
-import { useAsyncData, useRoute, useHead } from "nuxt/app";
+import { servicePath, typePath } from "~/utils/routes";
+import { useAsyncData, useHead } from "nuxt/app";
 
 /**
  * Главная — вёрстка макета `docs/sait-13` (1:1): разметка, стили и поведение перенесены
@@ -314,7 +312,6 @@ const docTabs: DocTab[] = [
   },
 ];
 
-const route = useRoute();
 
 usePageSeo({
   title: `Аренда спецтехники в ${city.value.nameIn} | ${brandName.value}`,
@@ -387,49 +384,11 @@ function moveStyleLast() {
   document.head.append(link);
 }
 
-type LeadErrorPayload = {
-  message?: string;
-  data?: { errors?: Array<{ field: string; message: string }> };
-};
-
-/**
- * Отправка заявки главной: те же схема и API, что у остальных форм сайта
- * (ADR-5 — сначала запись в БД, потом CRM). Согласие на обработку данных в макете
- * выражено примечанием под кнопкой, поэтому уходит `consent: true`.
- */
-async function submitLead(input: LandingLeadInput) {
-  const payload = buildLeadPayload({
-    place: "landing-form",
-    name: input.name,
-    phone: input.phone,
-    comment: input.comment,
-    consent: true,
-    pageUrl: window.location.href,
-    pageTitle: document.title,
-    referer: document.referrer || null,
-    requestId: createRequestId(),
-    query: route.query,
-  });
-
-  try {
-    await $fetch("/api/leads", { method: "POST", body: payload });
-  } catch (error) {
-    // Текст уходит в статус формы: сообщение сервера точнее общего текста макета.
-    const fetchError = error as FetchError<LeadErrorPayload>;
-    throw new Error(
-      fetchError.data?.data?.errors?.[0]?.message ??
-        fetchError.data?.message ??
-        "",
-      { cause: error },
-    );
-  }
-}
-
 /** Модули макета: появление блоков, меню, табы, маска, заявка, шкала разделов. */
 let disposeLanding: (() => void) | undefined;
 onMounted(() => {
   void nextTick(moveStyleLast);
-  disposeLanding = initLanding({ submitLead });
+  disposeLanding = initLanding();
 });
 onBeforeUnmount(() => {
   disposeLanding?.();
@@ -556,8 +515,8 @@ onBeforeUnmount(() => {
               </div>
               <div class="mt-auto pt-5">
                 <div class="border-t border-flame/30 pt-5" aria-hidden="true" />
-                <a class="btn btn--ghost" :href="categoryPath(card.slug)"
-                  >Смотреть раздел<svg
+                <a class="btn btn--ghost" href="/katalog"
+                  >Весь каталог<svg
                     class="h-4 w-4"
                     viewBox="0 0 24 24"
                     fill="none"
@@ -685,22 +644,6 @@ onBeforeUnmount(() => {
                 >
                   {{ priceDisclaimer }}
                 </p>
-                <div class="mt-6">
-                  <a class="btn btn--ghost" :href="categoryPath(category.slug)"
-                    >Расчёт по разделу «{{ category.title }}»<svg
-                      class="h-4 w-4"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      stroke-width="1.6"
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                      aria-hidden="true"
-                      focusable="false"
-                    >
-                      <path d="M4 12h15M13.5 6.5 19 12l-5.5 5.5" /></svg
-                  ></a>
-                </div>
               </section>
             </div>
           </div>
@@ -1348,7 +1291,7 @@ onBeforeUnmount(() => {
           <div class="stars stars--giant" />
         </div>
         <div
-          class="shell grid gap-10 lg:grid-cols-[1fr_minmax(0,430px)] lg:items-start lg:gap-14"
+          class="shell grid gap-10 lg:grid-cols-[1fr_minmax(0,500px)] lg:items-start lg:gap-14"
         >
           <div>
             <span class="kicker">Обратная связь</span>
@@ -1436,83 +1379,9 @@ onBeforeUnmount(() => {
             </ul>
           </div>
 
-          <form
-            class="panel panel--accent panel--form p-5 md:p-6"
-            method="post"
-            :action="emailLink"
-            enctype="text/plain"
-            data-form
-          >
-            <input type="hidden" name="Раздел" value="Главная" />
-
-            <div class="grid gap-4">
-              <div class="field">
-                <label for="f-name">Имя</label>
-                <input
-                  id="f-name"
-                  name="name"
-                  type="text"
-                  placeholder="Как к вам обращаться"
-                  required
-                  autocomplete="name"
-                />
-              </div>
-              <div class="field">
-                <label for="f-phone">Телефон</label>
-                <input
-                  id="f-phone"
-                  name="phone"
-                  type="tel"
-                  placeholder="+7 (___) ___-__-__"
-                  required
-                  autocomplete="tel"
-                />
-              </div>
-              <div class="field">
-                <label for="f-comment">Комментарий</label>
-                <textarea
-                  id="f-comment"
-                  name="comment"
-                  rows="3"
-                  placeholder="Вид работ, объект, объём и сроки — коротко"
-                />
-              </div>
-            </div>
-
-            <p
-              class="form-status mt-4"
-              data-form-status
-              data-form-error="Проверьте поля, отмеченные красным, и попробуйте снова."
-              role="status"
-              aria-live="polite"
-            >
-              Заявка отправлена: диспетчер свяжется с вами в рабочее время и
-              подберёт технику под задачу.
-            </p>
-
-            <div class="mt-5 flex flex-col gap-4 sm:flex-row sm:items-center">
-              <button class="btn btn--primary btn--wide" type="submit">
-                Отправить заявку<svg
-                  class="h-4 w-4"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  stroke-width="1.6"
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  aria-hidden="true"
-                  focusable="false"
-                >
-                  <path d="M4 12h15M13.5 6.5 19 12l-5.5 5.5" />
-                </svg>
-              </button>
-              <span class="form-note max-w-[22rem]"
-                >Нажимая кнопку, вы соглашаетесь на обработку персональных
-                данных.</span
-              >
-            </div>
-            <p class="form-note mt-3">{{ priceDisclaimer }}</p>
-          </form>
+          <div class="stars-lead-form">
+            <LeadForm place="callback" :equipment-types="allTypes.map(type => ({ slug: type.slug, name: type.name }))" :phone="phone" heading="Оставьте заявку" lead="Укажите контакты и задачу — уточним наличие, стоимость и сроки подачи." submit-label="Получить расчёт" />
+          </div>
         </div>
       </section>
     </main>

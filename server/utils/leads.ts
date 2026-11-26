@@ -50,8 +50,8 @@ export function buildLeadCreateData(
 ): LeadCreateData {
   return {
     requestId: input.requestId,
-    name: input.name,
-    phone: input.phone,
+    name: input.name ?? "",
+    phone: input.phone ?? "",
     email: input.email,
     comment: input.comment,
     place: input.place,

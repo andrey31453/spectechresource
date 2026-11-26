@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { CategoryCardDto, ServiceCardDto } from "~/types/catalog";
+import type { CatalogTypeDto, ServiceCardDto } from "~/types/catalog";
 
 const { data: site } = await useSite();
 
@@ -8,9 +8,9 @@ const route = useRoute();
 /** Страницы с полноэкранными полосами объявляют `definePageMeta({ fullBleed: true })`. */
 const fullBleed = computed(() => route.meta.fullBleed === true);
 
-const { data: categories } = await useAsyncData<CategoryCardDto[]>(
+const { data: types } = await useAsyncData<CatalogTypeDto[]>(
   "nav-categories",
-  () => $fetch<CategoryCardDto[]>("/api/catalog"),
+  () => $fetch<CatalogTypeDto[]>("/api/catalog"),
   { deep: false },
 );
 
@@ -19,7 +19,7 @@ const { data: services } = await useAsyncData<ServiceCardDto[]>(
 );
 
 const navCategories = computed(() =>
-  (categories.value ?? []).map((category) => ({ slug: category.slug, title: category.title })),
+  (types.value ?? []).map((type) => ({ slug: type.slug, title: type.name })),
 );
 
 if (site.value) {
@@ -49,14 +49,14 @@ if (site.value) {
 </script>
 
 <template>
-  <div class="min-h-screen bg-sand text-ink">
+  <div class="flex min-h-screen flex-col bg-sand text-ink">
     <SiteHeader v-if="site" :site="site" :categories="navCategories" :services="services ?? []" />
 
-    <main v-if="fullBleed">
+    <main v-if="fullBleed" class="flex-1">
       <slot />
     </main>
 
-    <main v-else class="page-main">
+    <main v-else class="page-main flex-1">
       <div class="container">
         <slot />
       </div>

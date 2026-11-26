@@ -79,7 +79,6 @@ if (landing.value?.type.priceFrom) {
       :items="[
         { name: 'Главная', path: '/' },
         { name: 'Каталог', path: '/katalog' },
-        { name: landing.category.title, path: categoryPath(landing.category.slug) },
         { name: landing.type.name },
       ]"
     />
@@ -188,6 +187,8 @@ if (landing.value?.type.priceFrom) {
       v-if="site"
       :phone="site.phone"
       :title="`Нужна ${landing.type.name.toLowerCase()}?`"
+      :equipment-type-slug="typeSlug"
+      :equipment-label="landing.type.name"
       text="Уточним наличие, рассчитаем смену и сроки подачи на объект."
     />
 

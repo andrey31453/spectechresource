@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import type { HomeDto } from "~/types/catalog";
 import { formatPriceFrom } from "~/utils/price";
-import { categoryPath, servicePath, typePath } from "~/utils/routes";
+import { servicePath, typePath } from "~/utils/routes";
 import { telHref } from "~/utils/phone";
 
 definePageMeta({ layout: false });
@@ -153,7 +153,7 @@ useHead({ meta: [{ name: "theme-color", content: "#171b1f", key: "theme-color" }
 
     <footer id="kontakty" class="bg-[#171b1f] pt-12 pb-24 text-white md:pb-6"><div :class="shell"><div class="grid gap-8 border-b border-white/20 pb-10 sm:grid-cols-2 lg:grid-cols-[1.3fr_1fr_1fr]">
       <div><p class="mb-3 text-lg font-black tracking-tight">СПЕЦ<span class="text-[#ff9b38]">ТЕХ</span>РЕСУРС</p><p class="max-w-xs text-sm leading-relaxed text-[#c4cdd4]">Нужная техника.<br>Для больших и маленьких задач.</p><p class="mb-0 text-sm text-[#c4cdd4]">{{ site?.legalName ?? site?.companyName }}</p><p v-if="site?.inn" class="mt-2 mb-0 text-xs text-[#c4cdd4]">ИНН {{ site.inn }}<template v-if="site.ogrn"> · ОГРН {{ site.ogrn }}</template></p></div>
-      <div><h2 class="mt-0 mb-3 text-sm font-bold text-white">Каталог техники</h2><a v-for="category in categories" :key="category.slug" :href="categoryPath(category.slug)" class="flex min-h-8 items-center text-xs text-[#c4cdd4] hover:text-[#ffc48a]">{{ category.title }}</a></div>
+      <div><h2 class="mt-0 mb-3 text-sm font-bold text-white">Каталог техники</h2><a v-for="type in allTypes" :key="type.slug" :href="typePath(type.slug, city.slug)" class="flex min-h-8 items-center text-xs text-[#c4cdd4] hover:text-[#ffc48a]">{{ type.name }}</a></div>
       <div><h2 class="mt-0 mb-3 text-sm font-bold text-white">Связаться с нами</h2><a v-if="phone" :href="telHref(phone)" class="inline-flex min-h-11 items-center text-xl font-bold text-white hover:text-[#ffc48a]">{{ phone }}</a><a v-if="site?.email" :href="`mailto:${site.email}`" class="flex min-h-9 items-center text-sm break-all text-[#c4cdd4] hover:text-[#ffc48a]">{{ site.email }}</a><p v-if="site?.address" class="mt-3 mb-2 text-sm leading-relaxed text-[#c4cdd4]">{{ site.address }}</p><p v-if="site?.workingHours" class="mb-2 text-xs text-[#c4cdd4]">{{ site.workingHours }}</p><div class="flex flex-wrap gap-3"><a v-for="messenger in messengers" :key="messenger.name" :href="messenger.url" target="_blank" rel="noopener noreferrer" class="inline-flex min-h-11 items-center text-sm text-[#ffc48a] hover:text-white">{{ messenger.name }}</a></div></div>
     </div><div class="flex flex-wrap items-center justify-between gap-3 pt-5 text-xs text-[#c4cdd4]"><span>© {{ new Date().getFullYear() }} {{ site?.companyName ?? 'СПЕЦТЕХРЕСУРС' }}</span><a href="/politika-obrabotki-personalnyh-dannyh" class="inline-flex min-h-9 items-center text-[#c4cdd4] hover:text-white">Политика обработки персональных данных</a><a href="#main-index5" class="inline-flex min-h-9 items-center text-[#c4cdd4] hover:text-white">Наверх ↑</a></div></div></footer>
     <div class="fixed inset-x-0 bottom-0 z-30 flex gap-3 border-t border-[#dfe4e8] bg-white p-3 shadow-lg md:hidden"><a v-if="phone" :href="telHref(phone)" class="inline-flex min-h-12 flex-1 items-center justify-center gap-2 rounded-lg border border-[#d5dce1] text-sm font-bold text-[#20272d] hover:text-[#9c4100]"><SiteIcon name="phone" class="h-4 w-4" />Позвонить</a><a href="#raschet" :class="[orangeButton, 'flex-1']">Оставить заявку</a></div>
