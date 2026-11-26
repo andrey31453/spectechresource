@@ -26,6 +26,7 @@ const wide = computed(
       <nav class="admin-shell__nav" aria-label="Разделы админки">
         <NuxtLink to="/admin/leads" class="admin-shell__link">Заявки</NuxtLink>
         <NuxtLink to="/admin/catalog" class="admin-shell__link">Каталог</NuxtLink>
+        <NuxtLink to="/admin/catalog/models" class="admin-shell__link">Товары</NuxtLink>
         <NuxtLink to="/admin/services" class="admin-shell__link">Услуги</NuxtLink>
         <NuxtLink to="/admin/content" class="admin-shell__link">Контент</NuxtLink>
         <NuxtLink to="/admin/pages" class="admin-shell__link">Страницы</NuxtLink>

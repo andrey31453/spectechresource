@@ -10,7 +10,7 @@ export default defineEventHandler(async (event) => {
     prisma.equipmentType.findMany({
       where: { isPublished: true, category: { isPublished: true } },
       orderBy: { sortOrder: "asc" },
-      select: { slug: true, updatedAt: true, models: { where: { isAvailable: true }, select: { slug: true, updatedAt: true } } },
+      select: { slug: true, updatedAt: true, models: { where: { isPublished: true }, select: { slug: true, updatedAt: true } } },
     }),
     prisma.service.findMany({
       where: { isPublished: true },

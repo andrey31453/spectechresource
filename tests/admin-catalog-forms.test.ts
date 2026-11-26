@@ -30,6 +30,8 @@ const categoryDto: AdminCategoryDto = {
 
 const modelDto: AdminModelDto = {
   id: "model-1",
+  typeId: "type-1",
+  type: { id: "type-1", name: "Экскаваторы", slug: "ekskavatory", category: { id: "cat-1", title: "Землеройная техника" } },
   slug: "test-model",
   brand: "JCB",
   model: "3CX",
@@ -37,7 +39,7 @@ const modelDto: AdminModelDto = {
   pricePerShift: "26000.00",
   pricePerHour: null,
   photos: ["/uploads/jcb-1.jpg", "/uploads/jcb-2.jpg"],
-  isAvailable: false,
+    isPublished: true,
   sortOrder: 20,
   specs: [
     { name: "Масса, т", value: "7,2" },

@@ -3,7 +3,7 @@ export default defineEventHandler(async (event) => {
   const typeSlug = String(query.typeSlug ?? "");
   const slug = String(query.modelSlug ?? "");
   const model = await usePrisma().equipmentModel.findFirst({
-    where: { slug, isAvailable: true, type: { slug: typeSlug, isPublished: true, category: { isPublished: true } } },
+    where: { slug, isPublished: true, type: { slug: typeSlug, isPublished: true, category: { isPublished: true } } },
     include: { specs: { orderBy: { sortOrder: "asc" } } },
   });
   if (!model) throw createError({ statusCode: 404, message: "Модель не найдена" });

@@ -15,7 +15,7 @@ export default defineEventHandler(async () => {
     }),
     prisma.equipmentModel.findMany({
       where: {
-        isAvailable: true,
+        isPublished: true,
         type: { isPublished: true, category: { isPublished: true } },
       },
       orderBy: [
@@ -69,7 +69,7 @@ export default defineEventHandler(async () => {
       image: category.image,
       types: category.types.map(toTypeCard),
     })),
-    models: models.map(toHomeModel),
+    models: models.filter((model) => model.type !== null).map((model) => toHomeModel({ ...model, type: model.type! })),
     services,
     advantages: advantages.map((item) => ({ title: item.title, text: item.text, icon: item.icon })),
     steps: steps.map((item) => ({ title: item.title, text: item.text })),

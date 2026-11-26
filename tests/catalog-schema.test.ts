@@ -186,13 +186,13 @@ describe("ModelCreateSchema", () => {
     expect(empty.success && empty.output.shortDesc).toBeNull();
   });
 
-  it("по умолчанию доступна, порядок 10, характеристик нет", () => {
+  it("по умолчанию скрыта, порядок 10, характеристик нет", () => {
     const parsed = v.safeParse(ModelCreateSchema, { brand: " JCB ", model: " 3CX " });
 
     expect(parsed.success && parsed.output).toMatchObject({
       brand: "JCB",
       model: "3CX",
-      isAvailable: true,
+      isPublished: false,
       sortOrder: 10,
       specs: [],
       photos: [],

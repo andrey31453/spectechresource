@@ -57,7 +57,7 @@ export default defineEventHandler(async (event) => {
 
   const equipmentModel = input.equipmentModelId
     ? await prisma.equipmentModel.findFirst({
-        where: { id: input.equipmentModelId, typeId: equipmentType?.id ?? "", isAvailable: true, type: { isPublished: true, category: { isPublished: true } } },
+        where: { id: input.equipmentModelId, typeId: equipmentType?.id ?? "", isPublished: true, type: { isPublished: true, category: { isPublished: true } } },
         select: { id: true },
       })
     : null;

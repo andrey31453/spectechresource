@@ -43,7 +43,7 @@
 |---|---|---|
 | `Category` — раздел каталога | `slug`, `title`, `h1`, `shortDesc`, `seoTitle`, `seoDescription`, `seoText`, `image`, `sortOrder`, `isPublished` | 8 разделов (§6) |
 | `EquipmentType` — вид техники (посадочная) | `categoryId`, `name`, `nameGenitive`, `slug`, `priceFrom`, `priceUnit` (`shift`/`hour`/`perMeter`), `minOrder`, `deliveryTerms`, `deliveryPrice`, `crewAvailable`, `worksPerformed` (markdown), `gallery[]`, `seoTitle`, `seoDescription`, `seoText`, `faq[]`, `relatedTypeIds[]`, `isPublished`, `sortOrder` | 39 шт.; `relatedTypeIds` — 3–4 позиции, допускается автоподбор из раздела |
-| `EquipmentModel` — модель/единица | `typeId`, `brand`, `model`, `specs[{name, value}]`, `pricePerShift`, `pricePerHour`, `photos[]`, `isAvailable`, `sortOrder` | таблица на посадочной |
+| `EquipmentModel` — модель/единица | `typeId?`, `brand`, `model`, `specs[{name, value}]`, `pricePerShift`, `pricePerHour`, `photos[]`, `isPublished`, `sortOrder` | товары без вида видны только в админке |
 | `Service` | `slug`, `title`, `desc`, `image`, `seo*`, `isPublished` | 5 услуг, опционально (Q-04) |
 | `FaqItem` | `scope` (`global`/`type`/`service`), `question`, `answer`, `sortOrder` | источник разметки FAQPage |
 | `Advantage`, `WorkStep` | `title`, `text`, `icon`, `sortOrder` | блоки главной; 4 шага |

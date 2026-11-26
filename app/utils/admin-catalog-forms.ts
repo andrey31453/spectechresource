@@ -189,6 +189,7 @@ export function typeFormBody(form: TypeForm) {
 // ──────────────────────────────── Модели ────────────────────────────────
 
 export interface ModelForm {
+  typeId: string | null;
   slug: string;
   brand: string;
   model: string;
@@ -196,13 +197,14 @@ export interface ModelForm {
   pricePerShift: string;
   pricePerHour: string;
   photos: string[];
-  isAvailable: boolean;
+  isPublished: boolean;
   sortOrder: number;
   specs: AdminSpecDto[];
 }
 
 export function emptyModelForm(): ModelForm {
   return {
+    typeId: null,
     slug: "",
     brand: "",
     model: "",
@@ -210,7 +212,7 @@ export function emptyModelForm(): ModelForm {
     pricePerShift: "",
     pricePerHour: "",
     photos: [],
-    isAvailable: true,
+    isPublished: false,
     sortOrder: 10,
     specs: [{ name: "", value: "" }],
   };
@@ -218,6 +220,7 @@ export function emptyModelForm(): ModelForm {
 
 export function modelFormFrom(model: AdminModelDto): ModelForm {
   return {
+    typeId: model.typeId,
     slug: model.slug,
     brand: model.brand,
     model: model.model,
@@ -225,7 +228,7 @@ export function modelFormFrom(model: AdminModelDto): ModelForm {
     pricePerShift: priceInput(model.pricePerShift),
     pricePerHour: priceInput(model.pricePerHour),
     photos: [...model.photos],
-    isAvailable: model.isAvailable,
+    isPublished: model.isPublished,
     sortOrder: model.sortOrder,
     specs: model.specs.length ? model.specs.map((spec) => ({ ...spec })) : [{ name: "", value: "" }],
   };
@@ -241,7 +244,8 @@ export function modelFormBody(form: ModelForm) {
     pricePerShift: emptyToNull(form.pricePerShift),
     pricePerHour: emptyToNull(form.pricePerHour),
     photos: cleanUrls(form.photos),
-    isAvailable: form.isAvailable,
+    isPublished: form.isPublished,
+    typeId: form.typeId,
     sortOrder: Number(form.sortOrder) || 0,
     specs: form.specs
       .map((spec) => ({ name: spec.name.trim(), value: spec.value.trim() }))

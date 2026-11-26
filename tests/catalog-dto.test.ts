@@ -79,6 +79,8 @@ describe("toAdminModel", () => {
   it("характеристики отдаёт парами имя → значение в исходном порядке", () => {
     const dto = toAdminModel({
       id: "model-1",
+      typeId: "type-1",
+      type: { id: "type-1", name: "Экскаваторы", slug: "ekskavatory", category: { id: "cat-1", title: "Землеройная техника" } },
       slug: "test-model",
       brand: "JCB",
       model: "3CX",
@@ -86,7 +88,7 @@ describe("toAdminModel", () => {
       pricePerShift: decimal("26000.00"),
       pricePerHour: null,
       photos: ["/uploads/jcb-3cx.jpg"],
-      isAvailable: true,
+      isPublished: true,
       sortOrder: 10,
       specs: [
         { name: "Масса, т", value: "7,2" },
@@ -132,6 +134,8 @@ describe("toAdminType", () => {
       models: [
         {
           id: "model-1",
+          typeId: "type-1",
+          type: { id: "type-1", name: "Экскаваторы", slug: "ekskavatory", category: { id: "cat-1", title: "Землеройная техника" } },
           slug: "test-model",
           brand: "JCB",
           model: "3CX",
@@ -139,7 +143,7 @@ describe("toAdminType", () => {
           pricePerShift: null,
           pricePerHour: null,
           photos: [],
-          isAvailable: true,
+          isPublished: true,
           sortOrder: 10,
           specs: [{ name: "Масса, т", value: "7,2" }],
         },

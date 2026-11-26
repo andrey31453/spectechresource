@@ -30,7 +30,10 @@ export default defineEventHandler(async (event) => {
         category: { select: { id: true, slug: true, title: true } },
         models: {
           orderBy: [{ sortOrder: "asc" }, { brand: "asc" }],
-          include: { specs: { orderBy: [{ sortOrder: "asc" }, { name: "asc" }] } },
+          include: {
+            specs: { orderBy: [{ sortOrder: "asc" }, { name: "asc" }] },
+            type: { include: { category: { select: { id: true, title: true } } } },
+          },
         },
         relatedFrom: {
           orderBy: [{ sortOrder: "asc" }],

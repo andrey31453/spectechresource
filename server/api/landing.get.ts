@@ -18,7 +18,7 @@ export default defineEventHandler(async (event) => {
       include: {
         category: true,
         models: {
-          where: { isAvailable: true },
+          where: { isPublished: true },
           orderBy: [{ sortOrder: "asc" }, { brand: "asc" }],
           include: { specs: { orderBy: { sortOrder: "asc" } } },
         },

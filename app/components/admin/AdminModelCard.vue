@@ -8,8 +8,9 @@ import { emptyModelForm, modelFormBody, modelFormFrom, type ModelForm } from "~/
  * подряд, не теряя несохранённые изменения в соседних.
  */
 const props = defineProps<{
-  typeId: string;
+  typeId?: string;
   model: AdminModelDto | null;
+  types?: Array<{ id: string; name: string; category?: { title: string } }>;
 }>();
 
 const emit = defineEmits<{
@@ -62,7 +63,7 @@ async function remove() {
     <div class="admin-subcard__head">
       <h3 class="admin-subcard__title">
         {{ title }}
-        <span v-if="model && !model.isAvailable" class="admin-badge admin-badge--off">недоступна</span>
+        <span v-if="model && !model.isPublished" class="admin-badge admin-badge--off">не опубликована</span>
       </h3>
       <div class="table__actions">
         <NuxtLink v-if="model" :to="`/admin/catalog/models/${model.id}`" class="button button--ghost">Отдельная страница</NuxtLink>
@@ -83,6 +84,14 @@ async function remove() {
 
     <form class="admin-form" novalidate @submit.prevent="save">
       <div class="admin-form__grid">
+        <AdminField v-if="types" label="Вид техники" :error="fieldErrors.typeId" hint="Без вида модель не публикуется и видна только в админке.">
+          <select v-model="form.typeId" class="field__input" name="typeId">
+            <option :value="null">Без категории</option>
+            <option v-for="item in types" :key="item.id" :value="item.id">
+              {{ item.category?.title ? `${item.category.title} → ` : "" }}{{ item.name }}
+            </option>
+          </select>
+        </AdminField>
         <AdminField label="Код модели в URL" :error="fieldErrors.slug" hint="Например, cat-320. Пустой при создании — из марки и модели.">
           <input v-model="form.slug" class="field__input" type="text" name="slug" autocomplete="off">
         </AdminField>
@@ -125,8 +134,8 @@ async function remove() {
       </div>
 
       <label class="field field--check">
-        <input v-model="form.isAvailable" type="checkbox" name="isAvailable">
-        <span class="field__label">Доступна для заявок</span>
+        <input v-model="form.isPublished" type="checkbox" name="isPublished">
+        <span class="field__label">Опубликована на сайте</span>
       </label>
 
       <p v-if="formError" class="admin-form__error" role="alert">{{ formError }}</p>

@@ -32,6 +32,7 @@ if (!data.value?.type) {
 }
 
 const type = computed(() => data.value?.type ?? null);
+const allTypes = computed(() => data.value?.types ?? []);
 const categories = computed(() => data.value?.categories ?? []);
 
 // ── Основные поля вида ──
@@ -201,6 +202,7 @@ async function saveRelated() {
         :key="model.id"
         :type-id="typeId"
         :model="model"
+        :types="allTypes"
         @saved="onModelSaved"
         @removed="onModelRemoved"
       />

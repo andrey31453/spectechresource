@@ -96,13 +96,15 @@ export function toAdminTypeListItem(type: {
 export interface AdminModelDto {
   slug: string;
   id: string;
+  typeId: string | null;
+  type: { id: string; name: string; slug: string; category: { id: string; title: string } } | null;
   brand: string;
   model: string;
   shortDesc: string | null;
   pricePerShift: string | null;
   pricePerHour: string | null;
   photos: string[];
-  isAvailable: boolean;
+  isPublished: boolean;
   sortOrder: number;
   specs: Array<{ name: string; value: string }>;
 }
@@ -110,26 +112,30 @@ export interface AdminModelDto {
 export function toAdminModel(model: {
   slug: string;
   id: string;
+  typeId: string | null;
+  type: { id: string; name: string; slug: string; category: { id: string; title: string } } | null;
   brand: string;
   model: string;
   shortDesc: string | null;
   pricePerShift: Decimalish | null;
   pricePerHour: Decimalish | null;
   photos: string[];
-  isAvailable: boolean;
+  isPublished: boolean;
   sortOrder: number;
   specs: Array<{ name: string; value: string }>;
 }): AdminModelDto {
   return {
     slug: model.slug,
     id: model.id,
+    typeId: model.typeId,
+    type: model.type,
     brand: model.brand,
     model: model.model,
     shortDesc: model.shortDesc,
     pricePerShift: money(model.pricePerShift),
     pricePerHour: money(model.pricePerHour),
     photos: model.photos,
-    isAvailable: model.isAvailable,
+    isPublished: model.isPublished,
     sortOrder: model.sortOrder,
     specs: model.specs.map((spec) => ({ name: spec.name, value: spec.value })),
   };

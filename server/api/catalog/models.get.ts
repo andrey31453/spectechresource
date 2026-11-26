@@ -6,7 +6,7 @@ export default defineEventHandler(async () => {
     include: {
       category: { select: { slug: true } },
       models: {
-        where: { isAvailable: true },
+        where: { isPublished: true },
         orderBy: [{ sortOrder: "asc" }, { brand: "asc" }, { model: "asc" }, { id: "asc" }],
         include: { specs: { orderBy: [{ sortOrder: "asc" }, { id: "asc" }] } },
       },

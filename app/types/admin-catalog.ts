@@ -39,13 +39,15 @@ export interface AdminSpecDto {
 export interface AdminModelDto {
   slug: string;
   id: string;
+  typeId: string | null;
+  type: { id: string; name: string; slug: string; category: { id: string; title: string } } | null;
   brand: string;
   model: string;
   shortDesc: string | null;
   pricePerShift: string | null;
   pricePerHour: string | null;
   photos: string[];
-  isAvailable: boolean;
+  isPublished: boolean;
   sortOrder: number;
   specs: AdminSpecDto[];
 }

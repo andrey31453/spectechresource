@@ -26,7 +26,7 @@ export default defineEventHandler(async (event) => {
         pricePerShift: input.pricePerShift ?? null,
         pricePerHour: input.pricePerHour ?? null,
         photos: input.photos ?? [],
-        isAvailable: input.isAvailable ?? true,
+        isPublished: input.isPublished ?? false,
         sortOrder: input.sortOrder ?? 10,
         specs: {
           create: (input.specs ?? []).map((spec, index) => ({
@@ -36,7 +36,7 @@ export default defineEventHandler(async (event) => {
           })),
         },
       },
-      include: { specs: { orderBy: [{ sortOrder: "asc" }] } },
+        include: { specs: { orderBy: [{ sortOrder: "asc" }] }, type: { include: { category: { select: { id: true, title: true } } } } },
     });
 
     setResponseStatus(event, 201);

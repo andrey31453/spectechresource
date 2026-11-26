@@ -215,6 +215,7 @@ const specsField = v.optional(
 );
 
 const modelFields = {
+  typeId: v.nullish(v.string("Вид техники: некорректный id")),
   slug: slugField(),
   brand: requiredText(80, "марку"),
   model: requiredText(80, "модель"),
@@ -222,7 +223,7 @@ const modelFields = {
   pricePerShift: moneyField("Цена за смену"),
   pricePerHour: moneyField("Цена за час"),
   photos: photosField("Фотографии модели"),
-  isAvailable: v.boolean("Доступность — да или нет"),
+  isPublished: v.boolean("Публикация — да или нет"),
   sortOrder: sortOrderField,
   specs: specsField,
 };
@@ -230,7 +231,7 @@ const modelFields = {
 export const ModelCreateSchema = v.object({
   ...modelFields,
   slug: v.optional(modelFields.slug),
-  isAvailable: v.optional(modelFields.isAvailable, true),
+  isPublished: v.optional(modelFields.isPublished, false),
   sortOrder: v.optional(sortOrderField, 10),
 });
 
