@@ -53,10 +53,11 @@ npm ci --include=dev --ignore-scripts --no-audit --no-fund
 npx prisma generate --config prisma7.config.ts
 runuser -u postgres -- pg_dump -Fc spectech > "$base/backups/before-$release.dump"
 npx prisma migrate deploy --config prisma7.config.ts
-count=$(runuser -u postgres -- psql -At -d spectech -c 'SELECT count(*) FROM categories')
-if [[ "$count" == 0 ]]; then
+count=$(runuser -u postgres -- psql -At -d spectech -c 'SELECT (SELECT count(*) FROM equipment_types) + (SELECT count(*) FROM services)')
+if [[ "$count" == 0 && ! -f "$base/shared/initialized" ]]; then
   npx tsx prisma/seed.ts
   npx tsx scripts/fill-earthworks.ts
+  touch "$base/shared/initialized"
 fi
 if [[ -f "$base/admin.env" ]]; then
   set -a
