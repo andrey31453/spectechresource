@@ -7,21 +7,18 @@ jobs:
   inspect:
     runs-on: ubuntu-latest
     steps:
+      - name: Install SSH password client
+        run: sudo apt-get update -qq && sudo apt-get install -y -qq sshpass
       - name: Inspect server without changes
         env:
-          SSH_KEY: ${{ secrets.SSH_KEY }}
+          SSHPASS: ${{ secrets.SSH_KEY }}
         run: |
           set -euo pipefail
           umask 077
-          key=$(mktemp)
-          trap 'rm -f "$key"' EXIT
-          printf '%s\n' "$SSH_KEY" | tr -d '\r' > "$key"
-          if ! ssh-keygen -y -P '' -f "$key" >/dev/null 2>&1; then
-            echo '::error::SSH_KEY is not a readable unencrypted private SSH key. Paste the complete private key with real line breaks, including BEGIN and END lines; do not use a public key or password.'
-            exit 1
-          fi
+          test -n "$SSHPASS"
           ssh-keyscan -t ed25519 -T 10 129.101.113.247 > "$RUNNER_TEMP/known_hosts"
-          ssh -i "$key" -o BatchMode=yes -o StrictHostKeyChecking=yes -o UserKnownHostsFile="$RUNNER_TEMP/known_hosts" -o ConnectTimeout=20 root@129.101.113.247 'bash -s' <<'REMOTE'
+          ssh-keygen -lf "$RUNNER_TEMP/known_hosts" | grep -F 'SHA256:hJAv4KrOs02WdM9uNhrFwD5TFAdOBwvbBlEZH8VyECs'
+          sshpass -e ssh -o PreferredAuthentications=password -o PubkeyAuthentication=no -o NumberOfPasswordPrompts=1 -o StrictHostKeyChecking=yes -o UserKnownHostsFile="$RUNNER_TEMP/known_hosts" -o ConnectTimeout=20 root@129.101.113.247 'bash -s' <<'REMOTE'
           set -eu
           cat /etc/os-release
           free -m
