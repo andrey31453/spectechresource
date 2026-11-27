@@ -112,10 +112,88 @@ export function matchEquipmentType(section: string, types: EquipmentTypeForImpor
 
 export function splitBrandModel(title: string): { brand: string; model: string } {
   const value = cleanText(title).replace(/[«»„“”"]/g, "").replace(/^аренда\s+/i, "").replace(/^мини\s+/i, "");
+  const crane = value.match(/^автокран\s+(\d+(?:[.,]\d+)?)\s+тонн\s+(.+)$/i);
+  if (crane) return { brand: crane[2]!, model: `${crane[1]} тонн` };
   const words = value.split(" ").filter(Boolean);
   if (words.length < 2) return { brand: value || "Техника", model: value || "Модель" };
   const ignored = new Set(["каток", "катка", "самосвал", "экскаватор", "компрессор", "погрузчик", "кран", "автокран", "аренда"]);
   const brand = words.find((word) => /[a-z]/i.test(word)) ?? words.find((word) => /[а-яё]/i.test(word) && !ignored.has(word.toLocaleLowerCase("ru"))) ?? words[0]!;
   const index = words.indexOf(brand);
   return { brand, model: words.slice(index + 1).join(" ") || brand };
+}
+
+export interface MergeConflict {
+  name: string;
+  values: string[];
+  selected: string;
+}
+
+function specKey(value: string): string {
+  return cleanText(value).toLocaleLowerCase("ru").replace(/ё/g, "е").replace(/\s*:\s*$/, "");
+}
+
+function comparableValue(value: string): string {
+  return specKey(value).replace(/(\d)\s+(?=\d)/g, "$1").replace(/(\d),(?=\d)/g, "$1.");
+}
+
+function scalar(value: string): number | null {
+  const match = comparableValue(value).match(/^(\d+(?:\.\d+)?)\s*([^\d]*)$/);
+  return match ? Number(match[1]) : null;
+}
+
+function minimumPrice(values: (string | null)[]): string | null {
+  const prices = values.filter((value): value is string => value !== null);
+  for (const price of prices) {
+    if (!/^\d+(?:\.\d{1,2})?$/.test(price) || !Number.isFinite(Number(price))) throw new Error("Некорректная цена в архиве");
+  }
+  return prices.length ? Math.min(...prices.map(Number)).toFixed(2) : null;
+}
+
+export function mergeArchivedProducts(products: ArchivedProduct[]): { products: ArchivedProduct[]; merges: { title: string; count: number; conflicts: MergeConflict[] }[] } {
+  const groups = new Map<string, ArchivedProduct[]>();
+  for (const original of products) {
+    const crane = /^\s*(?:аренда\s+)?автокран\s+\d+(?:[.,]\d+)?\s+тонн\s+/i.test(original.title);
+    const product = { ...original, ...(crane ? splitBrandModel(original.title) : {}) };
+    // Unknown sections must not be collapsed into a single null-type category.
+    const section = product.typeId ?? `${product.source}:${specKey(product.sourceSection)}`;
+    const key = JSON.stringify([section, specKey(product.brand), specKey(product.model)]);
+    const group = groups.get(key) ?? [];
+    group.push(product);
+    groups.set(key, group);
+  }
+  const result: ArchivedProduct[] = [];
+  const merges: { title: string; count: number; conflicts: MergeConflict[] }[] = [];
+  for (const group of groups.values()) {
+    const first = group[0]!;
+    if (group.length === 1) { result.push(first); continue; }
+    const specs = new Map<string, { name: string; values: string[] }>();
+    for (const product of group) {
+      for (const spec of product.specs) {
+        // Prices have dedicated fields; do not keep contradictory prices in specs.
+        if (/^цена за (?:час|смену)$/i.test(cleanText(spec.name))) continue;
+        const key = specKey(spec.name);
+        const entry = specs.get(key) ?? { name: spec.name, values: [] };
+        if (!entry.values.some((value) => comparableValue(value) === comparableValue(spec.value))) entry.values.push(spec.value);
+        specs.set(key, entry);
+      }
+    }
+    const conflicts: MergeConflict[] = [];
+    const mergedSpecs = [...specs.values()].map(({ name, values }) => {
+      let selected = values[0]!;
+      if (values.length > 1) {
+        const numbers = values.map(scalar);
+        if (numbers.some((number) => number === null)) throw new Error(`Нельзя выбрать меньшее значение характеристики «${name}»: ${values.join(" / ")}`);
+        const units = new Set(values.map((value) => comparableValue(value).replace(/^\d+(?:\.\d+)?\s*/, "")).filter(Boolean));
+        if (units.size > 1) throw new Error(`Разные единицы характеристики «${name}»: ${values.join(" / ")}`);
+        selected = values[numbers.indexOf(Math.min(...numbers as number[]))]!;
+        conflicts.push({ name, values, selected });
+      }
+      return { name, value: selected };
+    });
+    const paragraphs = [...new Set(group.flatMap((product) => (product.description ?? "").split(/\n\s*\n/)).map((text) => text.trim()).filter(Boolean))];
+    if (conflicts.length) paragraphs.unshift(`ВНИМАНИЕ: обнаружено несоответствие характеристик исходных карточек. Товар снят с публикации до проверки.\n${conflicts.map((conflict) => `${conflict.name}: ${conflict.values.map((value, index) => `вариант ${index + 1} — ${value}`).join("; ")}. В характеристиках выбрано: ${conflict.selected}.`).join("\n")}`);
+    result.push({ ...first, description: paragraphs.join("\n\n") || null, specs: mergedSpecs, photos: [...new Set(group.flatMap((product) => product.photos))], pricePerHour: minimumPrice(group.map((product) => product.pricePerHour)), pricePerShift: minimumPrice(group.map((product) => product.pricePerShift)), isPublished: Boolean(first.typeId) && group.every((product) => product.isPublished) && !conflicts.length });
+    merges.push({ title: first.title, count: group.length, conflicts });
+  }
+  return { products: result, merges };
 }

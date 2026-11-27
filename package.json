@@ -19,6 +19,7 @@
     "admin:create": "tsx scripts/create-admin.ts",
     "images:prepare": "tsx scripts/prepare-images.ts",
     "catalog:import": "tsx scripts/import-catalog.ts",
+    "catalog:deduplicate": "tsx scripts/deduplicate-catalog.ts",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "test": "vitest run",
