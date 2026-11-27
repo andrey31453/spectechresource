@@ -49,7 +49,7 @@ set +a
 mkdir -p "$dir"
 tar -xzf "$base/incoming.tar.gz" -C "$dir"
 cd "$dir"
-npm ci --ignore-scripts --no-audit --no-fund
+npm ci --include=dev --ignore-scripts --no-audit --no-fund
 npx prisma generate --config prisma7.config.ts
 runuser -u postgres -- pg_dump -Fc spectech > "$base/backups/before-$release.dump"
 npx prisma migrate deploy --config prisma7.config.ts
