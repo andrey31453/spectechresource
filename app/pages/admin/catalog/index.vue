@@ -144,6 +144,17 @@ async function remove(category: AdminCategoryDto) {
           <textarea v-model="form.shortDesc" class="field__input field__textarea" name="shortDesc" />
         </AdminField>
 
+        <AdminField label="Описание блока на главной" :error="fieldErrors.description">
+          <textarea v-model="form.description" class="field__input field__textarea" name="description" maxlength="2000" rows="5" />
+        </AdminField>
+        <AdminField label="Цветовая тема" :error="fieldErrors.colorTheme">
+          <select v-model="form.colorTheme" class="field__input" name="colorTheme">
+            <option value="WHITE">Светлая</option>
+            <option value="ORANGE">Оранжевая</option>
+            <option value="BLACK">Чёрная</option>
+          </select>
+        </AdminField>
+
         <AdminImageField
           v-model="form.image"
           label="Изображение раздела"

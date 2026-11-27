@@ -18,6 +18,8 @@ describe("toAdminCategory", () => {
       title: "Землеройная техника",
       h1: "Аренда землеройной техники",
       shortDesc: null,
+      description: null,
+      colorTheme: "WHITE",
       image: null,
       seoTitle: null,
       seoDescription: null,

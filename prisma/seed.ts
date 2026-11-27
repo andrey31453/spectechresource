@@ -40,93 +40,57 @@ const PHOTO = {
 // ДЕМО: h1, короткие описания, фото и SEO-тексты — заменить реальными через админку.
 const categories = [
   {
-    slug: "zemleroynaya-tehnika",
-    title: "Землеройная техника",
-    h1: "Аренда землеройной техники в Москве",
-    shortDesc: "Экскаваторы, траншеекопатели и планировщики для земляных работ.",
-    image: PHOTO.earthworks,
-    seoTitle: "Аренда землеройной техники в Москве — цены за смену",
-    seoDescription: "Экскаваторы, траншеекопатели и планировщики в аренду: смена 8 часов, экипаж, доставка тралом по Москве и области, договор с юрлицами.",
-    seoText: "Землеройная техника закрывает нулевой цикл: снятие грунта, котлованы, траншеи под коммуникации, обратную засыпку и планировку.\n\n- гусеничные и колёсные экскаваторы от 1,5 до 25 т;\n- траншеекопатели для узких траншей под кабель и трубу;\n- планировщики и экскаваторы с длинной стрелой для больших вылетов.",
-    sortOrder: 10,
+    "slug": "zemlyanye-raboty",
+    "title": "Земляные работы",
+    "shortDesc": "Снять грунт, выкопать котлован или траншею, забить сваи: экскаваторы и сваебойная техника с экипажем, доставка на объект.",
+    "description": "Подберём экскаватор для котлована, траншеи под коммуникации или планировки участка. Если нужно подготовить свайное основание, поможем выбрать сваебойную технику под условия площадки. Учтём объём работ и доступ к месту проведения работ.",
+    "colorTheme": "WHITE",
+    "sortOrder": 10,
+    "h1": "Земляные работы",
+    "image": "/landing/images/tech/park.webp",
+    "seoTitle": "Земляные работы",
+    "seoDescription": "Снять грунт, выкопать котлован или траншею, забить сваи: экскаваторы и сваебойная техника с экипажем, доставка на объект.",
+    "seoText": "Подберём экскаватор для котлована, траншеи под коммуникации или планировки участка. Если нужно подготовить свайное основание, поможем выбрать сваебойную технику под условия площадки. Учтём объём работ и доступ к месту проведения работ."
   },
   {
-    slug: "pogruzochnaya-tehnika",
-    title: "Погрузочная техника",
-    h1: "Аренда погрузочной техники в Москве",
-    shortDesc: "Мини-погрузчики, вилочные и телескопические погрузчики.",
-    image: PHOTO.fleet,
-    seoTitle: "Аренда погрузочной техники в Москве — цены за смену",
-    seoDescription: "Мини-погрузчики, вилочные и телескопические погрузчики в аренду: подача от 4 часов, работа с экипажем и без, договор с юрлицами.",
-    seoText: "Погрузочная техника нужна на разгрузке, перемещении материалов по площадке и подаче грузов на высоту.\n\n- мини-погрузчики проходят в ворота и работают на ограниченной площади;\n- вилочные погрузчики — паллеты и контейнеры;\n- телескопические — подача на верхние отметки и в котлован.",
-    sortOrder: 20,
+    "slug": "pogruzka-i-podem",
+    "title": "Погрузка и подъём",
+    "shortDesc": "Разгрузить машину, поднять груз на высоту, смонтировать конструкцию: погрузчики, автокраны, гусеничные краны и автовышки.",
+    "description": "Поможем подобрать технику для разгрузки материалов, перемещения паллет и подачи грузов на высоту. Для монтажа конструкций предложим кран, а для обслуживания фасадов и работ на высоте — автовышку. Уточним массу груза, необходимый вылет и ограничения подъезда, чтобы подобрать подходящую машину.",
+    "colorTheme": "ORANGE",
+    "sortOrder": 20,
+    "h1": "Погрузка и подъём",
+    "image": "/landing/images/tech/park.webp",
+    "seoTitle": "Погрузка и подъём",
+    "seoDescription": "Разгрузить машину, поднять груз на высоту, смонтировать конструкцию: погрузчики, автокраны, гусеничные краны и автовышки.",
+    "seoText": "Поможем подобрать технику для разгрузки материалов, перемещения паллет и подачи грузов на высоту. Для монтажа конструкций предложим кран, а для обслуживания фасадов и работ на высоте — автовышку. Уточним массу груза, необходимый вылет и ограничения подъезда, чтобы подобрать подходящую машину."
   },
   {
-    slug: "podyomnaya-tehnika",
-    title: "Подъёмная техника",
-    h1: "Аренда подъёмной техники в Москве",
-    shortDesc: "Автокраны, гусеничные краны и автовышки.",
-    image: PHOTO.crane,
-    seoTitle: "Аренда подъёмной техники в Москве — автокраны и автовышки",
-    seoDescription: "Автокраны, гусеничные краны и автовышки в аренду: подбор по грузоподъёмности и вылету, расчёт смены за 30 минут, договор с юрлицами.",
-    seoText: "Подъёмная техника подбирается по грузоподъёмности, вылету стрелы и высоте подъёма — эти параметры уточняем до расчёта.\n\n- автокраны 16–50 т для монтажа и разгрузки;\n- гусеничные краны для тяжёлых конструкций и слабых грунтов;\n- автовышки для работ на высоте до 22 м.",
-    sortOrder: 30,
+    "slug": "dorogi-i-stroyka",
+    "title": "Дороги и стройплощадка",
+    "shortDesc": "Подготовить основание, уложить асфальт, залить бетон: дорожно-ремонтная и строительная техника под линейные и площадные работы.",
+    "description": "Подберём технику для подготовки и уплотнения основания, дорожного ремонта и укладки асфальта. Для бетонных работ поможем выбрать оборудование под объём и условия подачи смеси. Можно подобрать машину как для отдельного этапа, так и для нескольких последовательных работ на площадке.",
+    "colorTheme": "BLACK",
+    "sortOrder": 30,
+    "h1": "Дороги и стройплощадка",
+    "image": "/landing/images/tech/park.webp",
+    "seoTitle": "Дороги и стройплощадка",
+    "seoDescription": "Подготовить основание, уложить асфальт, залить бетон: дорожно-ремонтная и строительная техника под линейные и площадные работы.",
+    "seoText": "Подберём технику для подготовки и уплотнения основания, дорожного ремонта и укладки асфальта. Для бетонных работ поможем выбрать оборудование под объём и условия подачи смеси. Можно подобрать машину как для отдельного этапа, так и для нескольких последовательных работ на площадке."
   },
   {
-    slug: "dorozhno-remontnaya-tehnika",
-    title: "Дорожно-ремонтная техника",
-    h1: "Аренда дорожно-ремонтной техники в Москве",
-    shortDesc: "Грейдеры, катки, фрезы и асфальтоукладчики.",
-    image: PHOTO.grading,
-    seoTitle: "Аренда дорожно-ремонтной техники в Москве — цены за смену",
-    seoDescription: "Автогрейдеры, катки, дорожные фрезы и асфальтоукладчики в аренду: подготовка основания, уплотнение, ямочный ремонт, договор с юрлицами.",
-    seoText: "Дорожно-ремонтная техника работает на подготовке основания и укладке покрытия.\n\n- автогрейдеры и бульдозеры — планировка и профилирование;\n- катки — послойное уплотнение грунта и асфальта;\n- фрезы и асфальтоукладчики — ремонт и новое покрытие.",
-    sortOrder: 40,
-  },
-  {
-    slug: "stroitelnaya-tehnika",
-    title: "Строительная техника",
-    h1: "Аренда строительной техники в Москве",
-    shortDesc: "Бетононасосы, бетоносмесители и вибропогружатели.",
-    image: PHOTO.site,
-    seoTitle: "Аренда строительной техники в Москве — бетононасосы и подъёмники",
-    seoDescription: "Автобетононасосы, бетоносмесители, вибропогружатели и подъёмники в аренду: подача бетона, свайные работы, договор с юрлицами и НДС.",
-    seoText: "Строительная техника закрывает бетонные и свайные работы, где важны темп подачи и точность.\n\n- автобетононасосы — подача бетона на высоту и в труднодоступные места;\n- автобетоносмесители — доставка смеси с сохранением подвижности;\n- вибропогружатели и грейферы — сваи и разработка грунта под водой.",
-    sortOrder: 50,
-  },
-  {
-    slug: "transportnaya-tehnika",
-    title: "Транспортная техника",
-    h1: "Аренда транспортной техники в Москве",
-    shortDesc: "Манипуляторы, самосвалы, длинномеры и тралы.",
-    image: PHOTO.trailer,
-    seoTitle: "Аренда транспортной техники в Москве — самосвалы и тралы",
-    seoDescription: "Манипуляторы, самосвалы, длинномеры и низкорамные тралы в аренду: вывоз грунта и мусора, перевозка техники, договор с юрлицами.",
-    seoText: "Транспортная техника возит грунт, обломки, материалы и саму технику между площадками.\n\n- самосвалы 10–30 т — вывоз грунта и строительного мусора;\n- манипуляторы — перевозка с погрузкой и разгрузкой одним бортом;\n- тралы — доставка гусеничной и негабаритной техники.",
-    sortOrder: 60,
-  },
-  {
-    slug: "kommunalnaya-tehnika",
-    title: "Коммунальная техника",
-    h1: "Аренда коммунальной техники в Москве",
-    shortDesc: "Илососы, водовозы и поливомоечные машины.",
-    image: PHOTO.haul,
-    seoTitle: "Аренда коммунальной техники в Москве — илососы и водовозы",
-    seoDescription: "Илососы, вакуумные машины, водовозы и поливомоечные машины в аренду: прочистка сетей, подвоз воды, пылеподавление, договор с юрлицами.",
-    seoText: "Коммунальная техника нужна для обслуживания сетей, подвоза воды и содержания площадки.\n\n- илососы и вакуумные машины — прочистка колодцев и откачка стоков;\n- водовозы — подвоз технической воды на объект;\n- поливомоечные машины — пылеподавление и мойка покрытия.",
-    sortOrder: 70,
-  },
-  {
-    slug: "svaeboynaya-tehnika",
-    title: "Сваебойная техника",
-    h1: "Аренда сваебойной техники в Москве",
-    shortDesc: "Сваебойные установки для свайных работ.",
-    image: PHOTO.crane,
-    seoTitle: "Аренда сваебойной техники в Москве — сваебойные установки",
-    seoDescription: "Сваебойные установки в аренду: забивка свай под фундаменты и опоры, подбор по длине и сечению сваи, доставка на объект, договор с юрлицами.",
-    seoText: "Сваебойная установка подбирается по длине и сечению сваи, а также по несущей способности грунта.\n\n- забивка свай под фундаменты зданий и сооружений;\n- сваи под опоры ЛЭП, освещения и ограждений;\n- работа на площадках с ограниченным подъездом.",
-    sortOrder: 80,
-  },
+    "slug": "perevozki-i-kommunalka",
+    "title": "Перевозки и коммунальное хозяйство",
+    "shortDesc": "Вывезти грунт и мусор, перевезти технику, прочистить сети и полить дороги: самосвалы, манипуляторы, тралы и коммунальные машины.",
+    "description": "Поможем организовать перевозку техники и материалов, подобрать транспорт для вывоза грунта или строительного мусора. Для обслуживания территории предложим коммунальные машины для полива, уборки и прочистки сетей. При подборе учтём маршрут, объём груза и условия подъезда.",
+    "colorTheme": "WHITE",
+    "sortOrder": 40,
+    "h1": "Перевозки и коммунальное хозяйство",
+    "image": "/landing/images/tech/park.webp",
+    "seoTitle": "Перевозки и коммунальное хозяйство",
+    "seoDescription": "Вывезти грунт и мусор, перевезти технику, прочистить сети и полить дороги: самосвалы, манипуляторы, тралы и коммунальные машины.",
+    "seoText": "Поможем организовать перевозку техники и материалов, подобрать транспорт для вывоза грунта или строительного мусора. Для обслуживания территории предложим коммунальные машины для полива, уборки и прочистки сетей. При подборе учтём маршрут, объём груза и условия подъезда."
+  }
 ];
 
 type TypeSeed = {
@@ -140,52 +104,52 @@ type TypeSeed = {
 // 39 видов техники — порядок и слаги строго по ТЗ.
 const types: TypeSeed[] = [
   // Землеройная (9)
-  { categorySlug: "zemleroynaya-tehnika", slug: "gusenichnogo-ekskavatora", name: "Гусеничные экскаваторы", nameGenitive: "гусеничного экскаватора" },
-  { categorySlug: "zemleroynaya-tehnika", slug: "kolesnogo-ekskavatora", name: "Колёсные экскаваторы", nameGenitive: "колёсного экскаватора" },
-  { categorySlug: "zemleroynaya-tehnika", slug: "ekskavatora-razrushitelya", name: "Экскаваторы-разрушители", nameGenitive: "экскаватора-разрушителя" },
-  { categorySlug: "zemleroynaya-tehnika", slug: "plavayushchego-ekskavatora", name: "Плавающие экскаваторы", nameGenitive: "плавающего экскаватора" },
-  { categorySlug: "zemleroynaya-tehnika", slug: "ekskavatora-planirovshchika", name: "Экскаваторы-планировщики", nameGenitive: "экскаватора-планировщика" },
-  { categorySlug: "zemleroynaya-tehnika", slug: "ekskavatora-pogruzchika", name: "Экскаваторы-погрузчики", nameGenitive: "экскаватора-погрузчика" },
-  { categorySlug: "zemleroynaya-tehnika", slug: "mini-ekskavatora", name: "Мини-экскаваторы", nameGenitive: "мини-экскаватора" },
-  { categorySlug: "zemleroynaya-tehnika", slug: "transheekopatelya", name: "Траншеекопатели", nameGenitive: "траншеекопателя", priceUnit: "PER_METER" },
-  { categorySlug: "zemleroynaya-tehnika", slug: "ekskavatora-s-dlinnoy-streloy", name: "Экскаваторы с длинной стрелой", nameGenitive: "экскаватора с длинной стрелой" },
+  { categorySlug: "zemlyanye-raboty", slug: "gusenichnogo-ekskavatora", name: "Гусеничные экскаваторы", nameGenitive: "гусеничного экскаватора" },
+  { categorySlug: "zemlyanye-raboty", slug: "kolesnogo-ekskavatora", name: "Колёсные экскаваторы", nameGenitive: "колёсного экскаватора" },
+  { categorySlug: "zemlyanye-raboty", slug: "ekskavatora-razrushitelya", name: "Экскаваторы-разрушители", nameGenitive: "экскаватора-разрушителя" },
+  { categorySlug: "zemlyanye-raboty", slug: "plavayushchego-ekskavatora", name: "Плавающие экскаваторы", nameGenitive: "плавающего экскаватора" },
+  { categorySlug: "zemlyanye-raboty", slug: "ekskavatora-planirovshchika", name: "Экскаваторы-планировщики", nameGenitive: "экскаватора-планировщика" },
+  { categorySlug: "zemlyanye-raboty", slug: "ekskavatora-pogruzchika", name: "Экскаваторы-погрузчики", nameGenitive: "экскаватора-погрузчика" },
+  { categorySlug: "zemlyanye-raboty", slug: "mini-ekskavatora", name: "Мини-экскаваторы", nameGenitive: "мини-экскаватора" },
+  { categorySlug: "zemlyanye-raboty", slug: "transheekopatelya", name: "Траншеекопатели", nameGenitive: "траншеекопателя", priceUnit: "PER_METER" },
+  { categorySlug: "zemlyanye-raboty", slug: "ekskavatora-s-dlinnoy-streloy", name: "Экскаваторы с длинной стрелой", nameGenitive: "экскаватора с длинной стрелой" },
   // Погрузочная (4)
-  { categorySlug: "pogruzochnaya-tehnika", slug: "mini-pogruzchika", name: "Мини-погрузчики", nameGenitive: "мини-погрузчика" },
-  { categorySlug: "pogruzochnaya-tehnika", slug: "vilochnogo-pogruzchika", name: "Вилочные погрузчики", nameGenitive: "вилочного погрузчика" },
-  { categorySlug: "pogruzochnaya-tehnika", slug: "teleskopicheskogo-pogruzchika", name: "Телескопические погрузчики", nameGenitive: "телескопического погрузчика" },
-  { categorySlug: "pogruzochnaya-tehnika", slug: "frontalnogo-pogruzchika", name: "Фронтальные погрузчики", nameGenitive: "фронтального погрузчика" },
+  { categorySlug: "pogruzka-i-podem", slug: "mini-pogruzchika", name: "Мини-погрузчики", nameGenitive: "мини-погрузчика" },
+  { categorySlug: "pogruzka-i-podem", slug: "vilochnogo-pogruzchika", name: "Вилочные погрузчики", nameGenitive: "вилочного погрузчика" },
+  { categorySlug: "pogruzka-i-podem", slug: "teleskopicheskogo-pogruzchika", name: "Телескопические погрузчики", nameGenitive: "телескопического погрузчика" },
+  { categorySlug: "pogruzka-i-podem", slug: "frontalnogo-pogruzchika", name: "Фронтальные погрузчики", nameGenitive: "фронтального погрузчика" },
   // Подъёмная (4)
-  { categorySlug: "podyomnaya-tehnika", slug: "avtokrana", name: "Автокраны", nameGenitive: "автокрана" },
-  { categorySlug: "podyomnaya-tehnika", slug: "bashennogo-avtokrana", name: "Башенные автокраны", nameGenitive: "башенного автокрана" },
-  { categorySlug: "podyomnaya-tehnika", slug: "gusenichnogo-krana", name: "Гусеничные краны", nameGenitive: "гусеничного крана" },
-  { categorySlug: "podyomnaya-tehnika", slug: "avtovyshki", name: "Автовышки", nameGenitive: "автовышки" },
+  { categorySlug: "pogruzka-i-podem", slug: "avtokrana", name: "Автокраны", nameGenitive: "автокрана" },
+  { categorySlug: "pogruzka-i-podem", slug: "bashennogo-avtokrana", name: "Башенные автокраны", nameGenitive: "башенного автокрана" },
+  { categorySlug: "pogruzka-i-podem", slug: "gusenichnogo-krana", name: "Гусеничные краны", nameGenitive: "гусеничного крана" },
+  { categorySlug: "pogruzka-i-podem", slug: "avtovyshki", name: "Автовышки", nameGenitive: "автовышки" },
   // Дорожно-ремонтная (7)
-  { categorySlug: "dorozhno-remontnaya-tehnika", slug: "avtogreydera", name: "Автогрейдеры", nameGenitive: "автогрейдера" },
-  { categorySlug: "dorozhno-remontnaya-tehnika", slug: "asfaltoukladchika", name: "Асфальтоукладчики", nameGenitive: "асфальтоукладчика" },
-  { categorySlug: "dorozhno-remontnaya-tehnika", slug: "buldozera", name: "Бульдозеры", nameGenitive: "бульдозера" },
-  { categorySlug: "dorozhno-remontnaya-tehnika", slug: "gidromolota", name: "Гидромолоты", nameGenitive: "гидромолота" },
-  { categorySlug: "dorozhno-remontnaya-tehnika", slug: "dorozhnoy-frezy", name: "Дорожные фрезы", nameGenitive: "дорожной фрезы" },
-  { categorySlug: "dorozhno-remontnaya-tehnika", slug: "katka", name: "Катки", nameGenitive: "катка" },
-  { categorySlug: "dorozhno-remontnaya-tehnika", slug: "kompressora", name: "Компрессоры", nameGenitive: "компрессора" },
+  { categorySlug: "dorogi-i-stroyka", slug: "avtogreydera", name: "Автогрейдеры", nameGenitive: "автогрейдера" },
+  { categorySlug: "dorogi-i-stroyka", slug: "asfaltoukladchika", name: "Асфальтоукладчики", nameGenitive: "асфальтоукладчика" },
+  { categorySlug: "dorogi-i-stroyka", slug: "buldozera", name: "Бульдозеры", nameGenitive: "бульдозера" },
+  { categorySlug: "dorogi-i-stroyka", slug: "gidromolota", name: "Гидромолоты", nameGenitive: "гидромолота" },
+  { categorySlug: "dorogi-i-stroyka", slug: "dorozhnoy-frezy", name: "Дорожные фрезы", nameGenitive: "дорожной фрезы" },
+  { categorySlug: "dorogi-i-stroyka", slug: "katka", name: "Катки", nameGenitive: "катка" },
+  { categorySlug: "dorogi-i-stroyka", slug: "kompressora", name: "Компрессоры", nameGenitive: "компрессора" },
   // Строительная (5)
-  { categorySlug: "stroitelnaya-tehnika", slug: "avtobetononasosa", name: "Автобетононасосы", nameGenitive: "автобетононасоса" },
-  { categorySlug: "stroitelnaya-tehnika", slug: "avtobetonosmesitelya", name: "Автобетоносмесители", nameGenitive: "автобетоносмесителя" },
-  { categorySlug: "stroitelnaya-tehnika", slug: "vibropogruzhatelya", name: "Вибропогружатели", nameGenitive: "вибропогружателя" },
-  { categorySlug: "stroitelnaya-tehnika", slug: "greyfera", name: "Грейферы", nameGenitive: "грейфера" },
-  { categorySlug: "stroitelnaya-tehnika", slug: "podemnika", name: "Подъёмники", nameGenitive: "подъёмника" },
+  { categorySlug: "dorogi-i-stroyka", slug: "avtobetononasosa", name: "Автобетононасосы", nameGenitive: "автобетононасоса" },
+  { categorySlug: "dorogi-i-stroyka", slug: "avtobetonosmesitelya", name: "Автобетоносмесители", nameGenitive: "автобетоносмесителя" },
+  { categorySlug: "dorogi-i-stroyka", slug: "vibropogruzhatelya", name: "Вибропогружатели", nameGenitive: "вибропогружателя" },
+  { categorySlug: "dorogi-i-stroyka", slug: "greyfera", name: "Грейферы", nameGenitive: "грейфера" },
+  { categorySlug: "dorogi-i-stroyka", slug: "podemnika", name: "Подъёмники", nameGenitive: "подъёмника" },
   // Транспортная (5)
-  { categorySlug: "transportnaya-tehnika", slug: "manipulyatora", name: "Манипуляторы", nameGenitive: "манипулятора" },
-  { categorySlug: "transportnaya-tehnika", slug: "dlinnomera", name: "Длинномеры", nameGenitive: "длинномера" },
-  { categorySlug: "transportnaya-tehnika", slug: "samosvala", name: "Самосвалы", nameGenitive: "самосвала" },
-  { categorySlug: "transportnaya-tehnika", slug: "nizkoramnoy-platformy", name: "Низкорамные платформы (тралы)", nameGenitive: "низкорамной платформы (трала)" },
-  { categorySlug: "transportnaya-tehnika", slug: "bortovoy-mashiny", name: "Бортовые машины", nameGenitive: "бортовой машины" },
+  { categorySlug: "perevozki-i-kommunalka", slug: "manipulyatora", name: "Манипуляторы", nameGenitive: "манипулятора" },
+  { categorySlug: "perevozki-i-kommunalka", slug: "dlinnomera", name: "Длинномеры", nameGenitive: "длинномера" },
+  { categorySlug: "perevozki-i-kommunalka", slug: "samosvala", name: "Самосвалы", nameGenitive: "самосвала" },
+  { categorySlug: "perevozki-i-kommunalka", slug: "nizkoramnoy-platformy", name: "Низкорамные платформы (тралы)", nameGenitive: "низкорамной платформы (трала)" },
+  { categorySlug: "perevozki-i-kommunalka", slug: "bortovoy-mashiny", name: "Бортовые машины", nameGenitive: "бортовой машины" },
   // Коммунальная (4)
-  { categorySlug: "kommunalnaya-tehnika", slug: "ilososa", name: "Илососы", nameGenitive: "илососа" },
-  { categorySlug: "kommunalnaya-tehnika", slug: "polivomoechnoy-mashiny", name: "Поливомоечные машины", nameGenitive: "поливомоечной машины" },
-  { categorySlug: "kommunalnaya-tehnika", slug: "vodovoza", name: "Водовозы", nameGenitive: "водовоза" },
-  { categorySlug: "kommunalnaya-tehnika", slug: "vakuumnoy-mashiny", name: "Вакуумные машины", nameGenitive: "вакуумной машины" },
+  { categorySlug: "perevozki-i-kommunalka", slug: "ilososa", name: "Илососы", nameGenitive: "илососа" },
+  { categorySlug: "perevozki-i-kommunalka", slug: "polivomoechnoy-mashiny", name: "Поливомоечные машины", nameGenitive: "поливомоечной машины" },
+  { categorySlug: "perevozki-i-kommunalka", slug: "vodovoza", name: "Водовозы", nameGenitive: "водовоза" },
+  { categorySlug: "perevozki-i-kommunalka", slug: "vakuumnoy-mashiny", name: "Вакуумные машины", nameGenitive: "вакуумной машины" },
   // Сваебойная (1)
-  { categorySlug: "svaeboynaya-tehnika", slug: "svaeboynoy-ustanovki", name: "Сваебойные установки", nameGenitive: "сваебойной установки" },
+  { categorySlug: "zemlyanye-raboty", slug: "svaeboynoy-ustanovki", name: "Сваебойные установки", nameGenitive: "сваебойной установки" },
 ];
 
 type TypeDetail = {
@@ -1261,12 +1225,14 @@ async function main() {
   for (const c of categories) {
     const row = await prisma.category.upsert({
       where: { slug: c.slug },
-      update: { title: c.title, sortOrder: c.sortOrder },
+      update: {},
       create: {
         slug: c.slug,
         title: c.title,
         h1: c.h1,
         shortDesc: c.shortDesc,
+        description: c.description,
+        colorTheme: c.colorTheme,
         image: c.image,
         seoTitle: c.seoTitle,
         seoDescription: c.seoDescription,
@@ -1275,26 +1241,7 @@ async function main() {
       },
     });
 
-    // ДЕМО-поля заполняем только там, где админ ещё не задал своё — правки не затираем.
-    const categoryPatch = {
-      h1: row.h1 ?? c.h1,
-      shortDesc: row.shortDesc ?? c.shortDesc,
-      image: row.image ?? c.image,
-      seoTitle: row.seoTitle ?? c.seoTitle,
-      seoDescription: row.seoDescription ?? c.seoDescription,
-      seoText: row.seoText ?? c.seoText,
-    };
-    if (
-      !row.h1 ||
-      !row.shortDesc ||
-      !row.image ||
-      !row.seoTitle ||
-      !row.seoDescription ||
-      !row.seoText
-    ) {
-      await prisma.category.update({ where: { slug: c.slug }, data: categoryPatch });
-    }
-
+    // Настройки существующих категорий полностью принадлежат администратору.
     categoryIds.set(c.slug, row.id);
   }
 

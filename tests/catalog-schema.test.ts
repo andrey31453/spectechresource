@@ -86,6 +86,15 @@ describe("CategoryCreateSchema", () => {
 });
 
 describe("CategoryUpdateSchema", () => {
+  it("принимает описание и только три разрешённые темы", () => {
+    for (const colorTheme of ["WHITE", "ORANGE", "BLACK"]) {
+      const parsed = v.safeParse(CategoryUpdateSchema, { description: "  Текст блока  ", colorTheme });
+      expect(parsed.success && parsed.output).toEqual({ description: "Текст блока", colorTheme });
+    }
+    expect(v.safeParse(CategoryUpdateSchema, { colorTheme: "RED" }).success).toBe(false);
+    expect(v.safeParse(CategoryUpdateSchema, { description: "а".repeat(2001) }).success).toBe(false);
+    expect(v.safeParse(CategoryUpdateSchema, { description: null }).success).toBe(true);
+  });
   it("не подставляет значения для отсутствующих полей", () => {
     const parsed = v.safeParse(CategoryUpdateSchema, {});
 

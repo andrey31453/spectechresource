@@ -3,6 +3,8 @@ import type { PriceUnitName } from "#shared/schemas/catalog";
 /** DTO админ-каталога — зеркало `server/utils/catalog-admin.ts`. */
 
 export interface AdminCategoryDto {
+  description: string | null;
+  colorTheme: string;
   id: string;
   slug: string;
   title: string;

@@ -63,6 +63,8 @@ export default defineEventHandler(async () => {
 
   return {
     categories: categories.map((category) => ({
+      description: category.description,
+      colorTheme: category.colorTheme,
       slug: category.slug,
       title: category.title,
       shortDesc: category.shortDesc,

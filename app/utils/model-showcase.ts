@@ -1,9 +1,9 @@
 import type { HomeModelSection } from "~/utils/model-groups";
 import { modelsCountLabel, priceRangeLabel } from "~/utils/models";
 
-/** Одна витрина, в режиме «Все» модели разделов чередуются. */
-export function showcaseShelf(section: HomeModelSection, categorySlug = "") {
-  const shelves = section.shelves.filter((shelf) => !categorySlug || shelf.category.slug === categorySlug);
+/** Одна витрина, в режиме «Все» модели видов техники чередуются. */
+export function showcaseShelf(section: HomeModelSection, typeSlug = "") {
+  const shelves = section.shelves.filter((shelf) => !typeSlug || shelf.category.slug === typeSlug);
   const length = Math.max(0, ...shelves.map((shelf) => shelf.models.length));
   const models = Array.from({ length }, (_, index) => shelves.flatMap((shelf) => {
     const model = shelf.models[index];

@@ -30,6 +30,8 @@ const emptyToNull = (value: string): string | null => {
 // ─────────────────────────────── Разделы ───────────────────────────────
 
 export interface CategoryForm {
+  description: string;
+  colorTheme: string;
   slug: string;
   title: string;
   h1: string;
@@ -44,6 +46,8 @@ export interface CategoryForm {
 
 export function emptyCategoryForm(): CategoryForm {
   return {
+    description: "",
+    colorTheme: "WHITE",
     slug: "",
     title: "",
     h1: "",
@@ -59,6 +63,8 @@ export function emptyCategoryForm(): CategoryForm {
 
 export function categoryFormFrom(category: AdminCategoryDto): CategoryForm {
   return {
+    description: text(category.description),
+    colorTheme: category.colorTheme,
     slug: category.slug,
     title: category.title,
     h1: text(category.h1),
@@ -75,6 +81,8 @@ export function categoryFormFrom(category: AdminCategoryDto): CategoryForm {
 /** Тело запроса: пустые необязательные поля уходят как `null`, числа — числами. */
 export function categoryFormBody(form: CategoryForm) {
   return {
+    description: emptyToNull(form.description),
+    colorTheme: form.colorTheme,
     slug: form.slug.trim(),
     title: form.title.trim(),
     h1: emptyToNull(form.h1),

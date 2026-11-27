@@ -43,6 +43,8 @@ model Category {
   title          String // «Землеройная техника»
   h1             String?
   shortDesc      String?
+  description    String?
+  colorTheme     String   @default("WHITE")
   image          String?
   seoTitle       String?
   seoDescription String?

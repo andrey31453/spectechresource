@@ -2,8 +2,7 @@
 import { computed, nextTick, onBeforeUnmount, onMounted, ref } from "vue";
 import type { HomeDto } from "~/types/catalog";
 import { initLanding } from "~/utils/landing";
-import { groupModelsBySupergroup } from "~/utils/model-groups";
-import { groupModelsByCategory } from "~/utils/models";
+import { categoryModelSections } from "~/utils/model-groups";
 import { telHref } from "~/utils/phone";
 import { pluralRu } from "~/utils/plural";
 import { formatPriceFrom, formatPriceShort, lowestPrice } from "~/utils/price";
@@ -131,14 +130,8 @@ const parkSectionsLabel = computed(
     `${categories.value.length} ${pluralRu(categories.value.length, ["раздел", "раздела", "разделов"])}`,
 );
 
-/**
- * Секции `#modeli`: техника разложена по надгруппам (земляные работы, погрузка и подъём,
- * дороги и стройка, перевозки и коммуналка), внутри каждой — полки разделов каталога.
- * Порядок разделов и моделей задаёт `GET /api/home`, группировка — `groupModelsByCategory`,
- * надгруппы — `groupModelsBySupergroup` (`app/utils/model-groups.ts`).
- */
-const modelGroups = computed(() => groupModelsByCategory(categories.value, models.value));
-const modelSections = computed(() => groupModelsBySupergroup(modelGroups.value));
+/** Категории БД — секции главной; порядок, описание и тема из админки. */
+const modelSections = computed(() => categoryModelSections(categories.value, models.value));
 
 /** Классы, которые заказывают чаще всего: по ним в карточках разделов ставим «Хит спроса». */
 const HIT_TYPE_SLUGS = new Set([

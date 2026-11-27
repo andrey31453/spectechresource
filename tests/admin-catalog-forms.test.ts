@@ -18,6 +18,8 @@ const categoryDto: AdminCategoryDto = {
   title: "Землеройная техника",
   h1: null,
   shortDesc: "Экскаваторы и планировщики",
+  description: null,
+  colorTheme: "WHITE",
   image: null,
   seoTitle: null,
   seoDescription: null,
@@ -75,6 +77,12 @@ const typeDto: AdminTypeDto = {
 };
 
 describe("формы раздела", () => {
+  it("передаёт описание и тему между редактором и API", () => {
+    const form = categoryFormFrom({ ...categoryDto, description: "Описание блока", colorTheme: "BLACK" });
+    expect(categoryFormBody(form)).toMatchObject({ description: "Описание блока", colorTheme: "BLACK" });
+    expect(categoryFormBody({ ...form, description: "  " })).toMatchObject({ description: null });
+    expect(emptyCategoryForm().colorTheme).toBe("WHITE");
+  });
   it("null-поля DTO превращаются в пустые строки", () => {
     const form = categoryFormFrom(categoryDto);
 

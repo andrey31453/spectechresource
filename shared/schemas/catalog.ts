@@ -126,6 +126,8 @@ const isPublishedField = v.boolean("Публикация — да или нет"
 // ───────────────────────────── Разделы каталога ─────────────────────────────
 
 const categoryFields = {
+  description: optionalText(2000, "описание блока"),
+  colorTheme: v.optional(v.picklist(["WHITE", "ORANGE", "BLACK"]), "WHITE"),
   slug: slugField(),
   title: requiredText(120, "название раздела"),
   h1: optionalText(255, "H1"),

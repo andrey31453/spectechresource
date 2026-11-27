@@ -34,6 +34,8 @@ export interface CatalogModelsDto {
 }
 
 export interface CategoryCardDto {
+  description?: string | null;
+  colorTheme?: string;
   slug: string;
   title: string;
   shortDesc: string | null;

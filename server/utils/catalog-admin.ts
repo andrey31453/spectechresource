@@ -7,6 +7,8 @@ import { money, type Decimalish, type PriceUnit } from "./dto";
  */
 
 export interface AdminCategoryDto {
+  description: string | null;
+  colorTheme: string;
   id: string;
   slug: string;
   title: string;
@@ -23,6 +25,8 @@ export interface AdminCategoryDto {
 }
 
 export function toAdminCategory(category: {
+  description: string | null;
+  colorTheme: string;
   id: string;
   slug: string;
   title: string;
@@ -38,6 +42,8 @@ export function toAdminCategory(category: {
   _count: { types: number };
 }): AdminCategoryDto {
   return {
+    description: category.description,
+    colorTheme: category.colorTheme,
     id: category.id,
     slug: category.slug,
     title: category.title,

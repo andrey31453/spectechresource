@@ -2,7 +2,7 @@
 import { imageVariantUrl } from "#shared/utils/uploads";
 import type { HomeModelSection } from "~/utils/model-groups";
 import type { HomeModelGroup } from "~/utils/models";
-import { categoryPath, modelPath } from "~/utils/routes";
+import { typePath, modelPath } from "~/utils/routes";
 import { formatMoney } from "~/utils/price";
 import { modelPage, showcaseShelf } from "~/utils/model-showcase";
 
@@ -61,34 +61,20 @@ function current(shelf: HomeModelGroup) {
   return shelf.models.find((model) => model.id === selected.value[shelf.category.slug]) ?? shelf.models[0];
 }
 
-const introductions: Record<string, string> = {
-  "zemlyanye-raboty": "От разработки грунта до устройства свай.",
-  "pogruzka-i-podem": "Погрузка, подъём и монтаж — техника под вашу задачу.",
-  "dorogi-i-stroyka": "От подготовки основания до асфальта и бетона.",
-  "perevozki-i-kommunalka": "Перевозка техники, вывоз грунта и обслуживание территорий.",
-};
-const descriptions: Record<string, string> = {
-  "zemlyanye-raboty": "Подберём экскаватор для котлована, траншеи под коммуникации или планировки участка. Если нужно подготовить свайное основание, поможем выбрать сваебойную технику под условия площадки. Учтём объём работ и доступ к месту проведения работ.",
-  "pogruzka-i-podem": "Поможем подобрать технику для разгрузки материалов, перемещения паллет и подачи грузов на высоту. Для монтажа конструкций предложим кран, а для обслуживания фасадов и работ на высоте — автовышку. Уточним массу груза, необходимый вылет и ограничения подъезда, чтобы подобрать подходящую машину.",
-  "dorogi-i-stroyka": "Подберём технику для подготовки и уплотнения основания, дорожного ремонта и укладки асфальта. Для бетонных работ поможем выбрать оборудование под объём и условия подачи смеси. Можно подобрать машину как для отдельного этапа, так и для нескольких последовательных работ на площадке.",
-  "perevozki-i-kommunalka": "Поможем организовать перевозку техники и материалов, подобрать транспорт для вывоза грунта или строительного мусора. Для обслуживания территории предложим коммунальные машины для полива, уборки и прочистки сетей. При подборе учтём маршрут, объём груза и условия подъезда.",
-};
-const tones = [
-  "bg-sand text-ink",
-  "bg-flame text-ink",
-  "bg-ink text-sand",
-];
+function sectionTone(section: HomeModelSection) {
+  return section.colorTheme === "BLACK" ? "bg-ink text-sand" : section.colorTheme === "ORANGE" ? "bg-flame text-ink" : "bg-cement2 text-ink";
+}
 </script>
 
 <template>
   <div>
     <section
-      v-for="(section, index) in sections"
+      v-for="section in sections"
       :id="`modeli-${variant}-${section.slug}`"
       :key="section.slug"
       :aria-labelledby="`modeli-${variant}-title-${section.slug}`"
       class="overflow-hidden px-5 md:px-8"
-      :class="[variant === 'h' && index % 3 === 0 ? 'bg-cement2 text-ink' : tones[index % 3], variant === 'h' ? 'py-[148px] md:py-[180px]' : 'py-12 md:py-20']"
+      :class="[sectionTone(section), variant === 'h' ? 'py-[148px] md:py-[180px]' : 'py-12 md:py-20']"
     >
       <div class="mx-auto max-w-site">
         <div v-if="variant !== 'h'" class="mb-8 flex flex-wrap items-center justify-between gap-4 border-b border-current/25 pb-4 text-xs font-bold tracking-widest uppercase">
@@ -96,11 +82,11 @@ const tones = [
           <span>{{ section.shelvesLabel }} · {{ section.modelsLabel }}</span>
         </div>
         <h2 :id="`modeli-${variant}-title-${section.slug}`" class="m-0! max-w-5xl text-[clamp(32px,5.8vw,80px)]! leading-[.98]! font-extrabold tracking-[-.055em] text-inherit! uppercase [overflow-wrap:anywhere]">{{ section.title }}</h2>
-        <p class="mt-5! mb-0! max-w-2xl text-lg leading-relaxed text-inherit!">{{ variant === 'h' ? (descriptions[section.slug] ?? section.lead) : (introductions[section.slug] ?? section.lead) }}</p>
-        <div v-if="variant !== 'i' && (variant !== 'h' || section.shelves.length > 1)" class="mt-10 flex flex-wrap gap-3" role="group" :aria-label="`Фильтр подкатегорий: ${section.title}`">
-          <button v-for="filter in filterOptions(section)" :key="filter.slug" type="button" :aria-pressed="isFilterActive(section, filter.slug)" class="min-h-14 rounded-2xl border-0 px-6 py-4 text-base font-bold transition-colors motion-reduce:transition-none! focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-current" :class="isFilterActive(section, filter.slug) ? (index % 3 === 2 ? 'bg-sand text-ink' : 'bg-ink text-sand') : 'bg-transparent text-inherit hover:bg-current/10'" @click="changeFilter(section, filter.slug)">{{ filter.title }}</button>
+        <p class="mt-5! mb-0! max-w-2xl text-lg leading-relaxed text-inherit!">{{ section.lead }}</p>
+        <div v-if="variant !== 'i' && (variant !== 'h' || section.shelves.length > 1)" class="mt-10 flex flex-wrap gap-3" role="group" :aria-label="`Фильтр видов техники: ${section.title}`">
+          <button v-for="filter in filterOptions(section)" :key="filter.slug" type="button" :aria-pressed="isFilterActive(section, filter.slug)" class="min-h-14 rounded-2xl border-0 px-6 py-4 text-base font-bold transition-colors motion-reduce:transition-none! focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-current" :class="isFilterActive(section, filter.slug) ? (section.colorTheme === 'BLACK' ? 'bg-sand text-ink' : 'bg-ink text-sand') : 'bg-transparent text-inherit hover:bg-current/10'" @click="changeFilter(section, filter.slug)">{{ filter.title }}</button>
         </div>
-        <nav v-else-if="variant === 'i'" class="mt-6 flex flex-wrap gap-x-6 gap-y-2" :aria-label="`Подкатегории: ${section.title}`">
+        <nav v-else-if="variant === 'i'" class="mt-6 flex flex-wrap gap-x-6 gap-y-2" :aria-label="`Виды техники: ${section.title}`">
           <a v-for="shelf in section.shelves" :key="shelf.category.slug" :href="`#modeli-${variant}-shelf-${shelf.category.slug}`" class="inline-flex min-h-11 items-center gap-2 text-sm font-bold text-inherit! underline underline-offset-4 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-current">{{ shelf.category.title }} <span aria-hidden="true">↓</span></a>
         </nav>
 
@@ -108,7 +94,7 @@ const tones = [
         <section v-for="shelf in visibleShelves(section)" :id="`modeli-${variant}-shelf-${shelf.category.slug}`" :key="`${shelf.category.slug}-${filters[section.slug] ?? ''}`" :aria-labelledby="variant === 'h' ? `modeli-${variant}-title-${section.slug}` : `modeli-${variant}-shelf-title-${shelf.category.slug}`" class="mt-6 min-w-0 scroll-mt-24 md:mt-8" :class="variant === 'h' ? '[grid-area:1/1]' : 'border-t border-current/25'">
           <div v-if="variant !== 'h'" class="flex flex-wrap items-baseline justify-between gap-4">
             <h3 v-if="variant !== 'h'" :id="`modeli-${variant}-shelf-title-${shelf.category.slug}`" class="m-0! text-[clamp(24px,3vw,40px)]! leading-tight! font-bold tracking-tight text-inherit!">{{ shelf.category.title }}</h3>
-            <a v-if="variant !== 'h'" :href="categoryPath(shelf.category.slug)" class="inline-flex min-h-11 items-center gap-3 text-sm font-bold text-inherit! underline underline-offset-4 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-current">Весь раздел <span aria-hidden="true">↗</span></a>
+            <a v-if="variant !== 'h'" :href="typePath(shelf.category.slug)" class="inline-flex min-h-11 items-center gap-3 text-sm font-bold text-inherit! underline underline-offset-4 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-current">Весь вид техники <span aria-hidden="true">↗</span></a>
           </div>
 
           <div v-if="current(shelf)" class="mt-10 grid! min-w-0 gap-10 lg:grid-cols-[minmax(0,1.65fr)_minmax(0,1fr)] lg:gap-12">
@@ -128,10 +114,10 @@ const tones = [
               <p class="mt-6! mb-0! text-[clamp(28px,3vw,44px)] font-bold leading-tight text-inherit!">{{ formatMoney(current(shelf)!.pricePerShift) ? `${formatMoney(current(shelf)!.pricePerShift)} ₽` : "Цена по запросу" }}<span v-if="current(shelf)!.pricePerShift" class="mt-1 block text-sm font-medium">за смену</span></p>
               <ModelSpecs :specs="current(shelf)!.specs" class="mt-6 py-5" />
               <div v-if="variant === 'h'" class="mt-auto flex w-full flex-wrap justify-end gap-3 pt-8">
-                <a :href="modelPath(current(shelf)!.typeSlug, current(shelf)!.slug)" class="group inline-flex min-h-14 items-center justify-between gap-4 rounded-2xl px-5 py-3 text-base font-bold transition-colors motion-reduce:transition-none! focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-current" :class="index % 3 === 2 ? 'bg-flame text-ink! hover:bg-flame2' : 'bg-ink text-sand! hover:bg-ink2'">Подробнее о технике <span aria-hidden="true" class="transition-transform group-hover:translate-x-1 motion-reduce:translate-none! motion-reduce:transition-none!">→</span></a>
-                <SiteButton href="#zayavka" :data-equipment-type-slug="current(shelf)!.typeSlug" :data-equipment-model-id="current(shelf)!.id" :data-equipment-label="`${current(shelf)!.brand} ${current(shelf)!.model}`" variant="ghost" :tone="index % 3 === 2 ? 'light' : 'dark'">Заказать</SiteButton>
+                <a :href="modelPath(current(shelf)!.typeSlug, current(shelf)!.slug)" class="group inline-flex min-h-14 items-center justify-between gap-4 rounded-2xl px-5 py-3 text-base font-bold transition-colors motion-reduce:transition-none! focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-current" :class="section.colorTheme === 'BLACK' ? 'bg-flame text-ink! hover:bg-flame2' : 'bg-ink text-sand! hover:bg-ink2'">Подробнее о технике <span aria-hidden="true" class="transition-transform group-hover:translate-x-1 motion-reduce:translate-none! motion-reduce:transition-none!">→</span></a>
+                <SiteButton href="#zayavka" :data-equipment-type-slug="current(shelf)!.typeSlug" :data-equipment-model-id="current(shelf)!.id" :data-equipment-label="`${current(shelf)!.brand} ${current(shelf)!.model}`" variant="ghost" :tone="section.colorTheme === 'BLACK' ? 'light' : 'dark'">Заказать</SiteButton>
               </div>
-              <a v-else :href="modelPath(current(shelf)!.typeSlug, current(shelf)!.slug)" class="group mt-8 inline-flex rounded-2xl min-h-14 w-full items-center justify-between gap-6 px-5 py-3 text-base font-bold transition-colors motion-reduce:transition-none! focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-current" :class="index % 3 === 2 ? 'bg-flame text-ink! hover:bg-flame2' : 'bg-ink text-sand! hover:bg-ink2'">Выбрать машину <span aria-hidden="true" class="transition-transform group-hover:translate-x-1 motion-reduce:translate-none! motion-reduce:transition-none!">→</span></a>
+              <a v-else :href="modelPath(current(shelf)!.typeSlug, current(shelf)!.slug)" class="group mt-8 inline-flex rounded-2xl min-h-14 w-full items-center justify-between gap-6 px-5 py-3 text-base font-bold transition-colors motion-reduce:transition-none! focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-current" :class="section.colorTheme === 'BLACK' ? 'bg-flame text-ink! hover:bg-flame2' : 'bg-ink text-sand! hover:bg-ink2'">Выбрать машину <span aria-hidden="true" class="transition-transform group-hover:translate-x-1 motion-reduce:translate-none! motion-reduce:transition-none!">→</span></a>
             </div>
           </div>
 
@@ -142,7 +128,7 @@ const tones = [
               type="button"
               :aria-pressed="current(shelf)?.id === model.id"
               class="group flex min-h-24 min-w-0 flex-col overflow-hidden rounded-2xl border p-0 text-left focus-visible:outline-2 focus-visible:outline-offset-4 motion-reduce:transition-none!"
-              :class="variant === 'h' ? ['border-2 bg-white! text-ink! transition-[border-color] hover:border-ember! focus-visible:outline-ember-ink', current(shelf)?.id === model.id ? 'border-ember-ink' : 'border-cement-line'] : ['border-current/40 transition-colors hover:bg-current/10 focus-visible:outline-current', current(shelf)?.id === model.id ? (index % 3 === 2 ? 'bg-sand text-ink' : 'bg-ink text-sand') : 'bg-transparent text-inherit hover:bg-current/10', current(shelf)?.id === model.id && variant !== 'i' ? 'ring-2 ring-current ring-offset-2' : '', variant === 'j' ? 'relative isolate min-h-36 bg-ink! text-sand!' : '']"
+              :class="variant === 'h' ? ['border-2 bg-white! text-ink! transition-[border-color] hover:border-ember! focus-visible:outline-ember-ink', current(shelf)?.id === model.id ? 'border-ember-ink' : 'border-cement-line'] : ['border-current/40 transition-colors hover:bg-current/10 focus-visible:outline-current', current(shelf)?.id === model.id ? (section.colorTheme === 'BLACK' ? 'bg-sand text-ink' : 'bg-ink text-sand') : 'bg-transparent text-inherit hover:bg-current/10', current(shelf)?.id === model.id && variant !== 'i' ? 'ring-2 ring-current ring-offset-2' : '', variant === 'j' ? 'relative isolate min-h-36 bg-ink! text-sand!' : '']"
               @click="selected[shelf.category.slug] = model.id"
             >
               <template v-if="variant === 'h'">
