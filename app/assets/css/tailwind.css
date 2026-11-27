@@ -11,29 +11,29 @@
   --font-sans: "Inter", ui-sans-serif, system-ui, "Segoe UI", Roboto, Arial, sans-serif;
   --font-display: var(--font-sans);
 
-  --color-flame: #ff7a2f;
-  --color-flame2: #ff9c4a;
-  --color-ember: #cf4418;
-  --color-ember-ink: #b83c12;
+  --color-flame: #ff901e;
+  --color-flame2: #ffa43e;
+  --color-ember: #b34700;
+  --color-ember-ink: #9a4b00;
   --color-volt: #c9f24a;
-  --color-sand: #f5f4ef;
-  --color-sand2: #e2dfd4;
-  --color-paper: #ffffff;
+  --color-sand: #f7f3ed;
+  --color-sand2: #e4dbd1;
+  --color-paper: #fffdf9;
   --color-ink: #0d1214;
-  --color-ink2: #3d474b;
-  --color-steel: #626b70;
+  --color-ink2: #5f5149;
+  --color-steel: #786d66;
   --color-fog: #c3ccd2;
-  --color-cement: #e8ecee;
-  --color-cement2: #f6f8f8;
-  --color-cement-line: #d3d9dd;
-  --color-brand: var(--color-ember-ink);
-  --color-brand-dark: #7a2a12;
-  --color-brand-soft: #fff0e6;
+  --color-cement: #eae1d7;
+  --color-cement2: #fbf5ec;
+  --color-cement-line: #e4dbd1;
+  --color-brand: #9a4b00;
+  --color-brand-dark: #762d00;
+  --color-brand-soft: #fff8f0;
   --color-muted: var(--color-steel);
   --color-line: var(--color-cement-line);
   --color-surface: var(--color-paper);
   --color-surface-soft: var(--color-sand);
-  --color-accent: var(--color-flame);
+  --color-accent: #ff901e;
   --color-danger: #8a1c1c;
   --color-danger-soft: #fdecec;
   --color-danger-line: #e6bcbc;
@@ -67,8 +67,8 @@
      чтобы чередование полос читалось. */
   --color-concrete: var(--color-cement2);
 
-  --color-brand-light: var(--color-flame2);
-  --color-brand-bright: var(--color-ember);
+  --color-brand-light: #ffa43e;
+  --color-brand-bright: #b34700;
 }
 
 :root {
@@ -218,7 +218,7 @@
   }
 
   .stars-lead-form form button[type="submit"]:hover:not(:disabled) {
-    box-shadow: 0 18px 38px -16px rgb(255 122 47 / 95%);
+    border-color: var(--color-snow);
   }
 
   .stars-lead-form form a {

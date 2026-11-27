@@ -39,14 +39,14 @@ const base =
 const experimentalVariants: Record<Variant, Record<Tone, string>> = {
   primary: {
     light:
-      "bg-linear-to-br from-brand-bright via-brand to-brand-dark text-white shadow-[0_14px_32px_-16px_rgb(15_92_156/0.85)] hover:brightness-110",
-    dark: "bg-linear-to-br from-brand-bright via-brand to-brand-dark text-white shadow-[0_14px_32px_-16px_rgb(15_92_156/0.85)] hover:brightness-110",
-    "on-brand": "bg-white text-brand-dark hover:bg-brand-soft",
+      "border border-transparent bg-linear-to-br from-brand-bright via-brand to-brand-dark text-white shadow-[0_14px_32px_-16px_rgb(15_92_156/0.85)] hover:border-snow",
+    dark: "border border-transparent bg-linear-to-br from-brand-bright via-brand to-brand-dark text-white shadow-[0_14px_32px_-16px_rgb(15_92_156/0.85)] hover:border-ink",
+    "on-brand": "border border-transparent bg-white text-brand-dark hover:border-brand-dark",
   },
   ghost: {
     light: "border border-white/30 text-snow hover:border-brand-light hover:text-brand-light",
     dark: "border border-line text-ink hover:border-brand hover:text-brand",
-    "on-brand": "border border-white/50 text-white hover:bg-white/10",
+    "on-brand": "border border-white/50 text-white hover:border-white",
   },
 };
 

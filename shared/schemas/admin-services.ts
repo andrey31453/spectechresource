@@ -13,6 +13,13 @@ const serviceFields = {
   slug: slugField(),
   title: requiredText(200, "название услуги"),
   description: optionalText(500, "краткое описание"),
+  descriptionTop: optionalText(20000, "верхнее описание"),
+  descriptionBottom: optionalText(20000, "нижнее описание"),
+  equipmentTypeIds: v.optional(v.pipe(
+    v.array(v.pipe(v.string(), v.trim(), v.minLength(1), v.maxLength(100))),
+    v.maxLength(100),
+    v.check((ids) => new Set(ids).size === ids.length, "Виды техники не должны повторяться"),
+  )),
   image: optionalText(500, "адрес изображения"),
   seoTitle: optionalText(255, "SEO-заголовок"),
   seoDescription: optionalText(300, "SEO-описание"),

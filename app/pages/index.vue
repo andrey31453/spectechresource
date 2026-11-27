@@ -26,6 +26,7 @@ definePageMeta({ layout: false });
 const heroActive = ref(false);
 
 const { data: site } = await useSite();
+const headerTypes = await useCatalogNavigation();
 const { data: home } = await useAsyncData<HomeDto>(
   "home-page",
   () => $fetch<HomeDto>("/api/home"),
@@ -268,37 +269,20 @@ usePageSeo({
   path: "/",
 });
 
-/** Шрифт макета и метка страницы: только на главной, при уходе со страницы теги снимаются. */
+/** Только декор главной; шрифт и цветовые токены общие для сайта. */
 useHead({
   // Метка на <body> отключает правила каркаса, которые пересекаются с макетом:
   // переносы в заголовках (`tailwind.css`) и классы `.lead`/`.grid` (`main.css`).
   bodyAttrs: {
-    class: "landing-page palette-warm-amber",
+    class: "landing-page",
   },
   // Тёмная строка браузера на мобильном — как у макета (`--color-night` = фон body).
   meta: [{ name: "theme-color", content: "#0b0f13", key: "theme-color" }],
   link: [
-    { rel: "preconnect", href: "https://fonts.googleapis.com" },
-    {
-      rel: "preconnect",
-      href: "https://fonts.gstatic.com",
-      crossorigin: "anonymous",
-    },
-    {
-      rel: "stylesheet",
-      href: "https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap",
-      key: "landing-font",
-    },
     {
       rel: "stylesheet",
       href: "/landing/style.css",
       key: "landing-style",
-      tagPriority: "low",
-    },
-    {
-      rel: "stylesheet",
-      href: "/landing/warm-amber.css",
-      key: "landing-warm-amber",
       tagPriority: "low",
     },
   ],
@@ -346,7 +330,7 @@ onBeforeUnmount(() => {
 </script>
 <template>
   <div>
-    <SiteHeader v-if="site" :site="site" :categories="categories" :services="services" fixed :active="heroActive" />
+    <SiteHeader v-if="site" :site="site" :categories="headerTypes" :services="services" fixed :active="heroActive" />
     <main id="main">
       <HomeExperimentalLanding variant="dark" embedded @activate="heroActive = true" />
 
@@ -1036,7 +1020,7 @@ onBeforeUnmount(() => {
             <div class="rounded-xl border border-[#dfe4ea] bg-white p-6">
               <p class="m-0 text-base font-bold text-[#20272d]">Обсудим вашу закупку</p>
               <p class="mt-3 mb-5 text-sm leading-relaxed text-[#4e555b]">Укажите номер закупки и срок подачи в комментарии к заявке.</p>
-              <a href="#zayavka" data-tender-cta class="inline-flex min-h-12 w-full items-center justify-center rounded-lg bg-[#ff901e] px-5 py-3 text-sm font-bold text-[#171b1f]! no-underline! transition-colors hover:bg-[#ffa43e] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#9c4100] motion-reduce:transition-none">Обсудить тендер</a>
+              <a href="#zayavka" data-tender-cta class="inline-flex min-h-12 w-full items-center justify-center rounded-lg border border-transparent bg-[#ff901e] px-5 py-3 text-sm font-bold text-[#171b1f]! no-underline! transition-colors hover:border-[#171b1f] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#9c4100] motion-reduce:transition-none">Обсудить тендер</a>
             </div>
           </aside>
         </div>
@@ -1120,10 +1104,6 @@ onBeforeUnmount(() => {
       </section>
 
     </main>
-    <SiteFooter v-if="site" :site="site" :categories="categories" :services="services" stars>
-      <template #form>
-        <LeadForm place="callback" :equipment-types="allTypes.map(type => ({ slug: type.slug, name: type.name }))" :phone="phone" heading="Оставьте заявку" lead="Укажите контакты и задачу — уточним наличие, стоимость и сроки подачи." submit-label="Получить расчёт" />
-      </template>
-    </SiteFooter>
+    <SiteFooter v-if="site" :site="site" />
   </div>
 </template>

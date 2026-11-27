@@ -4,6 +4,47 @@ import { describe, expect, it } from "vitest";
 const read = (path: string) => readFileSync(new URL(`../${path}`, import.meta.url), "utf8");
 
 describe("shared design system", () => {
+  it("uses a subtle footer link background and stationary border-based button hover", () => {
+    const footer = read("app/components/SiteFooter.vue");
+    expect(footer).toContain("[&_a:hover]:bg-flame/10");
+    expect(footer).toContain("[&_a:hover]:no-underline!");
+    expect(footer).toContain("[&_a]:px-2");
+    expect(footer).toContain("[&_a]:-mx-2");
+    expect(footer).toContain("[&_a]:rounded-field");
+    const buttons = read("app/components/SiteButton.vue");
+    expect(buttons).not.toContain("hover:brightness");
+    expect(buttons).not.toContain("hover:shadow");
+    expect(buttons).not.toContain("hover:translate");
+    const landing = read("public/landing/style.css");
+    expect(landing).not.toContain(".btn:hover{transform:");
+    expect(landing).not.toContain(".btn--primary:hover{box-shadow:");
+    expect(landing).toContain(".btn--primary:hover{border-color:var(--color-snow)}");
+    const css = read("app/assets/css/tailwind.css");
+    expect(css).toMatch(/button\[type="submit"\]:hover:not\(:disabled\)\s*\{\s*border-color: var\(--color-snow\);/);
+  });
+  it("uses the homepage palette and font globally instead of page-specific overrides", () => {
+    const home = read("app/pages/index.vue");
+    expect(home).not.toContain('href: "/landing/warm-amber.css"');
+    expect(home).not.toContain('key: "landing-font"');
+    expect(read("nuxt.config.ts")).toContain('key: "site-font"');
+    const tokens = read("app/assets/css/tailwind.css");
+    expect(tokens).toContain('--color-flame: #ff901e;');
+    expect(tokens).toContain('--color-sand: #f7f3ed;');
+  });
+  it("owns the complete footer and its star styles independently of the homepage", () => {
+    const footer = read("app/components/SiteFooter.vue");
+    expect(footer.match(/<footer\b/g)).toHaveLength(1);
+    expect(footer).toContain('useFetch<HomeDto>("/api/home"');
+    expect(footer).toContain('content.value?.categories ?? []');
+    expect(footer).toContain('content.value?.services ?? []');
+    expect(footer).toContain('<LeadForm place="callback" :equipment-types="equipmentTypes"');
+    expect(footer).toContain('<style scoped>');
+    expect(footer).toContain('--stars-far-field:');
+    expect(footer).toContain('prefers-reduced-motion: reduce');
+    expect(footer).not.toContain('landing-page');
+    expect(footer).not.toContain('stars?:');
+    expect(read("public/landing/style.css")).not.toContain('--stars-far-field');
+  });
   it("centers desktop navigation independently of side content and removes redundant menu entries", () => {
     const header = read("app/components/SiteHeader.vue");
     expect(header).toContain("lg:grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)]");
@@ -50,6 +91,21 @@ describe("shared design system", () => {
       expect(source).toContain("<SiteHeader");
       expect(source).toContain("<SiteFooter");
     }
+  });
+  it("uses the same catalog types source in the header on home and internal pages", () => {
+    const home = read("app/pages/index.vue");
+    const layout = read("app/layouts/default.vue");
+    expect(home).toContain("const headerTypes = await useCatalogNavigation()");
+    expect(home).toMatch(/<SiteHeader[^>]*:categories="headerTypes"/);
+    expect(home).not.toMatch(/<SiteHeader[^>]*:categories="categories"/);
+    expect(home).toContain('<SiteFooter v-if="site" :site="site" />');
+    expect(layout).toContain('<SiteFooter v-if="site" :site="site" />');
+    expect(layout).toContain("const navCategories = await useCatalogNavigation()");
+    expect(layout).toMatch(/<SiteHeader[^>]*:categories="navCategories"/);
+    const navigation = read("app/composables/useCatalogNavigation.ts");
+    expect(navigation).toContain('"/api/catalog"');
+    expect(navigation).toContain("title: type.name");
+    expect(navigation).not.toContain("/api/home");
   });
   it("keeps only the retained experimental routes", () => {
     for (const index of [2, 3, 4]) {

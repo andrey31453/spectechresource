@@ -36,6 +36,9 @@ export default defineNuxtConfig({
       // без него блоки `.reveal` видны сразу, а табы показывают все панели.
       htmlAttrs: { lang: "ru", class: "js" },
       link: [
+        { rel: "preconnect", href: "https://fonts.googleapis.com" },
+        { rel: "preconnect", href: "https://fonts.gstatic.com", crossorigin: "anonymous" },
+        { rel: "stylesheet", href: "https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap", key: "site-font" },
         { rel: "icon", href: "/favicon.ico?v=6", sizes: "32x32 48x48" },
         { rel: "icon", type: "image/png", sizes: "32x32", href: "/favicon-32x32.png?v=6" },
         { rel: "icon", type: "image/svg+xml", href: "/favicon.svg?v=6" },

@@ -7,6 +7,9 @@ const serviceDto: AdminServiceDto = {
   slug: "vyvoz-grunta",
   title: "Вывоз грунта",
   description: null,
+  descriptionTop: "## Верх",
+  descriptionBottom: null,
+  equipmentTypeIds: ["type-1"],
   image: "/uploads/vyvoz-grunta.jpg",
   seoTitle: null,
   seoDescription: "Вывоз грунта самосвалами",
@@ -50,6 +53,9 @@ describe("форма услуги", () => {
       slug: "vyvoz-grunta",
       title: "Вывоз грунта",
       description: null,
+      descriptionTop: null,
+      descriptionBottom: null,
+      equipmentTypeIds: [],
       image: "/uploads/grunt.jpg",
       seoTitle: null,
       seoDescription: null,
@@ -69,5 +75,9 @@ describe("форма услуги", () => {
     expect(body.seoDescription).toBe("Вывоз грунта самосвалами");
     expect(body.sortOrder).toBe(20);
     expect(body.isPublished).toBe(false);
+    expect(body.descriptionTop).toBe("## Верх");
+    expect(body.descriptionBottom).toBeNull();
+    expect(body.equipmentTypeIds).toEqual(["type-1"]);
+    expect(body.equipmentTypeIds).not.toBe(serviceDto.equipmentTypeIds);
   });
 });

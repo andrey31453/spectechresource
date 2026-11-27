@@ -29,6 +29,15 @@ const validService = {
 };
 
 describe("схема услуги", () => {
+  it("принимает два описания и уникальные ID, ограничивает текст и список", () => {
+    expect(v.safeParse(ServiceUpdateSchema, { descriptionTop: "## Верх", descriptionBottom: "Низ", equipmentTypeIds: ["type-1"] }).success).toBe(true);
+    expect(fields(ServiceUpdateSchema, { equipmentTypeIds: ["a", "a"] })).toContain("equipmentTypeIds");
+    expect(fields(ServiceUpdateSchema, { equipmentTypeIds: [""] })).toContain("equipmentTypeIds.0");
+    expect(v.safeParse(ServiceUpdateSchema, { equipmentTypeIds: Array.from({ length: 101 }, (_, i) => String(i)) }).success).toBe(false);
+    expect(fields(ServiceUpdateSchema, { descriptionTop: "x".repeat(20001) })).toContain("descriptionTop");
+    expect(fields(ServiceUpdateSchema, { descriptionBottom: "x".repeat(20001) })).toContain("descriptionBottom");
+    expect(v.parse(ServiceUpdateSchema, { equipmentTypeIds: [] })).toEqual({ equipmentTypeIds: [] });
+  });
   it("принимает корректную услугу и нормализует код и заголовок", () => {
     const parsed = v.safeParse(ServiceCreateSchema, {
       ...validService,

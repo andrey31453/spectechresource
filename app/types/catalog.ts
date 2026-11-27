@@ -158,10 +158,18 @@ export interface LandingDto {
 }
 
 export interface ServiceDetailDto extends ServiceCardDto {
+  descriptionTopHtml: string | null;
+  descriptionBottomHtml: string | null;
+  equipment: ServiceEquipmentDto;
   seoTitle: string | null;
   seoDescription: string | null;
   contentHtml: string | null;
   faq: FaqDto[];
+}
+
+export interface ServiceEquipmentDto {
+  types: Array<{ slug: string; name: string }>;
+  models: HomeModelDto[];
 }
 
 export interface PageDto {

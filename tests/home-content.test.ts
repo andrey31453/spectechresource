@@ -18,6 +18,11 @@ describe("consolidated homepage content", () => {
     expect(cards).not.toContain("modelPath");
     expect(cards).toContain("object-cover");
     expect(cards).not.toContain("object-contain");
+    expect(cards).toContain('changePage(section, page - 1)');
+    expect(cards).toContain('target > current.index ? "next" : "previous"');
+    expect(cards).toContain('duration-350');
+    expect(cards).toContain('motion-reduce:translate-x-0!');
+    expect(cards).toContain('@before-leave="disableLeavingPage"');
     expect(cards).toContain("pagination(section).models");
     expect(cards).toContain("grid-cols-2 gap-4 md:grid-cols-3 xl:grid-cols-4");
     expect(cards).toContain("Предыдущая страница видов техники");
@@ -28,22 +33,22 @@ describe("consolidated homepage content", () => {
     const footer = read("app/components/SiteFooter.vue");
     expect(home).not.toContain('<section id="zayavka"');
     expect(home.split("<SiteFooter ")).toHaveLength(2);
-    expect(home).toContain(':services="services" stars>');
-    expect(home).toContain('<template #form>');
-    expect(home).toContain('<LeadForm place="callback"');
-    expect(footer).toContain('v-if="stars" id="zayavka"');
+    expect(home).toContain('<SiteFooter v-if="site" :site="site" />');
+    expect(footer).not.toContain('<slot name="form"');
+    expect(footer).toContain('<LeadForm place="callback"');
+    expect(footer).toContain('<footer id="zayavka"');
     expect(footer).toContain('stars stars--far');
     expect(footer).toContain('stars stars--giant');
     expect(footer.indexOf('data-footer-catalog')).toBeLessThan(footer.indexOf('data-footer-form'));
     expect(footer.indexOf('data-footer-form')).toBeLessThan(footer.indexOf('data-footer-contacts'));
     expect(footer).toContain('categoryPath(category.slug)');
     expect(footer).toContain('© {{ year }} {{ site.companyName }}.');
-    expect(footer).toContain('<footer v-else');
+    expect(footer).not.toContain('<footer v-else');
   });
 
   it("keeps the star footer airy with bottom-aligned navigation and no price disclaimer", () => {
     const footer = read("app/components/SiteFooter.vue");
-    const stars = footer.slice(footer.indexOf('<footer v-if="stars"'), footer.indexOf('<footer v-else'));
+    const stars = footer.slice(footer.indexOf('<footer id="zayavka"'), footer.indexOf('</template>'));
     expect(stars).not.toContain("site.priceDisclaimer");
     expect(stars).toContain("py-20!");
     expect(stars).toContain("md:py-28!");
@@ -59,7 +64,7 @@ describe("consolidated homepage content", () => {
 
   it("removes desktop footer separators and keeps only two on smaller screens", () => {
     const footer = read("app/components/SiteFooter.vue");
-    const stars = footer.slice(footer.indexOf('<footer v-if="stars"'), footer.indexOf('<footer v-else'));
+    const stars = footer.slice(footer.indexOf('<footer id="zayavka"'), footer.indexOf('</template>'));
     expect(stars.match(/\bborder-t\b/g)).toHaveLength(4);
     expect(stars.match(/lg:border-t-0/g)).toHaveLength(2);
     expect(stars).not.toContain("lg:border-l");
@@ -111,14 +116,14 @@ describe("consolidated homepage content", () => {
     expect(home).not.toContain('Заправка, ТО и текущий ремонт — наша зона');
   });
 
-  it("uses the approved warm palette by default on the homepage only", () => {
+  it("uses the approved warm palette through shared tokens", () => {
     expect(home).not.toContain('route.query.palette');
     expect(home).not.toContain('warmAmberPalette');
-    expect(home).toContain('class: "landing-page palette-warm-amber"');
-    expect(home).toContain('href: "/landing/warm-amber.css"');
+    expect(home).toContain('class: "landing-page"');
+    expect(home).not.toContain('href: "/landing/warm-amber.css"');
     expect(read("public/landing/warm-amber.css")).toContain("#f7f3ed");
     expect(read("public/landing/warm-amber.css")).toContain("#ffa43e");
-    expect(read("app/assets/css/tailwind.css")).not.toContain("#f7f3ed");
+    expect(read("app/assets/css/tailwind.css")).toContain("#f7f3ed");
     expect(read("app/layouts/default.vue")).not.toContain("warm-amber.css");
     expect(read("nuxt.config.ts")).not.toContain("warm-amber.css");
   });

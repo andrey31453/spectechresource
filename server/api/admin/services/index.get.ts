@@ -7,7 +7,7 @@ export default defineEventHandler(async (event) => {
 
   const services = await usePrisma().service.findMany({
     orderBy: [{ sortOrder: "asc" }, { title: "asc" }],
-    include: { _count: { select: { faq: true } } },
+    include: { _count: { select: { faq: true } }, equipmentTypes: { select: { id: true } } },
   });
 
   return { services: services.map(toAdminService) };

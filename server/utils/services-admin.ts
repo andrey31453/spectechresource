@@ -10,6 +10,9 @@ export interface AdminServiceDto {
   slug: string;
   title: string;
   description: string | null;
+  descriptionTop: string | null;
+  descriptionBottom: string | null;
+  equipmentTypeIds: string[];
   image: string | null;
   seoTitle: string | null;
   seoDescription: string | null;
@@ -25,6 +28,9 @@ export function toAdminService(service: {
   slug: string;
   title: string;
   description: string | null;
+  descriptionTop: string | null;
+  descriptionBottom: string | null;
+  equipmentTypes?: Array<{ id: string }>;
   image: string | null;
   seoTitle: string | null;
   seoDescription: string | null;
@@ -39,6 +45,9 @@ export function toAdminService(service: {
     slug: service.slug,
     title: service.title,
     description: service.description,
+    descriptionTop: service.descriptionTop,
+    descriptionBottom: service.descriptionBottom,
+    equipmentTypeIds: service.equipmentTypes?.map((type) => type.id) ?? [],
     image: service.image,
     seoTitle: service.seoTitle,
     seoDescription: service.seoDescription,

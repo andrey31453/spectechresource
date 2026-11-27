@@ -18,6 +18,9 @@ export interface ServiceForm {
   slug: string;
   title: string;
   description: string;
+  descriptionTop: string;
+  descriptionBottom: string;
+  equipmentTypeIds: string[];
   image: string;
   seoTitle: string;
   seoDescription: string;
@@ -31,6 +34,9 @@ export function emptyServiceForm(): ServiceForm {
     slug: "",
     title: "",
     description: "",
+    descriptionTop: "",
+    descriptionBottom: "",
+    equipmentTypeIds: [],
     image: "",
     seoTitle: "",
     seoDescription: "",
@@ -45,6 +51,9 @@ export function serviceFormFrom(service: AdminServiceDto): ServiceForm {
     slug: service.slug,
     title: service.title,
     description: text(service.description),
+    descriptionTop: text(service.descriptionTop),
+    descriptionBottom: text(service.descriptionBottom),
+    equipmentTypeIds: [...service.equipmentTypeIds],
     image: text(service.image),
     seoTitle: text(service.seoTitle),
     seoDescription: text(service.seoDescription),
@@ -60,6 +69,9 @@ export function serviceFormBody(form: ServiceForm) {
     slug: form.slug.trim(),
     title: form.title.trim(),
     description: emptyToNull(form.description),
+    descriptionTop: emptyToNull(form.descriptionTop),
+    descriptionBottom: emptyToNull(form.descriptionBottom),
+    equipmentTypeIds: [...form.equipmentTypeIds],
     image: emptyToNull(form.image),
     seoTitle: emptyToNull(form.seoTitle),
     seoDescription: emptyToNull(form.seoDescription),

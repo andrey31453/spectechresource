@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { CatalogTypeDto, ServiceCardDto } from "~/types/catalog";
+import type { ServiceCardDto } from "~/types/catalog";
 
 const { data: site } = await useSite();
 
@@ -8,18 +8,10 @@ const route = useRoute();
 /** Страницы с полноэкранными полосами объявляют `definePageMeta({ fullBleed: true })`. */
 const fullBleed = computed(() => route.meta.fullBleed === true);
 
-const { data: types } = await useAsyncData<CatalogTypeDto[]>(
-  "nav-categories",
-  () => $fetch<CatalogTypeDto[]>("/api/catalog"),
-  { deep: false },
-);
+const navCategories = await useCatalogNavigation();
 
 const { data: services } = await useAsyncData<ServiceCardDto[]>(
   "nav-services", () => $fetch<ServiceCardDto[]>("/api/services"), { deep: false },
-);
-
-const navCategories = computed(() =>
-  (types.value ?? []).map((type) => ({ slug: type.slug, title: type.name })),
 );
 
 if (site.value) {
@@ -62,6 +54,6 @@ if (site.value) {
       </div>
     </main>
 
-    <SiteFooter v-if="site" :site="site" :categories="navCategories" :services="services ?? []" />
+    <SiteFooter v-if="site" :site="site" />
   </div>
 </template>

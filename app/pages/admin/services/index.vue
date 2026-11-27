@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import type { FetchError } from "ofetch";
 import type { AdminServiceDto } from "~/types/admin-services";
+import type { AdminTypeListItemDto } from "~/types/admin-catalog";
 import {
   emptyServiceForm,
   serviceFormBody,
@@ -21,6 +22,10 @@ const { data, error, refresh } = await useAsyncData("admin-services", () =>
   requestFetch<{ services: AdminServiceDto[] }>("/api/admin/services"),
 );
 throwIfError(error.value);
+const { data: typeData, error: typeError } = await useAsyncData("admin-service-types", () =>
+  requestFetch<{ types: AdminTypeListItemDto[] }>("/api/admin/catalog/types"),
+);
+throwIfError(typeError.value);
 
 const services = computed(() => data.value?.services ?? []);
 
@@ -152,6 +157,22 @@ async function remove(service: AdminServiceDto) {
           hint="Показывается в карточке услуги и на странице"
         />
 
+        <AdminField label="Верхнее описание (markdown)" :error="fieldErrors.descriptionTop" hint="Перед блоком техники">
+          <textarea v-model="form.descriptionTop" class="field__input field__textarea" name="descriptionTop" rows="10" />
+        </AdminField>
+        <AdminField label="Виды техники для услуги" :error="fieldErrors.equipmentTypeIds" hint="На сайте показываются только опубликованные виды, разделы и модели. Порядок — как в каталоге.">
+          <div>
+            <label v-for="type in typeData?.types ?? []" :key="type.id" class="field field--check">
+              <input v-model="form.equipmentTypeIds" type="checkbox" :value="type.id" name="equipmentTypeIds">
+              <span>{{ type.name }}{{ type.isPublished ? '' : ' (скрыт)' }}</span>
+            </label>
+            <p v-if="!typeData?.types.length" class="field__hint">Сначала добавьте виды техники в каталог.</p>
+          </div>
+        </AdminField>
+        <AdminField label="Нижнее описание (markdown)" :error="fieldErrors.descriptionBottom" hint="После блока техники">
+          <textarea v-model="form.descriptionBottom" class="field__input field__textarea" name="descriptionBottom" rows="10" />
+        </AdminField>
+
         <label class="field field--check">
           <input v-model="form.isPublished" type="checkbox" name="isPublished">
           <span class="field__label">Опубликована на сайте</span>
@@ -167,7 +188,7 @@ async function remove(service: AdminServiceDto) {
               <input v-model="form.seoDescription" class="field__input" type="text" name="seoDescription">
             </AdminField>
           </div>
-          <AdminField label="SEO-текст (markdown)" :error="fieldErrors.seoText">
+          <AdminField label="Прежний SEO-текст (markdown)" :error="fieldErrors.seoText" hint="Сохраняется для совместимости. Выводится только если оба новых описания пусты.">
             <textarea v-model="form.seoText" class="field__input field__textarea" name="seoText" rows="6" />
           </AdminField>
         </details>

@@ -4,6 +4,9 @@ export interface AdminServiceDto {
   slug: string;
   title: string;
   description: string | null;
+  descriptionTop: string | null;
+  descriptionBottom: string | null;
+  equipmentTypeIds: string[];
   image: string | null;
   seoTitle: string | null;
   seoDescription: string | null;

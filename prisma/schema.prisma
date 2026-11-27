@@ -91,6 +91,7 @@ model EquipmentType {
   relatedFrom RelatedType[]    @relation("RelatedSource")
   relatedTo   RelatedType[]    @relation("RelatedTarget")
   leads       Lead[]
+  services    Service[]
 
   @@index([categoryId, sortOrder])
   @@index([isPublished])
@@ -155,6 +156,8 @@ model Service {
   slug           String   @unique
   title          String
   description    String?
+  descriptionTop String?
+  descriptionBottom String?
   image          String?
   seoTitle       String?
   seoDescription String?
@@ -165,6 +168,7 @@ model Service {
   updatedAt      DateTime @updatedAt
 
   faq FaqItem[]
+  equipmentTypes EquipmentType[]
 
   @@index([sortOrder])
   @@map("services")

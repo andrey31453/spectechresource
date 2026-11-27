@@ -4,6 +4,7 @@ import { readValidBody, requirePathParam, throwConflict, throwNotFound } from ".
 import { saveSlugRedirect, serviceSlugRedirect } from "../../../utils/catalog-slugs";
 import { isUniqueViolation } from "../../../utils/leads";
 import { toAdminService } from "../../../utils/services-admin";
+import { serviceEquipmentRelation, validateServiceEquipment } from "../../../utils/service-equipment";
 
 /**
  * Правка услуги: приходят только изменённые поля (`partial`-схема).
@@ -20,12 +21,14 @@ export default defineEventHandler(async (event) => {
     select: { slug: true },
   });
   if (!existing) throwNotFound("Услуга не найдена");
+  const { equipmentTypeIds, ...fields } = input;
+  await validateServiceEquipment(prisma, equipmentTypeIds);
 
   try {
     const service = await prisma.service.update({
       where: { id },
-      data: input,
-      include: { _count: { select: { faq: true } } },
+      data: { ...fields, equipmentTypes: serviceEquipmentRelation(equipmentTypeIds) },
+      include: { _count: { select: { faq: true } }, equipmentTypes: { select: { id: true } } },
     });
 
     if (input.slug) {
