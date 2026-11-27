@@ -1,7 +1,8 @@
 /** Полный парк моделей для каталога; группы главной не являются фильтрами. */
-export default defineEventHandler(async () => {
+export default defineEventHandler(async (event) => {
+  const categorySlug = String(getQuery(event).categorySlug ?? "");
   const types = await usePrisma().equipmentType.findMany({
-    where: { isPublished: true, category: { isPublished: true } },
+    where: { isPublished: true, category: { isPublished: true, ...(categorySlug ? { slug: categorySlug } : {}) } },
     orderBy: [{ sortOrder: "asc" }, { name: "asc" }, { id: "asc" }],
     include: {
       category: { select: { slug: true } },

@@ -132,6 +132,11 @@ function specKey(value: string): string {
   return cleanText(value).toLocaleLowerCase("ru").replace(/ё/g, "е").replace(/\s*:\s*$/, "");
 }
 
+/** Марка и модель — отдельные поля товара; их дубль не является характеристикой. */
+export function withoutEquipmentNameSpec(specs: ImportSpec[]): ImportSpec[] {
+  return specs.filter((spec) => specKey(spec.name) !== "название техники");
+}
+
 function comparableValue(value: string): string {
   return specKey(value).replace(/(\d)\s+(?=\d)/g, "$1").replace(/(\d),(?=\d)/g, "$1.");
 }
@@ -153,7 +158,7 @@ export function mergeArchivedProducts(products: ArchivedProduct[]): { products: 
   const groups = new Map<string, ArchivedProduct[]>();
   for (const original of products) {
     const crane = /^\s*(?:аренда\s+)?автокран\s+\d+(?:[.,]\d+)?\s+тонн\s+/i.test(original.title);
-    const product = { ...original, ...(crane ? splitBrandModel(original.title) : {}) };
+    const product = { ...original, specs: withoutEquipmentNameSpec(original.specs), ...(crane ? splitBrandModel(original.title) : {}) };
     // Unknown sections must not be collapsed into a single null-type category.
     const section = product.typeId ?? `${product.source}:${specKey(product.sourceSection)}`;
     const key = JSON.stringify([section, specKey(product.brand), specKey(product.model)]);

@@ -69,7 +69,7 @@ export default defineEventHandler(async () => {
       title: category.title,
       shortDesc: category.shortDesc,
       image: category.image,
-      types: category.types.map(toTypeCard),
+      types: category.types.map((type) => ({ ...toTypeCard(type), description: type.descriptionTop?.trim() || type.worksPerformed })),
     })),
     models: models.filter((model) => model.type !== null).map((model) => toHomeModel({ ...model, type: model.type! })),
     services,

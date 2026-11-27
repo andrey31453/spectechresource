@@ -4,7 +4,7 @@ import { resolve } from "node:path";
 import { PrismaPg } from "@prisma/adapter-pg";
 import { PrismaClient } from "../generated/prisma/client";
 import { modelSlug } from "../shared/utils/model-slug";
-import type { ArchivedProduct } from "../server/utils/catalog-import";
+import { withoutEquipmentNameSpec, type ArchivedProduct } from "../server/utils/catalog-import";
 
 const input = process.argv[2];
 if (!input || !process.argv.includes("--replace-and-clear-leads")) throw new Error("Укажите архив и --replace-and-clear-leads");
@@ -30,7 +30,7 @@ const data = products.map((product, sortOrder) => {
   let suffix = 1;
   while (slugs.has(JSON.stringify([product.typeId, slug]))) slug = `${base}-${++suffix}`;
   slugs.add(JSON.stringify([product.typeId, slug]));
-  return { slug, typeId: product.typeId, brand: product.brand, model: product.model, shortDesc: product.description, pricePerHour: product.pricePerHour, pricePerShift: product.pricePerShift, photos: product.photos, isPublished: product.isPublished, sortOrder, specs: { create: product.specs.map((spec, index) => ({ name: spec.name, value: spec.value, sortOrder: index })) } };
+  return { slug, typeId: product.typeId, brand: product.brand, model: product.model, shortDesc: product.description, pricePerHour: product.pricePerHour, pricePerShift: product.pricePerShift, photos: product.photos, isPublished: product.isPublished, sortOrder, specs: { create: withoutEquipmentNameSpec(product.specs).map((spec, index) => ({ name: spec.name, value: spec.value, sortOrder: index })) } };
 });
 for (const product of products) {
   if (!Array.isArray(product.photos) || !product.photos.length) throw new Error("Нет фотографий");

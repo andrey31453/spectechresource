@@ -9,6 +9,8 @@ export interface CityDto {
 }
 
 export interface TypeCardDto {
+  /** Краткая информация главной: descriptionTop или worksPerformed. */
+  description?: string | null;
   slug: string;
   name: string;
   nameGenitive: string;

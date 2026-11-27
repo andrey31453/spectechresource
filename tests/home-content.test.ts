@@ -5,6 +5,25 @@ const read = (path: string) => readFileSync(new URL(`../${path}`, import.meta.ur
 const home = read("app/pages/index.vue");
 
 describe("consolidated homepage content", () => {
+  it("replaces individual machines with type card grids and removes the duplicate category overview", () => {
+    expect(home).toContain("<HomeTypeSections");
+    expect(home).not.toContain("<HomeModelsSignatureSections");
+    expect(home).not.toContain('id="katalog"');
+    expect(home).not.toContain("От котлована до свай");
+    const cards = read("app/components/HomeTypeSections.vue");
+    expect(cards).toContain("typePath(type.slug)");
+    expect(cards).toContain("type.modelsCount");
+    expect(cards).toContain("type.description");
+    expect(cards).toContain("formatPriceFrom(type.priceFrom, type.priceUnit)");
+    expect(cards).not.toContain("modelPath");
+    expect(cards).toContain("object-cover");
+    expect(cards).not.toContain("object-contain");
+    expect(cards).toContain("pagination(section).models");
+    expect(cards).toContain("grid-cols-2 gap-4 md:grid-cols-3 xl:grid-cols-4");
+    expect(cards).toContain("Предыдущая страница видов техники");
+    expect(cards).toContain("Следующая страница видов техники");
+    expect(cards).toContain(":aria-current=");
+  });
   it("combines the homepage request block and footer in three columns", () => {
     const footer = read("app/components/SiteFooter.vue");
     expect(home).not.toContain('<section id="zayavka"');

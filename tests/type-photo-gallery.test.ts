@@ -5,7 +5,7 @@ const read = (path: string) => readFileSync(new URL(`../${path}`, import.meta.ur
 
 describe("type page photo gallery", () => {
   const gallery = read("app/components/TypePhotoGallery.vue");
-  const page = read("app/pages/arenda-[slug].vue");
+  const page = read("app/components/EquipmentTypeLanding.vue");
 
   it("places models before the compact gallery", () => {
     expect(page.indexOf("data-model-list")).toBeLessThan(page.indexOf("<TypePhotoGallery"));

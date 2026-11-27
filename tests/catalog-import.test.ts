@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { cleanText, htmlToText, inferSection, matchEquipmentType, mergeArchivedProducts, parseMoney, parsePrice, splitBrandModel, type ArchivedProduct } from "../server/utils/catalog-import";
+import { cleanText, htmlToText, inferSection, matchEquipmentType, mergeArchivedProducts, parseMoney, parsePrice, splitBrandModel, withoutEquipmentNameSpec, type ArchivedProduct } from "../server/utils/catalog-import";
 
 describe("catalog import normalization", () => {
   it("normalizes whitespace and common entities", () => {
@@ -40,6 +40,24 @@ describe("catalog import normalization", () => {
 const product = (overrides: Partial<ArchivedProduct> = {}): ArchivedProduct => ({ source: "msg-spectech", sourceSection: "Мини-экскаваторы", title: "Bobcat E50", brand: "Bobcat", model: "E50", description: "Описание", specs: [], pricePerHour: null, pricePerShift: null, photos: ["/uploads/a.webp"], typeId: "mini", isPublished: true, ...overrides });
 
 describe("archive deduplication", () => {
+  it("removes equipment name specs without changing identity or other specs", () => {
+    const specs = [
+      { name: "Название техники", value: "Экскаватор" },
+      { name: " НАЗВАНИЕ\u00a0 техники : ", value: "Другой заголовок" },
+      { name: "Мощность", value: "100" },
+    ];
+    expect(withoutEquipmentNameSpec(specs)).toEqual([{ name: "Мощность", value: "100" }]);
+    expect(withoutEquipmentNameSpec([])).toEqual([]);
+    expect(specs).toHaveLength(3);
+    const original = product({ brand: "JCB", model: "JC130", specs });
+    const single = mergeArchivedProducts([original]).products[0]!;
+    expect(single).toMatchObject({ brand: "JCB", model: "JC130", specs: [{ name: "Мощность", value: "100" }] });
+    expect(original.specs).toHaveLength(3);
+    const merged = mergeArchivedProducts([original, { ...original, specs: [{ name: "Название техники", value: "Другой текст" }] }]);
+    expect(merged.products[0]?.specs).toEqual(single.specs);
+    expect(merged.merges[0]?.conflicts).toEqual([]);
+    expect(mergeArchivedProducts([single]).products).toEqual([single]);
+  });
   it("merges photos, paragraphs and specs and selects each minimum price independently", () => {
     const a = product({ description: "Общее\n\nПервое", pricePerHour: "1200.00", pricePerShift: "7000.00", specs: [{ name: "Масса", value: "4 900" }] });
     const b = product({ source: "aksgroup", description: "Общее\n\nВторое", pricePerHour: "1000.00", pricePerShift: "8000.00", photos: ["/uploads/a.webp", "/uploads/b.webp"], specs: [{ name: "Масса", value: "4900" }, { name: "Мощность", value: "50" }] });

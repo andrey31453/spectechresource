@@ -12,14 +12,10 @@ withDefaults(defineProps<{ models: HomeModelDto[]; wide?: boolean; equipmentType
       <CatalogPhotoCarousel :photos="model.photos" :title="`${model.brand} ${model.model}`" :href="modelPath(model.typeSlug, model.slug)" />
       <NuxtLink :to="modelPath(model.typeSlug, model.slug)" class="group flex flex-1 flex-col text-ink! no-underline! focus-visible:outline-2 focus-visible:-outline-offset-4 focus-visible:outline-ink">
         <div class="flex flex-1 flex-col p-5">
-          <p class="m-0! text-sm text-muted!">{{ model.typeName }}</p>
-          <h3 class="mt-2! mb-0! text-xl! leading-snug! font-bold [overflow-wrap:anywhere]">{{ model.brand }} {{ model.model }}</h3>
-          <p v-if="model.shortDesc" class="mt-3! mb-0! whitespace-pre-line text-sm leading-relaxed [overflow-wrap:anywhere]">{{ model.shortDesc }}</p>
-          <ModelSpecs :specs="model.specs" class="mt-5 border-t border-line pt-4" />
+          <h3 class="mt-0! mb-0! text-xl! leading-snug! font-bold [overflow-wrap:anywhere]">{{ model.brand }} {{ model.model }}</h3>
           <div class="mt-auto pt-5">
             <p class="m-0! text-lg font-bold text-ink!">{{ model.pricePerShift ? `${formatMoney(model.pricePerShift)} ₽ / смена` : model.pricePerHour ? `${formatMoney(model.pricePerHour)} ₽ / час` : 'Цена по запросу' }}</p>
             <p v-if="model.pricePerShift && model.pricePerHour" class="mt-1! mb-0! text-sm text-muted!">{{ formatMoney(model.pricePerHour) }} ₽ / час</p>
-            <span class="mt-5 flex min-h-11 items-center justify-between gap-3 rounded-field bg-ink px-4 py-3 text-sm font-bold text-white transition-colors group-hover:bg-ink2 motion-reduce:transition-none">Подробнее о технике <span aria-hidden="true">→</span></span>
           </div>
         </div>
       </NuxtLink>

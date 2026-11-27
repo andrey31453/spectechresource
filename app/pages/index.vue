@@ -2,10 +2,9 @@
 import { computed, nextTick, onBeforeUnmount, onMounted, ref } from "vue";
 import type { HomeDto } from "~/types/catalog";
 import { initLanding } from "~/utils/landing";
-import { categoryModelSections } from "~/utils/model-groups";
 import { telHref } from "~/utils/phone";
 import { pluralRu } from "~/utils/plural";
-import { formatPriceFrom, formatPriceShort, lowestPrice } from "~/utils/price";
+import { formatPriceFrom, formatPriceShort } from "~/utils/price";
 import { servicePath, typePath } from "~/utils/routes";
 import { useAsyncData, useHead } from "nuxt/app";
 
@@ -24,8 +23,6 @@ import { useAsyncData, useHead } from "nuxt/app";
  */
 definePageMeta({ layout: false });
 
-/** Сколько видов показываем в карточке раздела: остальные сворачиваются в «ещё N». */
-const CATALOG_TYPES_LIMIT = 4;
 const heroActive = ref(false);
 
 const { data: site } = await useSite();
@@ -128,44 +125,6 @@ const parkTypeLabel = computed(
 const parkSectionsLabel = computed(
   () =>
     `${categories.value.length} ${pluralRu(categories.value.length, ["раздел", "раздела", "разделов"])}`,
-);
-
-/** Категории БД — секции главной; порядок, описание и тема из админки. */
-const modelSections = computed(() => categoryModelSections(categories.value, models.value));
-
-/** Классы, которые заказывают чаще всего: по ним в карточках разделов ставим «Хит спроса». */
-const HIT_TYPE_SLUGS = new Set([
-  "gusenichnogo-ekskavatora",
-  "avtokrana",
-  "samosvala",
-  "katka",
-]);
-
-/**
- * Разделы каталога для сетки: четыре вида в списке, цена «от» по разделу,
- * счётчик видов и остаток за пределами списка.
- */
-const catalogCards = computed(() =>
-  categories.value.map((category) => {
-    const price = lowestPrice(category.types);
-    const types = category.types.slice(0, CATALOG_TYPES_LIMIT);
-    const hidden = category.types.length - types.length;
-
-    return {
-      slug: category.slug,
-      title: category.title,
-      shortDesc: category.shortDesc,
-      isHit: category.types.some((type) => HIT_TYPE_SLUGS.has(type.slug)),
-      price: price
-        ? formatPriceFrom(price.priceFrom, price.priceUnit)
-        : "Цена по запросу",
-      types,
-      typesCount: `${category.types.length} ${pluralRu(category.types.length, ["вид", "вида", "видов"])}`,
-      moreCount: hidden
-        ? `ещё ${hidden} ${pluralRu(hidden, ["вид", "вида", "видов"])}`
-        : null,
-    };
-  }),
 );
 
 /** Слаги «быстрого подбора»: частые заказы в полосе `#podbor` под первым экраном. */
@@ -409,8 +368,8 @@ onBeforeUnmount(() => {
         </div>
       </section>
 
-      <div v-if="models.length" id="modeli">
-        <HomeModelsSignatureSections :sections="modelSections" variant="h" :thumbnails="true" :city-slug="city.slug" :price-disclaimer="priceDisclaimer" />
+      <div v-if="categories.length" id="modeli">
+        <HomeTypeSections :categories="categories" :models="models" :price-disclaimer="priceDisclaimer" />
       </div>
 
       <section id="o-kompanii" class="band on-light">
@@ -446,117 +405,6 @@ onBeforeUnmount(() => {
                   <path d="M4 12h15M13.5 6.5 19 12l-5.5 5.5" /></svg
               ></a>
             </div>
-          </div>
-        </div>
-      </section>
-
-      <section id="katalog" class="band grid-bg">
-        <div class="shell">
-          <span class="kicker">Каталог техники</span>
-          <h2 class="h2 mt-4">От котлована до свай: {{ parkSectionsLabel }} каталога</h2>
-          <p class="lead mt-4 max-w-4xl">
-            Разложили парк по задачам: земляные работы, погрузка, монтаж, дорога,
-            бетон, перевозка, коммунальное хозяйство и сваи. В карточке — цена
-            «от» за смену, что входит в раздел и сколько видов внутри. Начните с
-            раздела, который ближе к вашей задаче.
-          </p>
-          <div class="mt-10 grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-            <article
-              v-for="card in catalogCards"
-              :key="card.slug"
-              class="panel flex flex-col p-6 reveal"
-            >
-              <div class="flex items-start justify-between gap-3">
-                <svg
-                  class="h-7 w-7 text-flame"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  stroke-width="1.6"
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  aria-hidden="true"
-                  focusable="false"
-                >
-                  <path d="M3 16.5V12h3.5V8.5h6V12H18l3 2.5v2h-2" />
-                  <path d="M6.5 16.5h11" />
-                  <path
-                    d="M6 19.5a1.8 1.8 0 1 0 0-3.6 1.8 1.8 0 0 0 0 3.6zM17 19.5a1.8 1.8 0 1 0 0-3.6 1.8 1.8 0 0 0 0 3.6z"
-                  />
-                </svg>
-                <span v-if="card.isHit" class="chip">Хит спроса</span>
-              </div>
-              <h3 class="h3 mt-5">{{ card.title }}</h3>
-              <p class="panel__meta mt-3">{{ card.shortDesc }}</p>
-              <p class="mt-4 text-lg font-semibold text-flame">
-                {{ card.price }}
-              </p>
-              <ul class="tick mt-5">
-                <li v-for="type in card.types" :key="type.slug">
-                  {{ type.name }} —
-                  {{ formatPriceShort(type.priceFrom, type.priceUnit) }}
-                </li>
-              </ul>
-              <div class="mt-5 flex flex-wrap gap-2">
-                <span class="chip">{{ card.typesCount }}</span>
-                <span v-if="card.moreCount" class="chip">{{
-                  card.moreCount
-                }}</span>
-              </div>
-              <div class="mt-auto pt-5">
-                <div class="border-t border-flame/30 pt-5" aria-hidden="true" />
-                <a class="btn btn--ghost" href="/katalog"
-                  >Весь каталог<svg
-                    class="h-4 w-4"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    stroke-width="1.6"
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    aria-hidden="true"
-                    focusable="false"
-                  >
-                    <path d="M4 12h15M13.5 6.5 19 12l-5.5 5.5" /></svg
-                ></a>
-              </div>
-            </article>
-          </div>
-          <p
-            class="note mt-6 border-l-2 px-4 py-3 text-sm border-flame/70 bg-flame/5"
-          >
-            {{ priceDisclaimer }}
-          </p>
-          <div class="mt-8 flex flex-wrap gap-3">
-            <a class="btn btn--primary" href="/katalog"
-              >Весь каталог — {{ parkTypeLabel
-              }}<svg
-                class="h-4 w-4"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="1.6"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                aria-hidden="true"
-                focusable="false"
-              >
-                <path d="M4 12h15M13.5 6.5 19 12l-5.5 5.5" /></svg
-            ></a>
-            <a class="btn btn--ghost" href="#zayavka"
-              >Подобрать под задачу<svg
-                class="h-4 w-4"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="1.6"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                aria-hidden="true"
-                focusable="false"
-              >
-                <path d="M4 12h15M13.5 6.5 19 12l-5.5 5.5" /></svg
-            ></a>
           </div>
         </div>
       </section>

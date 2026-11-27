@@ -5,7 +5,7 @@ import { dirname, resolve } from "node:path";
 import { PrismaPg } from "@prisma/adapter-pg";
 import { PrismaClient } from "../generated/prisma/client";
 import { processUploadImage } from "../server/utils/image-processing";
-import { htmlToText, matchEquipmentType, parsePrice, splitBrandModel, type ArchivedProduct, type ImportSpec, type EquipmentTypeForImport } from "../server/utils/catalog-import";
+import { htmlToText, matchEquipmentType, parsePrice, splitBrandModel, withoutEquipmentNameSpec, type ArchivedProduct, type ImportSpec, type EquipmentTypeForImport } from "../server/utils/catalog-import";
 import { detectImageMime, uploadStoragePath, uploadUrlFromPath, uploadGroupPaths, type ImageVariant } from "../shared/utils/uploads";
 
 const MAX_PRODUCTS = Number(process.env.IMPORT_MAX_PRODUCTS || 0);
@@ -28,7 +28,7 @@ function extractSpecs(html: string): ImportSpec[] {
     for (const match of html.matchAll(pattern)) specs.push({ name: htmlToText(match[1]!).replace(/:\s*$/, ""), value: htmlToText(match[2]!) });
   }
   const unique = new Map(specs.map((spec) => [`${spec.name}:${spec.value}`, spec]));
-  return [...unique.values()];
+  return withoutEquipmentNameSpec([...unique.values()]);
 }
 function extractImages(html: string, base: string): string[] {
   const candidates = [...matches(html, /(?:src|data-src|data-lazy-src|href)=["']([^"']+\.(?:jpe?g|png|webp|avif)(?:\?[^"']*)?)["']/gi), ...matches(html, /<meta[^>]+property=["']og:image["'][^>]+content=["']([^"']+)["']/gi)];

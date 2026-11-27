@@ -67,12 +67,12 @@ describe("shared design system", () => {
     expect(read("app/assets/css/main.css")).not.toMatch(/body:not\(\.landing-page\) \.grid\s*\{/);
   });
   it("keeps the desktop catalog filter sticky and scrollable within the viewport", () => {
-    const catalog = read("app/pages/katalog/index.vue");
+    const catalog = read("app/components/CatalogListing.vue");
     expect(catalog).toContain("lg:sticky lg:top-24");
     expect(catalog).toContain("lg:max-h-[calc(100dvh-7rem)] lg:overflow-y-auto");
   });
   it("uses a wider shared card grid on type pages without a sidebar", () => {
-    const landing = read("app/pages/arenda-[slug].vue");
+    const landing = read("app/components/EquipmentTypeLanding.vue");
     expect(landing).toContain('<CatalogModelsGrid :models="models" wide :equipment-type-slug="typeSlug" :equipment-label="landing.type.name" />');
     expect(landing).not.toContain("<aside");
     expect(read("app/components/CatalogModelsGrid.vue")).toContain("wide ? 'lg:grid-cols-3 xl:grid-cols-4' : 'xl:grid-cols-3'");
@@ -90,14 +90,14 @@ describe("shared design system", () => {
     expect(grid).toContain("предложим возможные варианты решения");
     expect(grid).toContain('<SiteButton href="#zayavka" :data-equipment-type-slug="equipmentTypeSlug" :data-equipment-label="equipmentLabel"');
     expect(grid).toContain("Обсудить задачу");
-    expect(read("app/pages/katalog/index.vue")).toContain(':equipment-type-slug="selectedType?.slug" :equipment-label="selectedType?.name"');
+    expect(read("app/components/CatalogListing.vue")).toContain(':equipment-type-slug="selectedType?.slug" :equipment-label="selectedType?.name"');
   });
   it("shares model specifications and compact shelf spacing", () => {
     const shelf = read("app/components/HomeModelsSignatureSections.vue");
     expect(shelf).toContain("mt-6 min-w-0 scroll-mt-24 md:mt-8");
     expect(shelf).not.toContain("scroll-mt-24 pt-10");
     expect(shelf).toContain("<ModelSpecs");
-    expect(read("app/pages/arenda-[slug].vue")).toContain("<CatalogModelsGrid");
-    expect(read("app/components/CatalogModelsGrid.vue")).toContain("<ModelSpecs");
+    expect(read("app/components/EquipmentTypeLanding.vue")).toContain("<CatalogModelsGrid");
+    expect(read("app/components/CatalogModelsGrid.vue")).not.toContain("<ModelSpecs");
   });
 });
