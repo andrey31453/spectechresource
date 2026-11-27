@@ -1,0 +1,54 @@
+name: Deploy production
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: production-deploy
+  cancel-in-progress: false
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci
+      - run: npm run lint
+      - run: npm run test
+      - run: npm run typecheck
+      - run: npm run build
+      - name: Prepare release
+        run: |
+          tar -czf "$RUNNER_TEMP/release.tar.gz" .output package.json package-lock.json prisma7.config.ts prisma shared scripts server/utils deploy
+      - name: Install SSH client
+        run: sudo apt-get update -qq && sudo apt-get install -y -qq sshpass
+      - name: Upload and deploy
+        env:
+          SSHPASS: ${{ secrets.SSH_KEY }}
+          ADMIN_PASSWORD_HASH: ${{ secrets.ADMIN_PASSWORD_HASH }}
+        run: |
+          set -euo pipefail
+          umask 077
+          test -n "$SSHPASS"
+          test -n "$ADMIN_PASSWORD_HASH"
+          ssh-keyscan -t ed25519 -T 10 129.101.113.247 > "$RUNNER_TEMP/known_hosts"
+          ssh-keygen -lf "$RUNNER_TEMP/known_hosts" | grep -F 'SHA256:hJAv4KrOs02WdM9uNhrFwD5TFAdOBwvbBlEZH8VyECs'
+          opts=(-o PreferredAuthentications=password -o PubkeyAuthentication=no -o StrictHostKeyChecking=yes -o UserKnownHostsFile="$RUNNER_TEMP/known_hosts" -o ConnectTimeout=20 -o ServerAliveInterval=15)
+          remote=root@129.101.113.247
+          printf 'ADMIN_EMAIL=%q\nADMIN_PASSWORD_HASH=%q\n' 'admin@example.ru' "$ADMIN_PASSWORD_HASH" > "$RUNNER_TEMP/admin.env"
+          trap 'rm -f "$RUNNER_TEMP/admin.env"' EXIT
+          sshpass -e ssh "${opts[@]}" "$remote" 'install -d -m 750 /opt/spectech'
+          sshpass -e scp "${opts[@]}" "$RUNNER_TEMP/admin.env" "$remote:/opt/spectech/admin.env"
+          sshpass -e scp "${opts[@]}" "$RUNNER_TEMP/release.tar.gz" "$remote:/opt/spectech/incoming.tar.gz"
+          sshpass -e scp "${opts[@]}" deploy/release.sh "$remote:/opt/spectech/release.sh"
+          sshpass -e ssh "${opts[@]}" "$remote" "bash /opt/spectech/release.sh '$GITHUB_SHA-$GITHUB_RUN_NUMBER'"
+      - name: Check live site
+        run: |
+          curl --fail --retry 3 https://specteh.online/ -o /dev/null
+          curl --fail https://specteh.online/api/services -o /dev/null
+          curl --fail https://specteh.online/admin/login -o /dev/null
+          echo '### Production: https://specteh.online' >> "$GITHUB_STEP_SUMMARY"
