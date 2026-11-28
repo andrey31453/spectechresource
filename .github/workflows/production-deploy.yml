@@ -32,6 +32,7 @@ jobs:
       - name: Upload and deploy
         env:
           SSHPASS: ${{ secrets.SSH_KEY }}
+          RUSENDER_API_TOKEN: ${{ secrets.RUSENDER_API_TOKEN }}
         run: |
           set -euo pipefail
           umask 077
@@ -43,6 +44,10 @@ jobs:
           sshpass -e ssh "${opts[@]}" "$remote" 'install -d -m 750 /opt/spectech'
           sshpass -e scp "${opts[@]}" "$RUNNER_TEMP/release.tar.gz" "$remote:/opt/spectech/incoming.tar.gz"
           sshpass -e scp "${opts[@]}" deploy/release.sh "$remote:/opt/spectech/release.sh"
+          if [[ -n "$RUSENDER_API_TOKEN" ]]; then
+            sshpass -e scp "${opts[@]}" deploy/configure-mail.py "$remote:/opt/spectech/configure-mail.py"
+            printf '%s' "$RUSENDER_API_TOKEN" | sshpass -e ssh "${opts[@]}" "$remote" 'python3 /opt/spectech/configure-mail.py'
+          fi
           sshpass -e ssh "${opts[@]}" "$remote" "bash /opt/spectech/release.sh '$GITHUB_SHA-$GITHUB_RUN_NUMBER'"
       - name: Check live site
         run: |

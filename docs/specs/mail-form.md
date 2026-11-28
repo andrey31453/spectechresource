@@ -32,3 +32,8 @@ HTTP-код/категорию, без ответа провайдера, ток
 Приёмка: unit-тесты транспорта/сервисного слоя с mock fetch, lint, typecheck,
 build. Настоящая доставка подтверждается отдельно в Rusender и ящике получателя.
 Токен из переписки рекомендуется отозвать и заменить.
+
+Production: workflow берёт GitHub Secret `RUSENDER_API_TOKEN`, передаёт по SSH
+stdin в `deploy/configure-mail.py`. Скрипт атомарно обновляет только четыре
+`NUXT_RUSENDER_*` в `/opt/spectech/shared/app.env` (0600), остальные настройки
+сохраняет. Штатный restart применяет окружение. Без секрета настройки не меняются.
