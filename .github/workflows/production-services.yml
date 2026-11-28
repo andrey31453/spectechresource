@@ -46,12 +46,12 @@ jobs:
           if [[ -n "$PHOTOS_RELEASE" ]]; then
             mkdir "$RUNNER_TEMP/photos"
             tar -xzf "$RUNNER_TEMP/services-photos.tar.gz" -C "$RUNNER_TEMP/photos"
-            while IFS= read -r -d '' file; do
+            while IFS= read -r -d '' file <&3; do
               relative=${file#"$RUNNER_TEMP/photos/"}
               [[ "$relative" =~ ^[0-9]{4}/[0-9]{2}/[a-f0-9-]+-full\.webp$ ]] || exit 1
               sshpass -e scp "${opts[@]}" "$file" "$remote:/opt/spectech/service-photo.tmp"
               sshpass -e ssh "${opts[@]}" "$remote" "set -e; target=/opt/spectech/shared/uploads/$relative; if test -e \"\$target\"; then cmp /opt/spectech/service-photo.tmp \"\$target\"; else install -D -o spectech -g spectech -m 640 /opt/spectech/service-photo.tmp \"\$target\"; fi; rm /opt/spectech/service-photo.tmp"
-            done < <(find "$RUNNER_TEMP/photos" -type f -print0)
+            done 3< <(find "$RUNNER_TEMP/photos" -type f -print0)
           fi
           sshpass -e scp "${opts[@]}" "$RUNNER_TEMP/services.json" "$remote:/opt/spectech/services.json"
           sshpass -e ssh "${opts[@]}" "$remote" 'bash -s' <<'REMOTE'
