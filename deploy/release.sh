@@ -83,7 +83,9 @@ fi
 nginx -t
 systemctl enable --now nginx
 systemctl reload nginx
-certbot --nginx --non-interactive --agree-tos --register-unsafely-without-email --redirect -d specteh.online
+if [[ ! -f /etc/letsencrypt/live/specteh.online/fullchain.pem ]]; then
+  certbot --nginx --non-interactive --agree-tos --register-unsafely-without-email --redirect -d specteh.online
+fi
 curl --fail --retry 5 --retry-delay 2 https://specteh.online/api/services >/dev/null
 rm -f "$base/incoming.tar.gz"
 echo "Release $release ready: https://specteh.online"
