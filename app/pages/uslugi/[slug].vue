@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import type { ServiceDetailDto } from "~/types/catalog";
-import { earthworksSlug } from "~~/shared/content/earthworks";
 
 definePageMeta({ fullBleed: true });
 
@@ -25,7 +24,7 @@ usePageSeo({
 </script>
 
 <template>
-  <article v-if="service && slug === earthworksSlug" id="service-earthworks" class="bg-cement2 text-ink">
+  <article v-if="service" :id="`service-${slug}`" data-service-page class="bg-cement2 text-ink">
     <section class="bg-night text-snow">
       <div class="mx-auto max-w-site px-5 pb-16 pt-6 md:px-8 md:pb-24">
         <div class="[&_a]:text-fog [&_span]:text-fog [&_nav]:text-fog [&_nav]:mb-10">
@@ -37,11 +36,11 @@ usePageSeo({
             <h1 class="mb-6 text-[clamp(2.75rem,6vw,5.5rem)] font-semibold leading-[1.02] tracking-tight">{{ service.title }}</h1>
             <p v-if="service.description" class="mb-8 max-w-xl text-lg leading-relaxed text-fog">{{ service.description }}</p>
             <SiteButton href="#zayavka" tone="light" with-arrow>Рассчитать работы</SiteButton>
-            <p class="mb-0 mt-4 text-sm leading-relaxed text-fog">Начнём с задачи, объёма и условий на площадке.</p>
+            <p class="mb-0 mt-4 text-sm leading-relaxed text-fog">Начнём с задачи, исходных данных и условий доступа.</p>
           </div>
           <figure v-if="service.image" class="m-0 min-w-0">
             <img :src="service.image" :alt="service.title" width="960" height="800" fetchpriority="high" class="aspect-[6/5] w-full rounded-card object-cover">
-            <figcaption class="mt-4 border-l-2 border-flame pl-4 text-sm leading-relaxed text-fog">Котлован · Траншеи · Погрузка · Обратная засыпка</figcaption>
+            <figcaption class="mt-4 border-l-2 border-flame pl-4 text-sm leading-relaxed text-fog">{{ service.title }} · Подбор техники под задачу</figcaption>
           </figure>
         </div>
       </div>
@@ -54,9 +53,9 @@ usePageSeo({
         <h2 class="mb-5 text-2xl font-semibold leading-tight">Расскажите об объекте</h2>
         <ul class="mb-7 space-y-4 text-sm leading-relaxed text-ink2">
           <li><strong class="block text-ink">Где работаем</strong>Адрес и условия подъезда.</li>
-          <li><strong class="block text-ink">Что делаем</strong>Вид работ, размеры и глубина.</li>
+          <li><strong class="block text-ink">Что делаем</strong>Задача, объём и параметры объекта или техники.</li>
           <li><strong class="block text-ink">Когда начинаем</strong>Желаемые даты и режим работ.</li>
-          <li><strong class="block text-ink">Куда перемещаем грунт</strong>На участке или с вывозом.</li>
+          <li><strong class="block text-ink">Что учесть</strong>Погрузка, доставка и ограничения доступа.</li>
         </ul>
         <SiteButton href="#zayavka" class="w-full">Обсудить задачу</SiteButton>
         <p class="mb-0 mt-4 text-sm leading-relaxed text-steel">Нет точных замеров? Начните с описания — уточним, какие данные нужны.</p>
@@ -86,24 +85,4 @@ usePageSeo({
       </div>
     </section>
   </article>
-  <div v-else-if="service" class="container py-8">
-    <SiteBreadcrumbs
-      :items="[
-        { name: 'Главная', path: '/' },
-        { name: 'Услуги', path: '/uslugi' },
-        { name: service.title },
-      ]"
-    />
-
-    <h1>{{ service.title }}</h1>
-    <p v-if="service.description" class="lead">{{ service.description }}</p>
-
-    <div v-if="service.descriptionTopHtml || service.contentHtml" v-html="service.descriptionTopHtml || service.contentHtml || ''" />
-    <ServiceEquipmentShowcase :equipment="service.equipment" :price-disclaimer="site?.priceDisclaimer" />
-    <div v-if="service.descriptionBottomHtml" v-html="service.descriptionBottomHtml" />
-
-    <FaqList v-if="service.faq.length" :items="service.faq" with-schema />
-
-    <CtaBlock v-if="site" :phone="site.phone" />
-  </div>
 </template>

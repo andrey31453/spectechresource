@@ -1,0 +1,200 @@
+name: Deploy to hosting (main)
+
+# Боевая выкладка: push в ветку main выкладывает на боевой сервер сайты, у
+# которых есть свой конфиг saits/sait-XX/hosting.json. Сайты без конфига на
+# сервер не едут — они живут только на витрине GitHub Pages (ветка develop,
+# .github/workflows/deploy-pages.yml).
+#
+# Транспорт задаётся полем transport в конфиге сайта:
+#   ssh      — rsync поверх SSH в документ-рут nginx (основной вариант),
+#   ftp/ftps — зеркало lftp (прошлый хостинг, оставлено для отката).
+#
+# Учётные данные в репозитории не хранятся: в hosting.json указано только имя
+# GitHub-секрета (passwordSecret или sshKeySecret). Перед первым запуском:
+# Settings → Secrets and variables → Actions → New repository secret.
+# Необязательно: Variable SSH_KNOWN_HOSTS — отпечаток ключа сервера (вывод
+# `ssh-keyscan -p 22 177.177.212.73`). Если задан, ssh доверяет только ему.
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      site:
+        description: 'Один сайт, например sait-13. Пусто — все сайты с hosting.json'
+        required: false
+        default: ''
+
+permissions:
+  contents: read
+
+# Параллельные выкладки не запускаем: зеркало должно идти по одному, а
+# прерванный деплой оставил бы сервер в промежуточном состоянии.
+concurrency:
+  group: hosting-deploy
+  cancel-in-progress: false
+
+jobs:
+  list:
+    name: Список сайтов с хостингом
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.sites.outputs.matrix }}
+      count: ${{ steps.sites.outputs.count }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Find sites with hosting.json
+        id: sites
+        env:
+          ONLY_SITE: ${{ inputs.site }}
+        run: |
+          if [ -n "$ONLY_SITE" ]; then
+            matrix=$(node saits/hosting-list.mjs --matrix --site "$ONLY_SITE")
+          else
+            matrix=$(node saits/hosting-list.mjs --matrix)
+          fi
+          count=$(node -e 'process.stdout.write(String(JSON.parse(process.argv[1]).include.length))' "$matrix")
+          {
+            echo "matrix<<JSON_END"
+            echo "$matrix"
+            echo "JSON_END"
+          } >> "$GITHUB_OUTPUT"
+          echo "count=$count" >> "$GITHUB_OUTPUT"
+          echo "Сайтов на выкладку: $count"
+
+  deploy:
+    name: ${{ matrix.site }}
+    needs: list
+    if: needs.list.outputs.count != '0'
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJSON(needs.list.outputs.matrix) }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # Секрет берётся по имени, указанному в saits/sait-XX/hosting.json
+      # (passwordSecret или sshKeySecret). Проверяем его до установки
+      # инструментов и сборки: иначе деплой падает только на выкладке, потратив
+      # время на сборку сайта.
+      - name: Check secret ${{ matrix.secret }}
+        env:
+          HOSTING_CREDENTIAL: ${{ secrets[matrix.secret] }}
+        run: |
+          if [ -z "${HOSTING_CREDENTIAL:-}" ]; then
+            echo "::error::Секрет «${{ matrix.secret }}» не найден. Добавьте его в Settings → Secrets and variables → Actions → Secrets (repository secret, не environment): имя — ${{ matrix.secret }}."
+            exit 1
+          fi
+          echo "Секрет «${{ matrix.secret }}» на месте"
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      # Инструменты под транспорт выкладки: ssh-варианту нужны rsync и sshpass
+      # (пароль через SSHPASS), ftp-варианту — lftp.
+      - name: Install tools (ssh)
+        if: matrix.transport == 'ssh'
+        run: sudo apt-get update -qq && sudo apt-get install -y -qq rsync sshpass
+
+      - name: Install tools (ftp)
+        if: matrix.transport != 'ssh'
+        run: sudo apt-get update -qq && sudo apt-get install -y -qq lftp
+
+      # Стейдж-сборка: адрес и индексация берутся из конфига, чтобы site.json
+      # оставался единственным источником данных, а боевой домен не попадал в
+      # canonical и sitemap, пока площадка живёт по IP.
+      - name: Build ${{ matrix.site }}
+        env:
+          SITE_STAGING: ${{ matrix.staging && '1' || '' }}
+          SITE_BASE_URL: ${{ matrix.baseUrl }}
+        run: ./saits/build.sh ${{ matrix.site }}
+
+      - name: Upload ${{ matrix.site }} to hosting
+        env:
+          HOSTING_CREDENTIAL: ${{ secrets[matrix.secret] }}
+          SSH_KNOWN_HOSTS: ${{ vars.SSH_KNOWN_HOSTS }}
+        run: ./saits/hosting-deploy.sh ${{ matrix.site }}
+
+      # Сайт sait-13 использует nginx вне document root. После выкладки статики
+      # синхронизируем deploy/ и применяем конфигурацию без переустановки TLS:
+      # install-tls.sh без аргументов сохраняет сертификат, проверяет nginx -t
+      # и делает reload. Иначе старый X-Robots-Tag оставался бы на VPS после
+      # удаления строки из репозитория.
+      - name: Prepare PHP mail and apply nginx config ${{ matrix.site }}
+        if: matrix.site == 'sait-13' && matrix.transport == 'ssh' && matrix.staging != true
+        env:
+          HOSTING_CREDENTIAL: ${{ secrets[matrix.secret] }}
+          SSH_KNOWN_HOSTS: ${{ vars.SSH_KNOWN_HOSTS }}
+        run: |
+          set -euo pipefail
+          site_dir="saits/${{ matrix.site }}"
+          tmp_files=()
+          cleanup() {
+            for file in "${tmp_files[@]+${tmp_files[@]}}"; do
+              rm -f "$file"
+            done
+          }
+          trap cleanup EXIT
+
+          ssh_opts=(
+            -p '${{ matrix.port }}'
+            -o ConnectTimeout=20
+            -o ServerAliveInterval=15
+            -o ServerAliveCountMax=3
+            -o NumberOfPasswordPrompts=1
+          )
+          if [ -n "${SSH_KNOWN_HOSTS:-}" ]; then
+            known_hosts_file="$(mktemp)"
+            tmp_files+=("$known_hosts_file")
+            printf '%s\n' "$SSH_KNOWN_HOSTS" >"$known_hosts_file"
+            ssh_opts+=(-o StrictHostKeyChecking=yes -o UserKnownHostsFile="$known_hosts_file")
+          else
+            ssh_opts+=(-o StrictHostKeyChecking=accept-new)
+          fi
+
+          if [ '${{ matrix.secretKind }}' = 'key' ]; then
+            key_file="$(mktemp)"
+            tmp_files+=("$key_file")
+            printf '%s\n' "$HOSTING_CREDENTIAL" >"$key_file"
+            chmod 600 "$key_file"
+            ssh_opts+=(-i "$key_file" -o IdentitiesOnly=yes -o BatchMode=yes)
+            rsync_ssh="ssh ${ssh_opts[*]}"
+            remote_cmd=(ssh "${ssh_opts[@]}" '${{ matrix.user }}@${{ matrix.host }}')
+          else
+            command -v sshpass >/dev/null 2>&1
+            export SSHPASS="$HOSTING_CREDENTIAL"
+            ssh_opts+=(-o PreferredAuthentications=password -o PubkeyAuthentication=no)
+            rsync_ssh="sshpass -e ssh ${ssh_opts[*]}"
+            remote_cmd=(sshpass -e ssh "${ssh_opts[@]}" '${{ matrix.user }}@${{ matrix.host }}')
+          fi
+
+          "${remote_cmd[@]}" "mkdir -p /root/deploy"
+          rsync -az -e "$rsync_ssh" "$site_dir/deploy/" '${{ matrix.user }}@${{ matrix.host }}:/root/deploy/'
+          rsync -az -e "$rsync_ssh" "$site_dir/mail-form/" '${{ matrix.user }}@${{ matrix.host }}:/root/mail-form/'
+          "${remote_cmd[@]}" 'MAIL_DOMAIN=zok.pro bash /root/mail-form/deploy/setup.sh'
+          "${remote_cmd[@]}" 'bash /root/deploy/install-tls.sh'
+          "${remote_cmd[@]}" 'code=$(curl -sS -o /tmp/site-lead-check.json -w "%{http_code}" -H "Accept: application/json" https://zok.pro/api/lead.php); cat /tmp/site-lead-check.json; test "$code" = 405'
+
+      - name: Summary
+        if: success()
+        run: |
+          {
+            echo "### ${{ matrix.site }} выложен на сервер"
+            if [ -n "${{ matrix.url }}" ]; then
+              echo ""
+              echo "${{ matrix.url }}"
+            fi
+            if [ "${{ matrix.staging }}" = "true" ]; then
+              echo ""
+              echo "Сборка стейджа: страницы noindex, robots.txt закрыт, счётчик Метрики не выводится."
+            fi
+          } >> "$GITHUB_STEP_SUMMARY"

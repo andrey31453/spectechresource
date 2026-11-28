@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import type { HomeModelDto, ServiceEquipmentDto } from "~/types/catalog";
 import { serviceShowcaseSelection } from "~/utils/service-showcase";
+import { modelPage } from "~/utils/model-showcase";
 
 const model = (id: string, typeSlug: string): HomeModelDto => ({
   id, typeSlug, slug: id, categorySlug: "earth", typeName: typeSlug,
@@ -13,6 +14,14 @@ const equipment: ServiceEquipmentDto = {
 };
 
 describe("service showcase selection", () => {
+  it("листит модели выбранного вида и ограничивает страницу при смене вида", () => {
+    const first = serviceShowcaseSelection(equipment, "a", "a2");
+    expect(modelPage(first.models, 1, 1).models.map(item => item.id)).toEqual(["a2"]);
+    const next = serviceShowcaseSelection(equipment, "b", "");
+    expect(modelPage(next.models, 1, 1)).toMatchObject({ index: 0, count: 1 });
+    expect(next.model?.id).toBe("b1");
+    expect(modelPage(serviceShowcaseSelection(equipment, "empty", "").models, 0, 4).models).toEqual([]);
+  });
   it("выбирает первый вид и модель для SSR", () => {
     const current = serviceShowcaseSelection(equipment, "", "");
     expect(current.type?.slug).toBe("a");

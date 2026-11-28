@@ -16,18 +16,35 @@ describe("consolidated homepage content", () => {
     expect(cards).toContain("type.description");
     expect(cards).toContain("formatPriceFrom(type.priceFrom, type.priceUnit)");
     expect(cards).not.toContain("modelPath");
-    expect(cards).toContain("object-cover");
-    expect(cards).not.toContain("object-contain");
-    expect(cards).toContain('changePage(section, page - 1)');
-    expect(cards).toContain('target > current.index ? "next" : "previous"');
-    expect(cards).toContain('duration-350');
-    expect(cards).toContain('motion-reduce:translate-x-0!');
-    expect(cards).toContain('@before-leave="disableLeavingPage"');
-    expect(cards).toContain("pagination(section).models");
-    expect(cards).toContain("grid-cols-2 gap-4 md:grid-cols-3 xl:grid-cols-4");
-    expect(cards).toContain("Предыдущая страница видов техники");
-    expect(cards).toContain("Следующая страница видов техники");
-    expect(cards).toContain(":aria-current=");
+    expect(cards).toContain("<EquipmentCarousel");
+    expect(cards).toContain('<template #content="{ item: type }">');
+    const carousel = read("app/components/EquipmentCarousel.vue");
+    expect(carousel).toContain("'object-cover'");
+    expect(carousel).toContain('next > pagination.value.index ? "next" : "previous"');
+    expect(carousel).toContain('duration-350');
+    expect(carousel).toContain('motion-reduce:translate-x-0!');
+    expect(carousel).toContain('@before-leave="disableLeavingPage"');
+    expect(carousel).toContain("pagination.models");
+    expect(carousel).toContain("grid-cols-2 gap-4 md:grid-cols-3 xl:grid-cols-4");
+    expect(carousel).toContain("Предыдущая страница");
+    expect(carousel).toContain("Следующая страница");
+    expect(carousel).toContain(":aria-current=");
+  });
+  it("shares the carousel and image shell with services, keeping content in scoped slots", () => {
+    for (const path of ["HomeTypeSections", "ServiceEquipmentShowcase"]) {
+      const component = read(`app/components/${path}.vue`);
+      expect(component).toContain("<EquipmentCarousel");
+      expect(component).toContain("<template #content=");
+      expect(component).not.toContain("modelPage");
+      expect(component).not.toContain("matchMedia");
+      expect(component).not.toContain("TransitionGroup");
+    }
+    const carousel = read("app/components/EquipmentCarousel.vue");
+    expect(carousel).toContain('<slot name="content" :item="item" />');
+    expect(carousel).toContain('if (transitioning.value || next === pagination.value.index) return');
+    expect(carousel).toContain('element.setAttribute("inert", "")');
+    expect(carousel).toContain('watch(itemKeys, () => { page.value = 0; })');
+    expect(carousel).toContain('onBeforeUnmount(() => removeMediaListeners?.())');
   });
   it("combines the homepage request block and footer in three columns", () => {
     const footer = read("app/components/SiteFooter.vue");
