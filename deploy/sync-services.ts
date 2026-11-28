@@ -1,4 +1,4 @@
-import { readFileSync } from "node:fs";
+import { readFileSync, existsSync } from "node:fs";
 import { PrismaPg } from "@prisma/adapter-pg";
 import { PrismaClient } from "../generated/prisma/client";
 
@@ -17,7 +17,10 @@ try {
       if (!row || Object.keys(row).some(key => !fields.includes(key)) || typeof row.slug !== "string" || typeof row.title !== "string" || !Array.isArray(row.equipmentTypes)) throw new Error("Invalid service payload");
       if (slugs.has(row.slug)) throw new Error("Duplicate service slug");
       slugs.add(row.slug);
-      if (row.image?.startsWith("/uploads/")) throw new Error("Upload images require separate file transfer");
+      if (row.image?.startsWith("/uploads/")) {
+        if (!/^\/uploads\/\d{4}\/\d{2}\/[a-f0-9-]+-full\.webp$/.test(row.image)
+          || !existsSync(`/opt/spectech/shared${row.image}`)) throw new Error("Service upload missing or invalid");
+      }
     }
     await prisma.$transaction(async tx => {
       for (const { equipmentTypes, ...data } of rows) {
