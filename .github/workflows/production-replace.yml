@@ -1,0 +1,57 @@
+name: Replace all production data
+on:
+  workflow_dispatch:
+    inputs:
+      confirmation:
+        description: Type REPLACE ALL PRODUCTION DATA (including administrators and leads)
+        required: true
+      release_tag:
+        description: Release containing encrypted replacement.enc only
+        required: true
+      sha256:
+        description: Expected SHA256 of encrypted archive
+        required: true
+permissions:
+  contents: read
+concurrency:
+  group: production-deploy
+  cancel-in-progress: false
+jobs:
+  replace:
+    if: github.ref == 'refs/heads/main' && inputs.confirmation == 'REPLACE ALL PRODUCTION DATA'
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - name: Download encrypted transfer
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_TAG: ${{ inputs.release_tag }}
+          EXPECTED_SHA: ${{ inputs.sha256 }}
+        run: |
+          set -euo pipefail
+          cd "$RUNNER_TEMP"
+          gh release download "$RELEASE_TAG" --repo "$GITHUB_REPOSITORY" --pattern replacement.enc
+          [[ "$EXPECTED_SHA" =~ ^[a-f0-9]{64}$ ]]
+          echo "$EXPECTED_SHA  replacement.enc" | sha256sum -c -
+      - run: sudo apt-get update -qq && sudo apt-get install -y -qq sshpass
+      - name: Restore, verify, back up and switch
+        env:
+          SSHPASS: ${{ secrets.SSH_KEY }}
+          TRANSFER_KEY: ${{ secrets.PRODUCTION_TRANSFER_KEY }}
+        run: |
+          set -euo pipefail
+          umask 077
+          test -n "$TRANSFER_KEY"
+          printf '%s' "$TRANSFER_KEY" > "$RUNNER_TEMP/replacement.key"
+          trap 'rm -f "$RUNNER_TEMP/replacement.key"' EXIT
+          ssh-keyscan -t ed25519 -T 10 129.101.113.247 > "$RUNNER_TEMP/known_hosts"
+          ssh-keygen -lf "$RUNNER_TEMP/known_hosts" | grep -F 'SHA256:hJAv4KrOs02WdM9uNhrFwD5TFAdOBwvbBlEZH8VyECs'
+          opts=(-o PreferredAuthentications=password -o PubkeyAuthentication=no -o StrictHostKeyChecking=yes -o UserKnownHostsFile="$RUNNER_TEMP/known_hosts" -o ConnectTimeout=20 -o ServerAliveInterval=15)
+          remote=root@129.101.113.247
+          sshpass -e scp "${opts[@]}" "$RUNNER_TEMP/replacement.enc" "$RUNNER_TEMP/replacement.key" deploy/replace-database.sh "$remote:/opt/spectech/"
+          sshpass -e ssh "${opts[@]}" "$remote" "CONFIRM_REPLACE='REPLACE ALL PRODUCTION DATA' bash /opt/spectech/replace-database.sh '$GITHUB_RUN_ID'"
+      - name: Check HTTPS
+        run: |
+          curl --fail --retry 3 https://specteh.online/katalog -o /dev/null
+          curl --fail https://specteh.online/api/home -o /dev/null
