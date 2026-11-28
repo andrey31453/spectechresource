@@ -69,13 +69,15 @@ function sectionTone(section: HomeModelSection) {
 <template>
   <div>
     <section
-      v-for="section in sections"
+      v-for="(section, index) in sections"
       :id="`modeli-${variant}-${section.slug}`"
       :key="section.slug"
       :aria-labelledby="`modeli-${variant}-title-${section.slug}`"
-      class="overflow-hidden px-5 md:px-8"
+      class="relative isolate overflow-hidden px-5 md:px-8"
       :class="[sectionTone(section), variant === 'h' ? 'py-[148px] md:py-[180px]' : 'py-12 md:py-20']"
     >
+      <div aria-hidden="true" class="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(circle_at_top_right,var(--color-flame),transparent_60%)]" :class="section.colorTheme === 'BLACK' ? 'opacity-25' : 'opacity-20'" />
+      <div aria-hidden="true" class="pointer-events-none absolute inset-0 -z-10 opacity-[0.06]" :class="index % 3 === 2 ? 'bg-[linear-gradient(to_right,currentColor_1px,transparent_1px),linear-gradient(to_bottom,currentColor_1px,transparent_1px)] bg-size-[56px_56px]' : 'bg-[radial-gradient(circle,currentColor_1px,transparent_1.1px)] bg-size-[15px_15px]'" />
       <div class="mx-auto max-w-site">
         <div v-if="variant !== 'h'" class="mb-8 flex flex-wrap items-center justify-between gap-4 border-b border-current/25 pb-4 text-xs font-bold tracking-widest uppercase">
           <span>{{ section.numberLabel }} / Парк техники</span>

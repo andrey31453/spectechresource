@@ -11,7 +11,9 @@ const sections = computed(() => homeTypeSections(props.categories, props.models)
 
 <template>
   <div data-home-types>
-    <section v-for="section in sections" :id="`modeli-h-${section.slug}`" :key="section.slug" :aria-labelledby="`types-title-${section.slug}`" class="overflow-hidden px-5 py-[148px] md:px-8 md:py-[180px]" :class="section.colorTheme === 'BLACK' ? 'bg-ink text-sand' : section.colorTheme === 'ORANGE' ? 'bg-flame text-ink' : 'bg-cement2 text-ink'">
+    <section v-for="(section, index) in sections" :id="`modeli-h-${section.slug}`" :key="section.slug" :aria-labelledby="`types-title-${section.slug}`" class="relative isolate overflow-hidden px-5 py-[148px] md:px-8 md:py-[180px]" :class="section.colorTheme === 'BLACK' ? 'bg-ink text-sand' : section.colorTheme === 'ORANGE' ? 'bg-flame text-ink' : 'bg-cement2 text-ink'">
+      <div aria-hidden="true" class="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(circle_at_top_right,var(--color-flame),transparent_60%)]" :class="section.colorTheme === 'BLACK' ? 'opacity-25' : 'opacity-20'" />
+      <div aria-hidden="true" class="pointer-events-none absolute inset-0 -z-10 opacity-[0.06]" :class="index % 3 === 2 ? 'bg-[linear-gradient(to_right,currentColor_1px,transparent_1px),linear-gradient(to_bottom,currentColor_1px,transparent_1px)] bg-size-[56px_56px]' : 'bg-[radial-gradient(circle,currentColor_1px,transparent_1.1px)] bg-size-[15px_15px]'" />
       <div class="mx-auto max-w-site">
         <h2 :id="`types-title-${section.slug}`" class="m-0! max-w-5xl text-[clamp(32px,5.8vw,80px)]! leading-[.98]! font-extrabold tracking-[-.055em] text-inherit! uppercase [overflow-wrap:anywhere]">{{ section.title }}</h2>
         <p v-if="section.lead" class="mt-5! mb-0! max-w-2xl text-lg leading-relaxed text-inherit!">{{ section.lead }}</p>
