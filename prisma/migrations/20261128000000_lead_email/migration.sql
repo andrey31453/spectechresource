@@ -1,0 +1,5 @@
+ALTER TABLE "leads"
+ADD COLUMN "emailSentAt" TIMESTAMP(3),
+ADD COLUMN "emailMessageId" TEXT,
+ADD COLUMN "emailAttempts" INTEGER NOT NULL DEFAULT 0,
+ADD COLUMN "emailErrorText" TEXT;

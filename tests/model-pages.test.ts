@@ -4,7 +4,7 @@ import { modelSlug } from "#shared/utils/model-slug";
 import { ModelCreateSchema, ModelUpdateSchema } from "#shared/schemas/catalog";
 import { LeadSchema } from "#shared/schemas/leads";
 import { buildLeadCreateData } from "~~/server/utils/leads";
-import { buildLeadPayload } from "~/utils/lead-form";
+import { buildLeadPayload } from "~/mail-form/payload";
 
 describe("model pages", () => {
   it("generates an initial code for Latin and Cyrillic names", () => {

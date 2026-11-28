@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { parse, safeParse } from "valibot";
 import { buildLeadSource, readLeadPageContext } from "~/utils/lead-source";
-import { buildLeadPayload } from "~/utils/lead-form";
+import { buildLeadPayload } from "~/mail-form/payload";
 import { LeadSchema } from "#shared/schemas/leads";
 import { buildLeadCreateData, toCrmLead, crmLeadFromRecord } from "~~/server/utils/leads";
 import { mapLeadToBitrix } from "~~/server/utils/bitrix";

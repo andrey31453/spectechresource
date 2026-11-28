@@ -3,7 +3,7 @@ import type { FetchError } from "ofetch";
 import { nextTick, ref } from "vue";
 import { safeParse } from "valibot";
 import { LeadSchema, toLeadFieldErrors, type LeadPlace } from "#shared/schemas/leads";
-import { buildLeadPayload, createRequestId } from "~/utils/lead-form";
+import { buildLeadPayload, createRequestId } from "~/mail-form/payload";
 import { readLeadPageContext, type LeadSourceContext } from "~/utils/lead-source";
 
 /**

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { buildLeadPayload, createRequestId, utmFromQuery } from "~/utils/lead-form";
+import { buildLeadPayload, createRequestId, utmFromQuery } from "~/mail-form/payload";
 
 describe("utmFromQuery", () => {
   it("достаёт UTM-метки в поля схемы", () => {

@@ -3,6 +3,8 @@ import { LeadSchema, toLeadFieldErrors } from "#shared/schemas/leads";
 import { buildLeadCreateData, isDryRun, isUniqueViolation, toCrmLead } from "../utils/leads";
 import { createLeadDelivery } from "../utils/leads-delivery";
 import { hitRateLimit } from "../utils/rate-limit";
+import { deliverLeadEmail } from "../mail-form/delivery";
+import { mailConfigFromRuntime, sendLeadEmail } from "../mail-form/rusender";
 
 /**
  * Приём заявки с сайта: валидация → запись в `Lead` → отправка в Битрикс24.
@@ -87,6 +89,17 @@ export default defineEventHandler(async (event) => {
       return { ok: true, duplicate: true };
     }
     throw error;
+  }
+
+  // Почтовая ошибка не отменяет сохранение заявки и не блокирует независимый канал CRM.
+  try {
+    const mail = mailConfigFromRuntime(config);
+    await deliverLeadEmail({ id: leadId, crm: toCrmLead(data, equipmentType?.name ?? null) }, {
+      send: (id, crm) => sendLeadEmail(id, crm, mail),
+      update: (id, update) => prisma.lead.update({ where: { id }, data: update }),
+    });
+  } catch {
+    console.warn(`[leads] заявка ${leadId}: результат email не сохранён; проверьте историю Rusender`);
   }
 
   const delivery = await createLeadDelivery(prisma, {

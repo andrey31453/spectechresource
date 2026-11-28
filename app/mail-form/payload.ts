@@ -2,7 +2,7 @@ import type { LocationQuery, LocationQueryValue } from "vue-router";
 import type { LeadPlace } from "#shared/schemas/leads";
 
 /**
- * Чистые помощники формы заявки: разбор UTM из адреса и сборка тела `POST /api/leads`.
+ * Клиентские помощники формы: разбор UTM и сборка тела `POST /api/leads`.
  * Схема — одна (`shared/schemas/leads.ts`), поэтому клиент отправляет ровно её поля.
  */
 

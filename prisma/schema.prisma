@@ -385,6 +385,12 @@ model Lead {
   crmLeadId String?
   errorText String?
 
+  /// Независимый от CRM результат приёма письма Rusender.
+  emailSentAt DateTime?
+  emailMessageId String?
+  emailAttempts Int @default(0)
+  emailErrorText String?
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 

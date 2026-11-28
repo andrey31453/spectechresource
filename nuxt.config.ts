@@ -14,6 +14,10 @@ export default defineNuxtConfig({
     experimental: { tasks: true },
   },
   runtimeConfig: {
+    rusenderApiToken: "",
+    rusenderFrom: "info@specteh.online",
+    rusenderTo: "andrey31453@gmail.com",
+    rusenderEnabled: "false",
     // Только сервер. В прод — NUXT_DATABASE_URL (или DATABASE_URL, см. server/utils/prisma.ts).
     databaseUrl: "",
     // Входящий вебхук Битрикс24; пустое значение — заявки копятся со статусом NEW.
