@@ -1,0 +1,46 @@
+name: Sync production services
+on:
+  workflow_dispatch:
+    inputs:
+      confirmation:
+        description: Type SYNC SERVICES ONLY
+        required: true
+      payload:
+        description: Services JSON exported using deploy/sync-services.ts
+        required: true
+permissions:
+  contents: read
+concurrency:
+  group: production-deploy
+  cancel-in-progress: false
+jobs:
+  sync:
+    if: github.ref == 'refs/heads/main' && inputs.confirmation == 'SYNC SERVICES ONLY'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: sudo apt-get update -qq && sudo apt-get install -y -qq sshpass
+      - name: Back up and sync services only
+        env:
+          SSHPASS: ${{ secrets.SSH_KEY }}
+          PAYLOAD: ${{ inputs.payload }}
+        run: |
+          set -euo pipefail
+          umask 077
+          printf '%s' "$PAYLOAD" > "$RUNNER_TEMP/services.json"
+          ssh-keyscan -t ed25519 -T 10 129.101.113.247 > "$RUNNER_TEMP/known_hosts"
+          ssh-keygen -lf "$RUNNER_TEMP/known_hosts" | grep -F 'SHA256:hJAv4KrOs02WdM9uNhrFwD5TFAdOBwvbBlEZH8VyECs'
+          opts=(-o PreferredAuthentications=password -o PubkeyAuthentication=no -o StrictHostKeyChecking=yes -o UserKnownHostsFile="$RUNNER_TEMP/known_hosts" -o ConnectTimeout=20)
+          remote=root@129.101.113.247
+          sshpass -e scp "${opts[@]}" "$RUNNER_TEMP/services.json" "$remote:/opt/spectech/services.json"
+          sshpass -e ssh "${opts[@]}" "$remote" 'bash -s' <<'REMOTE'
+          set -euo pipefail
+          umask 077
+          trap 'rm -f /opt/spectech/services.json' EXIT
+          cd /opt/spectech/current
+          set -a
+          source /opt/spectech/shared/app.env
+          set +a
+          runuser -u postgres -- pg_dump -Fc spectech > "/opt/spectech/backups/services-$(date +%s).dump"
+          CONFIRM_SERVICES='SYNC SERVICES ONLY' npx tsx deploy/sync-services.ts /opt/spectech/services.json
+          REMOTE
